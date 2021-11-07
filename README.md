@@ -31,6 +31,12 @@ mkdir -p ~/reminder
 docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder
 ```
 
+For subsequent runs, better add below alias to `~/.bashrc` ( or `~/.zshrc`, etc), so that you can invoke the command, just as `reminder`:
+
+```sh
+alias reminder='docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder'
+```
+
 ### Non-Docker Setup
 
 #### Install `go`

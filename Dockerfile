@@ -5,8 +5,13 @@ ENV DIR_DATA /data
 
 WORKDIR ${DIR_DATA}
 
-# copy the repo
-COPY . reminder
+# copy required files
+COPY go.mod reminder/
+COPY go.sum reminder/
+COPY cmd reminder/cmd
+COPY internal reminder/internal
+COPY pkg reminder/pkg
+COPY scripts reminder/scripts
 
 # install the command
 RUN cd reminder \
