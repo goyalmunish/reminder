@@ -1,15 +1,12 @@
 FROM golang:1.17.2-alpine3.14
 
-ENV DIR_HOME=/app
+ENV DIR_HOME=/root
 ENV DIR_DATA /data
 
-# install required packages
-RUN apk add git
-RUN apk add openssh
-
-# clone the repo
 WORKDIR ${DIR_DATA}
-RUN git clone https://github.com/goyalmunish/reminder.git
+
+# copy the repo
+COPY . reminder
 
 # install the command
 RUN cd reminder \
@@ -23,6 +20,7 @@ WORKDIR ${DIR_HOME}
 CMD [ \
         "/bin/sh", "-c", \
         " \
-        while true; do echo \"Hit CTRL+C\"; sleep 1; done \
+        reminder \
+        # while true; do echo \"Hit CTRL+C\"; sleep 1; done \
         " \
     ]

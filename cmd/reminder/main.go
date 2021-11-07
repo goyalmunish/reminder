@@ -15,7 +15,7 @@ import (
 	"reminder/pkg/utils"
 )
 
-var DataFile = path.Join(os.Getenv("HOME"), "reminder.json")
+var DataFile = path.Join(os.Getenv("HOME"), "reminder", "data.json")
 
 // recursive function for overall flow
 func flow() {

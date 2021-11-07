@@ -24,11 +24,11 @@ This is the easiest way to get going, if you have [Docker](https://docs.docker.c
 # pull the image
 docker pull goyalmunish/reminder
 
-# spin up the container
-docker run -it -d --name ${REMINDER_IMAGE} ${REMINDER_CONTAINER}
+# make sure the directory for data file existing on host machine
+mkdir -p ~/reminder
 
-# run the command
-docker exec -it ${REMINDER_CONTAINER} /bin/sh -c "reminder"
+# spin up the container, with data file shared from host machine
+docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder
 ```
 
 ### Non-Docker Setup
