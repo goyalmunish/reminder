@@ -1,0 +1,18 @@
+# run go tests for passed directory with relative path
+run_go_test() {
+  test_dir="$@"
+  cur_dir=$(pwd)
+  cd ${test_dir}
+  echo "Running tests under $(pwd)"
+  if [[  $CONSOLE_PRINT == "true" ]]; then
+    go test
+  else
+    go test .
+  fi
+  cd ${cur_dir}
+}
+
+# run tests
+run_go_test "pkg/utils/"
+run_go_test "internal/models/"
+run_go_test "cmd/reminder/"

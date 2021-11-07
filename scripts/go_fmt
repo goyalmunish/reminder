@@ -1,0 +1,14 @@
+# format go files under directory with relative path
+run_go_fmt() {
+  dest_dir="$@"
+  cur_dir=$(pwd)
+  cd ${dest_dir}
+  echo "Formatting files under $(pwd)"
+  go fmt .
+  cd ${cur_dir}
+}
+
+# run tests
+run_go_fmt "pkg/utils/"
+run_go_fmt "internal/models/"
+run_go_fmt "cmd/reminder/"
