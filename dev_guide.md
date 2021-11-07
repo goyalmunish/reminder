@@ -37,7 +37,7 @@ Don't run `coa ml_with_p374`.
 :GoInstallBinaries
 ```
 
-## Run Program
+## How to run in development mode?
 
 ```sh
 cd ~/MG/cst
