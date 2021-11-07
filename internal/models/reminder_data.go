@@ -7,11 +7,11 @@ import (
 	"github.com/manifoldco/promptui"
 	"io/ioutil"
 	"os"
+	"path"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"path"
 
 	"reminder/pkg/utils"
 )

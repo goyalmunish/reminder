@@ -9,6 +9,7 @@
             - [Install `go`](#install-go)
             - [Install `reminder` command](#install-reminder-command)
             - [Run `reminder`](#run-reminder)
+    - [Contributing towards development](#contributing-towards-development)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -18,7 +19,7 @@
 
 ### Running via Docker
 
-This is the easiest way to get going, if you have [Docker](https://docs.docker.com/get-docker/) installed. Just issue the following commands:
+_This is the easiest way to get going, if you have [Docker](https://docs.docker.com/get-docker/) installed. Just issue the following commands:_
 
 ```sh
 # pull the image
@@ -31,10 +32,16 @@ mkdir -p ~/reminder
 docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder
 ```
 
-For subsequent runs, better add below alias to `~/.bashrc` ( or `~/.zshrc`, etc), so that you can invoke the command, just as `reminder`:
+_For subsequent runs, better add below alias to `~/.bashrc` ( or `~/.zshrc`, etc), so that you can invoke the command, just as `reminder`:_
 
 ```sh
 alias reminder='docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder'
+```
+
+_Run the command:_
+
+```sh
+reminder
 ```
 
 ### Non-Docker Setup
@@ -91,7 +98,7 @@ Install the command as:
 ```sh
 cd reminder
 go install cmd/reminder/main.go
-cp ${GOPATH}/bin/main ~/reminder
+mv ${GOPATH}/bin/main ${GOPATH}/bin/reminder
 ```
 
 #### Run `reminder`
@@ -102,8 +109,6 @@ If your `go/bin` path is alreay in `PATH`, then you can just run the command as:
 reminder
 ```
 
-You may like to check the installation path:
+## Contributing towards development
 
-```sh
-which reminder
-```
+Check [Development Guide](./dev_guide.md).
