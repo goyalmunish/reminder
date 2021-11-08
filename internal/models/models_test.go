@@ -41,7 +41,7 @@ func TestNoteString(t *testing.T) {
   |              :  c3
    |        Status:  pending
    |          Tags:  [1 2]
-   |    CompleteBy:  Sunday, 03-Jan-21 18:20:35 +08
+   |    CompleteBy:  Sunday, 03-Jan-21 10:20:35 UTC
    |     CreatedAt:  nil
    |     UpdatedAt:  nil
 ]`
@@ -63,7 +63,7 @@ func TestStringRepr(t *testing.T) {
   |        Status:  pending
   |              :  tag_1
   |              :  tag_2
-  |    CompleteBy:  Sunday, 03-Jan-21 18:20:35 +08
+  |    CompleteBy:  Sunday, 03-Jan-21 10:20:35 UTC
   |     CreatedAt:  nil
   |     UpdatedAt:  nil
 `

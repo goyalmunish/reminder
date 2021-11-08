@@ -7,6 +7,7 @@
     - [Run Tests](#run-tests)
     - [Format Files](#format-files)
     - [Debugging Program](#debugging-program)
+    - [Build Docker Image](#build-docker-image)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -69,4 +70,13 @@ cd cmd/reminder
 > <next>, <list>, <continue>
 > call <function>
 > print <expression>
+```
+
+## Build Docker Image
+
+_Make use of [`build_image.sh`](./scripts/build_image.sh) to build and push (requires admin rights) Docker image:_
+
+```sh
+cd reminder/
+. ./scripts/build_image.sh
 ```

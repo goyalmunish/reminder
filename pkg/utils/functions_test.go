@@ -28,7 +28,7 @@ func TestCurrentUnixTimestamp(t *testing.T) {
 }
 
 func TestUnixTimestampToTime(t *testing.T) {
-	current_time := time.Now()
+	current_time := utils.CurrentTime()
 	current_timestamp := current_time.Unix()
 	output := utils.UnixTimestampToTime(current_timestamp)
 	utils.AssertEqual(t, output.Format(time.UnixDate), current_time.Format(time.UnixDate))
@@ -36,21 +36,21 @@ func TestUnixTimestampToTime(t *testing.T) {
 
 func TestUnixTimestampToTimeStr(t *testing.T) {
 	output := utils.UnixTimestampToTimeStr(int64(1608575176), "02-Jan-06")
-	utils.AssertEqual(t, output, "22-Dec-20")
+	utils.AssertEqual(t, output, "21-Dec-20")
 	output = utils.UnixTimestampToTimeStr(int64(1608575176), time.RFC850)
-	utils.AssertEqual(t, output, "Tuesday, 22-Dec-20 02:26:16 +08")
+	utils.AssertEqual(t, output, "Monday, 21-Dec-20 18:26:16 UTC")
 	output = utils.UnixTimestampToTimeStr(int64(-1), "02-Jan-06")
 	utils.AssertEqual(t, output, "nil")
 }
 
 func TestUnixTimestampToShortTimeStr(t *testing.T) {
 	output := utils.UnixTimestampToShortTimeStr(int64(1608575176))
-	utils.AssertEqual(t, output, "22-Dec-20")
+	utils.AssertEqual(t, output, "21-Dec-20")
 }
 
 func TestUnixTimestampToLongTimeStr(t *testing.T) {
 	output := utils.UnixTimestampToLongTimeStr(int64(1608575176))
-	utils.AssertEqual(t, output, "Tuesday, 22-Dec-20 02:26:16 +08")
+	utils.AssertEqual(t, output, "Monday, 21-Dec-20 18:26:16 UTC")
 }
 
 func TestUnixTimestampForCorrespondingCurrentYear(t *testing.T) {

@@ -41,14 +41,21 @@ import (
 // 	AssertEqual(t *testing.T, got interface{}, want interface{})
 // }
 
+// get current time
+// serve as a central place to switch between
+// local time and UTC
+func CurrentTime() time.Time {
+	return time.Now().UTC()
+}
+
 // get current unix timestamp
 func CurrentUnixTimestamp() int64 {
-	return int64(time.Now().Unix())
+	return int64(CurrentTime().Unix())
 }
 
 // convert unix timestamp to time
 func UnixTimestampToTime(unix_timestamp int64) time.Time {
-	return time.Unix(unix_timestamp, 0)
+	return time.Unix(unix_timestamp, 0).UTC()
 }
 
 // convert unix timestamp to time string
@@ -74,7 +81,7 @@ func UnixTimestampToShortTimeStr(unix_timestamp int64) string {
 
 // get unix timestamp for date corresponding to current year
 func UnixTimestampForCorrespondingCurrentYear(month int, day int) int64 {
-	current_year, _, _ := time.Now().Date()
+	current_year, _, _ := CurrentTime().Date()
 	format := "2006-1-2"
 	time_value, _ := time.Parse(format, fmt.Sprintf("%v-%v-%v", current_year, month, day))
 	return int64(time_value.Unix())
@@ -82,7 +89,7 @@ func UnixTimestampForCorrespondingCurrentYear(month int, day int) int64 {
 
 // get unix timestamp for date corresponding to current year and current month
 func UnixTimestampForCorrespondingCurrentYearMonth(day int) int64 {
-	current_year, current_month, _ := time.Now().Date()
+	current_year, current_month, _ := CurrentTime().Date()
 	format := "2006-1-2"
 	time_value, _ := time.Parse(format, fmt.Sprintf("%v-%v-%v", current_year, int(current_month), day))
 	return int64(time_value.Unix())
