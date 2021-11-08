@@ -5,4 +5,4 @@ import (
 	"path"
 )
 
-var DataFile = path.Join(os.Getenv("HOME"), "reminder.json")
+var DataFile = path.Join(os.Getenv("HOME"), "reminder", "data.json")

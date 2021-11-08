@@ -15,17 +15,15 @@ import (
 	"reminder/pkg/utils"
 )
 
-var DataFile = path.Join(os.Getenv("HOME"), "reminder", "data.json")
-
 // recursive function for overall flow
 func flow() {
 	// make sure DataFile exists
-	models.FMakeSureFileExists(DataFile)
+	models.FMakeSureFileExists(models.DataFile)
 	// open the file
-	reminderData := *models.FReadDataFile(DataFile)
+	reminderData := *models.FReadDataFile(models.DataFile)
 	// print data
 	if len(reminderData.Tags) > 0 {
-		fmt.Printf("\nStats of %q\n", DataFile)
+		fmt.Printf("\nStats of %q\n", models.DataFile)
 		fmt.Printf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags))
 		fmt.Printf("%4vPending Notes: %v/%v\n", "- ", len(models.FNotesWithStatus(reminderData.Notes, "pending")), len(reminderData.Notes))
 	}
@@ -165,13 +163,13 @@ func flow() {
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["pad"], "Create Backup"):
 		// get backup file name
-		ext := path.Ext(DataFile)
-		dstFile := DataFile[:len(DataFile)-len(ext)] + "_backup_" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + ext
-		lnFile := DataFile[:len(DataFile)-len(ext)] + "_backup_latest" + ext
+		ext := path.Ext(models.DataFile)
+		dstFile := models.DataFile[:len(models.DataFile)-len(ext)] + "_backup_" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + ext
+		lnFile := models.DataFile[:len(models.DataFile)-len(ext)] + "_backup_latest" + ext
 		fmt.Printf("Creating backup at %q\n", dstFile)
 		fmt.Println(dstFile)
 		// create backup
-		byteValue, err := ioutil.ReadFile(DataFile)
+		byteValue, err := ioutil.ReadFile(models.DataFile)
 		utils.PrintErrorIfPresent(err)
 		err = ioutil.WriteFile(dstFile, byteValue, 0644)
 		utils.PrintErrorIfPresent(err)
@@ -187,21 +185,21 @@ func flow() {
 		err = cmd.Run()
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File"):
-		fmt.Printf("Printing contents (and if possible, its difference since last backup) of %q:\n", DataFile)
-		ext := path.Ext(DataFile)
-		lnFile := DataFile[:len(DataFile)-len(ext)] + "_backup_latest" + ext
+		fmt.Printf("Printing contents (and if possible, its difference since last backup) of %q:\n", models.DataFile)
+		ext := path.Ext(models.DataFile)
+		lnFile := models.DataFile[:len(models.DataFile)-len(ext)] + "_backup_latest" + ext
 		err := utils.PerformWhich("wdiff")
 		if err == nil {
 			err = utils.PerformFilePresence(lnFile)
 			if err == nil {
-				err = utils.FPerformCwdiff(lnFile, DataFile)
+				err = utils.FPerformCwdiff(lnFile, models.DataFile)
 			} else {
 				fmt.Printf("Warning: `%v` file is not available yet\n", lnFile)
-				err = utils.PerformCat(DataFile)
+				err = utils.PerformCat(models.DataFile)
 			}
 		} else {
 			fmt.Printf("%v Warning: `wdiff` command is not available\n", utils.Symbols["error"])
-			err = utils.PerformCat(DataFile)
+			err = utils.PerformCat(models.DataFile)
 		}
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v %v", utils.Symbols["checkerd_flag"], "Exit", utils.Symbols["red_flag"]):

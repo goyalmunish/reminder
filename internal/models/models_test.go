@@ -18,7 +18,7 @@ func TestDataFile(t *testing.T) {
 }
 
 func TestUser(t *testing.T) {
-	got := &models.User{Name: "Test User", EmailId: "user@test.com"}
+	got := models.User{Name: "Test User", EmailId: "user@test.com"}
 	want := "{Name: Test User, EmailId: user@test.com}"
 	utils.AssertEqual(t, got, want)
 }
