@@ -41,7 +41,7 @@ func flow() {
 		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Note"),
 		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Tag"),
 		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"),
-		fmt.Sprintf("%v %v", utils.Symbols["pad"], "Create Backup"),
+		fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"),
 		fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File")}, "Select Option")
 	// operate on main options
 	switch result {

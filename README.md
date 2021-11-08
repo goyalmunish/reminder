@@ -3,26 +3,39 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Reminder](#reminder)
-    - [Yet Another Reminder App. Why?](#yet-another-reminder-app-why)
+    - [Yet Another Reminder Tool/App. Why?](#yet-another-reminder-toolapp-why)
     - [How to run?](#how-to-run)
-        - [Running via Docker](#running-via-docker)
+        - [Easily run the tool via Docker (recommended)](#easily-run-the-tool-via-docker-recommended)
         - [Non-Docker Setup](#non-docker-setup)
             - [Install `go`](#install-go)
-            - [Install `reminder` command](#install-reminder-command)
-            - [Run `reminder`](#run-reminder)
+            - [Install the tool](#install-the-tool)
+            - [Run the tool](#run-the-tool)
     - [Contributing towards development](#contributing-towards-development)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Reminder
 
-## Yet Another Reminder App. Why?
+## Yet Another Reminder Tool/App. Why?
 
-This app is not for everybody, but is only for folks who spend most of their time on command-line (terminal) on Linux/Unix/macOS. It's **terminal-based interactive reminder app**.
+_This is a **terminal-based fully-interactive reminder tool**. It is not for everybody, but for the folks who spend most of their time on command-line (terminal) on Linux/Unix/macOS._
+
+_Apart from being **fully-interactive** and **terminal-based**, the other major benefits it comes with are:_
+
+- Easy to categorize notes/tasks with **tags** (🏷 ).
+- **Tag groups** to manage priority levels (👍 👎).
+- Each note/task can be **tagged with multiple keywords**.
+- Notes/tasks can be **updated** (📝) and also can be enhanced with **comments** (💬).
+- Notes/tasks can be marked **done** (✅) or **pending** (⏰).
+- Notes/tasks can be associated with **due date** (📅). Notes/tasks with upcoming deadlines automatically show up under the **current** tag.
+- **Full-text search** (🔎) among **pending** notes/tasks.
+- All of your **data** (📋) remains with you, and it remains in human readable and usable format. This is useful if you choose to move away.
+- Easily take **time-stamped backups** (💾).
+- Easy to update tags of existing notes/tasks.
 
 ## How to run?
 
-### Running via Docker
+### Easily run the tool via Docker (recommended)
 
 _This is the easiest way to get going, if you have [Docker](https://docs.docker.com/get-docker/) installed. Just issue the following commands:_
 
@@ -37,13 +50,13 @@ mkdir -p ~/reminder
 docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder
 ```
 
-_For subsequent runs, better add below alias to `~/.bashrc` ( or `~/.zshrc`, etc), so that you can invoke the command, just as `reminder`:_
+_For subsequent runs, better add below alias to `~/.bashrc` ( or `~/.zshrc`, etc), so that you can invoke the tool, just as `reminder`:_
 
 ```sh
 alias reminder='docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder'
 ```
 
-_Run the command:_
+_Run the tool:_
 
 ```sh
 reminder
@@ -61,7 +74,7 @@ brew install golang
 
 For other platforms, check [official `go` download and install guide](https://golang.org/dl/).
 
-Otherwise, you can also use one of the [Golang Offical Images](https://hub.docker.com/_/golang) to run command from a Docker container. For example,
+Otherwise, you can also use one of the [Golang Offical Images](https://hub.docker.com/_/golang) to run tool from a Docker container. For example,
 
 ```sh
 GOLANG_IMAGE=golang:1.17.2-alpine3.14
@@ -88,7 +101,7 @@ Check installed version:
 go version
 ```
 
-#### Install `reminder` command
+#### Install the tool
 
 Clone the repo:
 
@@ -98,7 +111,7 @@ git clone git@github.com:goyalmunish/reminder.git
 
 If this results in Permission issues, such as `git@github.com: Permission denied (publickey).`, then either you [Setup Git](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup) or just use `git clone https://github.com/goyalmunish/reminder.git` instead.
 
-Install the command as:
+Install the tool as:
 
 ```sh
 cd reminder
@@ -106,9 +119,9 @@ go install cmd/reminder/main.go
 mv ${GOPATH}/bin/main ${GOPATH}/bin/reminder
 ```
 
-#### Run `reminder`
+#### Run the tool
 
-If your `go/bin` path is alreay in `PATH`, then you can just run the command as:
+If your `go/bin` path is alreay in `PATH`, then you can just run the tool as:
 
 ```sh
 reminder

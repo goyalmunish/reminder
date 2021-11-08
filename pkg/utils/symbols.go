@@ -19,4 +19,5 @@ var Symbols = map[string]string{
 	"clip":          "🔗",
 	"pad":           "📋",
 	"add":           "➕",
+	"backup":        "💾",
 }
