@@ -3,6 +3,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Reminder](#reminder)
+    - [Yet Another Reminder App. Why?](#yet-another-reminder-app-why)
     - [How to run?](#how-to-run)
         - [Running via Docker](#running-via-docker)
         - [Non-Docker Setup](#non-docker-setup)
@@ -14,6 +15,10 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Reminder
+
+## Yet Another Reminder App. Why?
+
+This app is not for everybody, but is only for folks who spend most of their time on command-line (terminal) on Linux/Unix/macOS. It's **terminal-based interactive reminder app**.
 
 ## How to run?
 

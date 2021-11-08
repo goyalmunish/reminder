@@ -108,3 +108,48 @@ func TestStringRepr(t *testing.T) {
 `
 	utils.AssertEqual(t, note.StringRepr(reminderData), want)
 }
+
+func TestSearchText(t *testing.T) {
+	note := models.Note{Text: "a beautiful cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	got := note.SearchText()
+	utils.AssertEqual(t, got, "a beautiful cat [c1]")
+	note = models.Note{Text: "a cute dog", Comments: []string{"c1", "foo bar", "c3"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
+	got = note.SearchText()
+	utils.AssertEqual(t, got, "a cute dog [c1, foo bar, c3]")
+}
+
+func TestFNotesTexts(t *testing.T) {
+	var notes []*models.Note
+	notes = append(notes, &models.Note{Text: "beautiful little cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231})
+	notes = append(notes, &models.Note{Text: "cute brown dog", Comments: []string{"c1", "foo bar", "c3", "baz"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
+	got := models.FNotesTexts(notes, 0)
+	want := "[beautiful little cat {C:01, S:P, D:03-Jan-21} cute brown dog {C:04, S:D, D:03-Jan-21}]"
+	utils.AssertEqual(t, got, want)
+	got = models.FNotesTexts(notes, 5)
+	want = "[be... {C:01, S:P, D:03-Jan-21} cu... {C:04, S:D, D:03-Jan-21}]"
+	utils.AssertEqual(t, got, want)
+	got = models.FNotesTexts(notes, 15)
+	want = "[beautiful li... {C:01, S:P, D:03-Jan-21} cute brown dog  {C:04, S:D, D:03-Jan-21}]"
+	utils.AssertEqual(t, got, want)
+	got = models.FNotesTexts(notes, 25)
+	want = "[beautiful little cat      {C:01, S:P, D:03-Jan-21} cute brown dog            {C:04, S:D, D:03-Jan-21}]"
+	utils.AssertEqual(t, got, want)
+}
+
+func TestFNotesWithStatus(t *testing.T) {
+	var notes []*models.Note
+	note1 := models.Note{Text: "big fat cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	notes = append(notes, &note1)
+	note2 := models.Note{Text: "cute brown dog", Comments: []string{"c1", "foo bar"}, Status: "done", TagIds: []int{1, 3}, CompleteBy: 1609669232}
+	notes = append(notes, &note2)
+	note3 := models.Note{Text: "little hamster", Comments: []string{"foo bar", "c3"}, Status: "pending", TagIds: []int{1}, CompleteBy: 1609669233}
+	notes = append(notes, &note3)
+	// case 1
+	got := models.FNotesWithStatus(notes, "pending")
+	want := []*models.Note{&note1, &note3}
+	utils.AssertEqual(t, got, want)
+	// case 2
+	got = models.FNotesWithStatus(notes, "done")
+	want = []*models.Note{&note2}
+	utils.AssertEqual(t, got, want)
+}

@@ -27,13 +27,13 @@ func (c NotesByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].Upd
 // method to provide basic string representation of a note
 func (note *Note) String() []string {
 	var strs []string
-	strs = append(strs, FPrintNoteField("Text", note.Text))
-	strs = append(strs, FPrintNoteField("Comments", note.Comments))
-	strs = append(strs, FPrintNoteField("Status", note.Status))
-	strs = append(strs, FPrintNoteField("Tags", note.TagIds))
-	strs = append(strs, FPrintNoteField("CompleteBy", utils.UnixTimestampToLongTimeStr(note.CompleteBy)))
-	strs = append(strs, FPrintNoteField("CreatedAt", utils.UnixTimestampToLongTimeStr(note.CreatedAt)))
-	strs = append(strs, FPrintNoteField("UpdatedAt", utils.UnixTimestampToLongTimeStr(note.UpdatedAt)))
+	strs = append(strs, fPrintNoteField("Text", note.Text))
+	strs = append(strs, fPrintNoteField("Comments", note.Comments))
+	strs = append(strs, fPrintNoteField("Status", note.Status))
+	strs = append(strs, fPrintNoteField("Tags", note.TagIds))
+	strs = append(strs, fPrintNoteField("CompleteBy", utils.UnixTimestampToLongTimeStr(note.CompleteBy)))
+	strs = append(strs, fPrintNoteField("CreatedAt", utils.UnixTimestampToLongTimeStr(note.CreatedAt)))
+	strs = append(strs, fPrintNoteField("UpdatedAt", utils.UnixTimestampToLongTimeStr(note.UpdatedAt)))
 	return strs
 }
 
@@ -42,7 +42,7 @@ func (note *Note) StringRepr(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
 	basic_strs := note.String()
-	tags_str := FPrintNoteField("Tags", FTagsSlugs(reminderData.TagsFromIds(note.TagIds)))
+	tags_str := fPrintNoteField("Tags", FTagsSlugs(reminderData.TagsFromIds(note.TagIds)))
 	basic_strs[3] = tags_str
 	strs = append(strs, basic_strs...)
 	return strings.Join(strs, "")
@@ -66,23 +66,6 @@ func (note *Note) SearchText() string {
 	search_text = append(search_text, strings.Join(comments_text, ""))
 	// return search text as for note a string
 	return strings.Join(search_text, " ")
-}
-
-// function to print given field of a note
-func FPrintNoteField(field_name string, field_value interface{}) string {
-	var strs []string
-	field_dynamic_type := fmt.Sprintf("%T", field_value)
-	if field_dynamic_type == "[]string" {
-		comments := field_value.([]string)
-		if comments != nil {
-			for _, v := range comments {
-				strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
-			}
-		}
-	} else {
-		strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", field_name, field_value))
-	}
-	return strings.Join(strs, "")
 }
 
 // get info texts of given notes
@@ -130,4 +113,21 @@ func FNewNote(tag_ids []int) *Note {
 		CreatedAt:  utils.CurrentUnixTimestamp(),
 		UpdatedAt:  utils.CurrentUnixTimestamp(),
 	}
+}
+
+// function to print given field of a note
+func fPrintNoteField(field_name string, field_value interface{}) string {
+	var strs []string
+	field_dynamic_type := fmt.Sprintf("%T", field_value)
+	if field_dynamic_type == "[]string" {
+		comments := field_value.([]string)
+		if comments != nil {
+			for _, v := range comments {
+				strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
+			}
+		}
+	} else {
+		strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", field_name, field_value))
+	}
+	return strings.Join(strs, "")
 }
