@@ -3,6 +3,7 @@ package models_test
 import (
 	// "fmt"
 	// "errors"
+	"sort"
 	"strings"
 	"testing"
 	// "time"
@@ -23,14 +24,37 @@ func TestUser(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
+func TestBySlug(t *testing.T) {
+	var tags []*models.Tag
+	tags = append(tags, &models.Tag{Id: 1, Slug: "a", Group: "tag_group1"})
+	tags = append(tags, &models.Tag{Id: 2, Slug: "z", Group: "tag_group1"})
+	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
+	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
+	sort.Sort(models.BySlug(tags))
+	var got_ids []int
+	for _, value := range tags {
+		got_ids = append(got_ids, value.Id)
+	}
+	want_ids := []int{1, 4, 3, 2}
+	utils.AssertEqual(t, got_ids, want_ids)
+}
+
 func TestFTagsSlugs(t *testing.T) {
 	var tags []*models.Tag
 	utils.AssertEqual(t, tags, "[]")
 	tags = append(tags, &models.Tag{Id: 1, Slug: "tag_1", Group: "tag_group"})
 	tags = append(tags, &models.Tag{Id: 2, Slug: "tag_2", Group: "tag_group"})
+	tags = append(tags, &models.Tag{Id: 3, Slug: "tag_3", Group: "tag_group"})
 	got := models.FTagsSlugs(tags)
-	want := "[tag_1 tag_2]"
+	want := "[tag_1 tag_2 tag_3]"
 	utils.AssertEqual(t, got, want)
+}
+
+func TestFBasicTags(t *testing.T) {
+	basic_tags := models.FBasicTags()
+	slugs := models.FTagsSlugs(basic_tags)
+	want := "[current priority-urgent priority-medium priority-low repeat-annually repeat-monthly tips]"
+	utils.AssertEqual(t, slugs, want)
 }
 
 func TestNoteString(t *testing.T) {

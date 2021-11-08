@@ -9,9 +9,9 @@ import (
 )
 
 type Tag struct {
-	Id        int    `json:"id"`
-	Slug      string `json:"slug"`
-	Group     string `json:"group"`
+	Id        int    `json:"id"`    // internal int-based id of the tag
+	Slug      string `json:"slug"`  // client-facing string-based id for tag
+	Group     string `json:"group"` // a note can be part of only one tag within a group
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`
 }
