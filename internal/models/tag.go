@@ -15,11 +15,11 @@ type Tag struct {
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`
 }
-type BySlug []*Tag
+type TagsBySlug []*Tag
 
-func (c BySlug) Len() int           { return len(c) }
-func (c BySlug) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c BySlug) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
+func (c TagsBySlug) Len() int           { return len(c) }
+func (c TagsBySlug) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c TagsBySlug) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
 
 // get slugs of given tags
 func FTagsSlugs(tags []*Tag) []string {

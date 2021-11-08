@@ -18,11 +18,11 @@ type Note struct {
 	UpdatedAt  int64    `json:"updated_at"`
 }
 
-type ByUpdatedAt []*Note
+type NotesByUpdatedAt []*Note
 
-func (c ByUpdatedAt) Len() int           { return len(c) }
-func (c ByUpdatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c ByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
+func (c NotesByUpdatedAt) Len() int           { return len(c) }
+func (c NotesByUpdatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c NotesByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
 // method to provide basic string representation of a note
 func (note *Note) String() []string {

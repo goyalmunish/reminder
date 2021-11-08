@@ -24,13 +24,13 @@ func TestUser(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
-func TestBySlug(t *testing.T) {
+func TestTagsBySlug(t *testing.T) {
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Id: 1, Slug: "a", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 2, Slug: "z", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
-	sort.Sort(models.BySlug(tags))
+	sort.Sort(models.TagsBySlug(tags))
 	var got_ids []int
 	for _, value := range tags {
 		got_ids = append(got_ids, value.Id)
@@ -55,6 +55,21 @@ func TestFBasicTags(t *testing.T) {
 	slugs := models.FTagsSlugs(basic_tags)
 	want := "[current priority-urgent priority-medium priority-low repeat-annually repeat-monthly tips]"
 	utils.AssertEqual(t, slugs, want)
+}
+
+func TestNotesByUpdatedAt(t *testing.T) {
+	var notes []*models.Note
+	notes = append(notes, &models.Note{Text: "1", Status: "pending", UpdatedAt: 1600000001})
+	notes = append(notes, &models.Note{Text: "2", Status: "pending", UpdatedAt: 1600000004})
+	notes = append(notes, &models.Note{Text: "3", Status: "done", UpdatedAt: 1600000003})
+	notes = append(notes, &models.Note{Text: "4", Status: "done", UpdatedAt: 1600000002})
+	sort.Sort(models.NotesByUpdatedAt(notes))
+	var got_texts []string
+	for _, value := range notes {
+		got_texts = append(got_texts, value.Text)
+	}
+	want_texts := []string{"2", "3", "4", "1"}
+	utils.AssertEqual(t, got_texts, want_texts)
 }
 
 func TestNoteString(t *testing.T) {
