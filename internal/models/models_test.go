@@ -188,3 +188,194 @@ func TestFReadDataFile(t *testing.T) {
 	reminder_data := models.FReadDataFile(data_file_path)
 	utils.AssertEqual(t, reminder_data.UpdatedAt > 0, true)
 }
+
+func TestUpdateDataFile(t *testing.T) {
+	var data_file_path = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(data_file_path))
+	// create the file and required dirs
+	models.FMakeSureFileExists(data_file_path)
+	reminder_data := models.FReadDataFile(data_file_path)
+	// old_updated_at := reminder_data.UpdatedAt
+	test_user := models.User{Name: "Test User", EmailId: "user@test.com"}
+	reminder_data.User = &test_user
+	reminder_data.UpdateDataFile(data_file_path)
+	reminder_data_re := models.FReadDataFile(data_file_path)
+	// utils.AssertEqual(t, reminder_data_re.UpdatedAt > old_updated_at, true)
+	utils.AssertEqual(t, reminder_data_re.User.EmailId == test_user.EmailId, true)
+}
+
+func TestTagsSlug(t *testing.T) {
+	reminder_data := models.ReminderData{
+		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
+		Notes: []*models.Note{},
+		Tags:  []*models.Tag{},
+	}
+	// creating tags
+	var tags []*models.Tag
+	tags = append(tags, &models.Tag{Id: 1, Slug: "a", Group: "tag_group1"})
+	tags = append(tags, &models.Tag{Id: 2, Slug: "z", Group: "tag_group1"})
+	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
+	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
+	reminder_data.Tags = tags
+	got_slugs := reminder_data.TagsSlugs()
+	want_slugs := []string{"a", "b", "c", "z"}
+	utils.AssertEqual(t, got_slugs, want_slugs)
+}
+
+func TestTagsFromIds(t *testing.T) {
+	reminder_data := models.ReminderData{
+		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
+		Notes: []*models.Note{},
+		Tags:  []*models.Tag{},
+	}
+	// creating tags
+	var tags []*models.Tag
+	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
+	tags = append(tags, &tag1)
+	tag2 := models.Tag{Id: 2, Slug: "z", Group: "tag_group1"}
+	tags = append(tags, &tag2)
+	tag3 := models.Tag{Id: 3, Slug: "c", Group: "tag_group1"}
+	tags = append(tags, &tag3)
+	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
+	tags = append(tags, &tag4)
+	reminder_data.Tags = tags
+	// case 1
+	tag_ids := []int{1, 3}
+	got_slugs := reminder_data.TagsFromIds(tag_ids)
+	want_slugs := []*models.Tag{&tag1, &tag3}
+	utils.AssertEqual(t, got_slugs, want_slugs)
+	// case 2
+	tag_ids = []int{}
+	got_slugs = reminder_data.TagsFromIds(tag_ids)
+	want_slugs = []*models.Tag{}
+	utils.AssertEqual(t, got_slugs, want_slugs)
+	// case 3
+	tag_ids = []int{1, 4, 2, 3}
+	got_slugs = reminder_data.TagsFromIds(tag_ids)
+	want_slugs = []*models.Tag{&tag1, &tag4, &tag2, &tag3}
+	utils.AssertEqual(t, got_slugs, want_slugs)
+}
+
+func TestTagFromSlug(t *testing.T) {
+	reminder_data := models.ReminderData{
+		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
+		Notes: []*models.Note{},
+		Tags:  []*models.Tag{},
+	}
+	// creating tags
+	var tags []*models.Tag
+	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
+	tags = append(tags, &tag1)
+	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
+	tags = append(tags, &tag2)
+	tag3 := models.Tag{Id: 3, Slug: "a2", Group: "tag_group1"}
+	tags = append(tags, &tag3)
+	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
+	tags = append(tags, &tag4)
+	reminder_data.Tags = tags
+	// case 1
+	utils.AssertEqual(t, reminder_data.TagFromSlug("a"), &tag1)
+	// case 2
+	utils.AssertEqual(t, reminder_data.TagFromSlug("a1"), &tag2)
+	// case 3
+	utils.AssertEqual(t, reminder_data.TagFromSlug("no_slug"), nil)
+}
+
+func TestTagIdsForGroup(t *testing.T) {
+	reminder_data := models.ReminderData{
+		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
+		Notes: []*models.Note{},
+		Tags:  []*models.Tag{},
+	}
+	// creating tags
+	var tags []*models.Tag
+	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
+	tags = append(tags, &tag1)
+	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
+	tags = append(tags, &tag2)
+	tag3 := models.Tag{Id: 3, Slug: "a2", Group: "tag_group1"}
+	tags = append(tags, &tag3)
+	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
+	tags = append(tags, &tag4)
+	reminder_data.Tags = tags
+	// case 1
+	utils.AssertEqual(t, reminder_data.TagIdsForGroup("tag_group1"), []int{1, 2, 3})
+	// case 2
+	utils.AssertEqual(t, reminder_data.TagIdsForGroup("tag_group2"), []int{4})
+	// case 3
+	utils.AssertEqual(t, reminder_data.TagIdsForGroup("tag_group_NO"), []int{})
+}
+
+func TestNextPossibleTagId(t *testing.T) {
+	reminder_data := models.ReminderData{
+		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
+		Notes: []*models.Note{},
+		Tags:  []*models.Tag{},
+	}
+	// creating tags
+	var tags []*models.Tag
+	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
+	tags = append(tags, &tag1)
+	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
+	tags = append(tags, &tag2)
+	tag3 := models.Tag{Id: 3, Slug: "a2", Group: "tag_group1"}
+	tags = append(tags, &tag3)
+	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
+	tags = append(tags, &tag4)
+	reminder_data.Tags = tags
+	utils.AssertEqual(t, reminder_data.NextPossibleTagId(), 4)
+}
+
+func TestNotesWithTagId(t *testing.T) {
+	reminder_data := models.ReminderData{
+		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
+		Notes: []*models.Note{},
+		Tags:  []*models.Tag{},
+	}
+	// creating tags
+	var tags []*models.Tag
+	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
+	tags = append(tags, &tag1)
+	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
+	tags = append(tags, &tag2)
+	tag3 := models.Tag{Id: 3, Slug: "a2", Group: "tag_group1"}
+	tags = append(tags, &tag3)
+	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
+	tags = append(tags, &tag4)
+	reminder_data.Tags = tags
+	// create notes
+	var notes []*models.Note
+	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	notes = append(notes, &note1)
+	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, UpdatedAt: 1600000004}
+	notes = append(notes, &note2)
+	note3 := models.Note{Text: "3", Status: "done", TagIds: []int{2}, UpdatedAt: 1600000003}
+	notes = append(notes, &note3)
+	note4 := models.Note{Text: "4", Status: "done", TagIds: []int{}, UpdatedAt: 1600000002}
+	notes = append(notes, &note4)
+	note5 := models.Note{Text: "5", Status: "pending", UpdatedAt: 1600000005}
+	notes = append(notes, &note5)
+	reminder_data.Notes = notes
+	// searching notes
+	// case 1
+	utils.AssertEqual(t, reminder_data.NotesWithTagId(2, "pending"), []*models.Note{&note2})
+	// case 2
+	utils.AssertEqual(t, reminder_data.NotesWithTagId(2, "done"), []*models.Note{&note3})
+	// case 3
+	utils.AssertEqual(t, reminder_data.NotesWithTagId(4, "pending"), []*models.Note{&note1, &note2})
+	// case 4
+	utils.AssertEqual(t, reminder_data.NotesWithTagId(1, "done"), []*models.Note{})
+}
+
+func TestRegisterBasicTags(t *testing.T) {
+	var data_file_path = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(data_file_path))
+	// create the file and required dirs
+	models.FMakeSureFileExists(data_file_path)
+	reminder_data := models.FReadDataFile(data_file_path)
+	// register basic tags
+	reminder_data.RegisterBasicTags()
+	utils.AssertEqual(t, len(reminder_data.Tags), 7)
+}
