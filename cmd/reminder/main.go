@@ -161,13 +161,12 @@ func flow() {
 			note := all_notes[index]
 			reminderData.PrintNoteAndAskOptions(note)
 		}
-	case fmt.Sprintf("%v %v", utils.Symbols["pad"], "Create Backup"):
+	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
 		// get backup file name
 		ext := path.Ext(models.DataFile)
 		dstFile := models.DataFile[:len(models.DataFile)-len(ext)] + "_backup_" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + ext
 		lnFile := models.DataFile[:len(models.DataFile)-len(ext)] + "_backup_latest" + ext
 		fmt.Printf("Creating backup at %q\n", dstFile)
-		fmt.Println(dstFile)
 		// create backup
 		byteValue, err := ioutil.ReadFile(models.DataFile)
 		utils.PrintErrorIfPresent(err)

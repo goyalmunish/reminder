@@ -29,9 +29,11 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 - Notes/tasks can be marked **done** (✅) or **pending** (⏰).
 - Notes/tasks can be associated with **due date** (📅). Notes/tasks with upcoming deadlines automatically show up under the **current** tag.
 - **Full-text search** (🔎) among **pending** notes/tasks.
-- All of your **data** (📋) remains with you, and it remains in human readable and usable format. This is useful if you choose to move away.
+- All of your **data** (📋) remains with **only you**.
+- The **data** remains in human readable and usable format. This is useful in case you choose to move away.
 - Easily take **time-stamped backups** (💾).
 - Easy to update tags of existing notes/tasks.
+- Nothing is hidden (except your data)! It's Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
 
 ## How to run?
 
@@ -50,7 +52,7 @@ mkdir -p ~/reminder
 docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder
 ```
 
-_For subsequent runs, better add below alias to `~/.bashrc` ( or `~/.zshrc`, etc), so that you can invoke the tool, just as `reminder`:_
+_For subsequent runs, better add below alias to `~/.bashrc` ( or `~/.zshrc`, etc), so that you can invoke the tool, just by typing `reminder`:_
 
 ```sh
 alias reminder='docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder'
