@@ -23,7 +23,7 @@ _This is a **terminal-based fully-interactive reminder tool**. It is not for eve
 _Apart from being **fully-interactive** and **terminal-based**, the other major benefits it comes with are:_
 
 - Easy to categorize notes/tasks with **tags** (🏷 ).
-- **Tag groups** to manage priority levels (👍 👎).
+- **Tag-groups** for manage priority levels (⬆️ ⬇️).
 - Each note/task can be **tagged with multiple keywords**.
 - Notes/tasks can be **updated** (📝) and also can be enhanced with **comments** (💬).
 - Notes/tasks can be marked **done** (✅) or **pending** (⏰).
@@ -33,7 +33,7 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 - The **data** remains in human readable and usable format. This is useful in case you choose to move away.
 - Easily take **time-stamped backups** (💾).
 - Easy to update tags of existing notes/tasks.
-- Nothing is hidden (except your data)! It's Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
+- Nothing is hidden (except your data)! The tool is Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
 
 ## How to run?
 
