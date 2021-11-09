@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/manifoldco/promptui"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
@@ -50,10 +51,12 @@ func FBlankReminder() *ReminderData {
 // function to make sure data_file_path exists
 func FMakeSureFileExists(data_file_path string) {
 	_, err := os.Stat(data_file_path)
-	if os.IsNotExist(err) {
-		os.MkdirAll(path.Dir(data_file_path), 0777)
-		reminderData := *FBlankReminder()
-		err = reminderData.UpdateDataFile(data_file_path)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			os.MkdirAll(path.Dir(data_file_path), 0777)
+			reminderData := *FBlankReminder()
+			err = reminderData.UpdateDataFile(data_file_path)
+		}
 	}
 	utils.PrintErrorIfPresent(err)
 }

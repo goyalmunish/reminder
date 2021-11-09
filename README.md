@@ -33,7 +33,8 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 - The **data** remains in human readable and usable format. This is useful in case you choose to move away.
 - Easily take **time-stamped backups** (💾).
 - Easy to update tags of existing notes/tasks.
-- Nothing is hidden (except your data)! The tool is Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
+
+Nothing is hidden (except your data)! The tool is Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
 
 ## How to run?
 

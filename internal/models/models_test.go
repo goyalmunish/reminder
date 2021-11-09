@@ -2,7 +2,10 @@ package models_test
 
 import (
 	// "fmt"
-	// "errors"
+	"errors"
+	"io/fs"
+	"os"
+	"path"
 	"sort"
 	"strings"
 	"testing"
@@ -158,4 +161,19 @@ func TestFNotesWithStatus(t *testing.T) {
 	got = models.FNotesWithStatus(notes, "done")
 	want = []*models.Note{&note2}
 	utils.AssertEqual(t, got, want)
+}
+
+func TestFMakeSureFileExists(t *testing.T) {
+	var data_file_path = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(data_file_path))
+	// make sure file doesn't exists already
+	_, err := os.Stat(data_file_path)
+	utils.AssertEqual(t, err != nil, true)
+	errors.Is(err, fs.ErrNotExist)
+	// attempt to create the file and required dirs
+	models.FMakeSureFileExists(data_file_path)
+	// prove that the file was created
+	_, err = os.Stat(data_file_path)
+	utils.AssertEqual(t, err == nil, true)
 }
