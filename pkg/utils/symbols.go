@@ -6,6 +6,8 @@ var Symbols = map[string]string{
 	"home":          "⛺",
 	"up_vote":       "👍",
 	"down_vote":     "👎",
+	"up_arrow":      "⬆️",
+	"down_arrow":    "⬇️",
 	"calendar":      "📅",
 	"comment":       "💬",
 	"tag":           "🏷t",
