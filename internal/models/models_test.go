@@ -177,3 +177,14 @@ func TestFMakeSureFileExists(t *testing.T) {
 	_, err = os.Stat(data_file_path)
 	utils.AssertEqual(t, err == nil, true)
 }
+
+func TestFReadDataFile(t *testing.T) {
+	var data_file_path = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(data_file_path))
+	// create the file and required dirs
+	models.FMakeSureFileExists(data_file_path)
+	// attempt to read file and parse it
+	reminder_data := models.FReadDataFile(data_file_path)
+	utils.AssertEqual(t, reminder_data.UpdatedAt > 0, true)
+}
