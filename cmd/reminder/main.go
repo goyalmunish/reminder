@@ -77,7 +77,7 @@ func flow() {
 		repeat_tag_ids := reminderData.TagIdsForGroup("repeat")
 		// populating current_notes
 		for _, note := range pending_notes {
-			note_ids_with_repeat := utils.GetCommonIntMembers(note.TagIds, repeat_tag_ids)
+			note_ids_with_repeat := utils.GetCommonMembersIntSlices(note.TagIds, repeat_tag_ids)
 			// first process notes without tag with group "repeat"
 			// start showing such notes 7 days in advance from their due date, and until they are marked done
 			min_day := note.CompleteBy - 7*24*60*60
@@ -93,7 +93,7 @@ func flow() {
 				// check for repeat-annually tag
 				repeat_annually_tag := reminderData.TagFromSlug("repeat-annually")
 				repeat_monthly_tag := reminderData.TagFromSlug("repeat-monthly")
-				if (repeat_annually_tag != nil) && utils.IntInSlice(repeat_annually_tag.Id, note.TagIds) {
+				if (repeat_annually_tag != nil) && utils.IntPresentInSlice(repeat_annually_tag.Id, note.TagIds) {
 					_, note_month, note_day := utils.UnixTimestampToTime(note.CompleteBy).Date()
 					note_timestamp_current := utils.UnixTimestampForCorrespondingCurrentYear(int(note_month), note_day)
 					note_timestamp_previous := note_timestamp_current - 365*24*60*60
@@ -105,7 +105,7 @@ func flow() {
 					}
 				}
 				// check for repeat-monthly tag
-				if (repeat_monthly_tag != nil) && utils.IntInSlice(repeat_monthly_tag.Id, note.TagIds) {
+				if (repeat_monthly_tag != nil) && utils.IntPresentInSlice(repeat_monthly_tag.Id, note.TagIds) {
 					_, _, note_day := utils.UnixTimestampToTime(note.CompleteBy).Date()
 					note_timestamp_current := utils.UnixTimestampForCorrespondingCurrentYearMonth(note_day)
 					note_timestamp_previous := note_timestamp_current - 30*24*60*60
@@ -135,7 +135,7 @@ func flow() {
 		all_notes := reminderData.Notes
 		var all_texts []string
 		for _, note := range all_notes {
-			all_texts = append(all_texts, note.SearchText())
+			all_texts = append(all_texts, note.SearchableText())
 		}
 		// function to search across notes
 		search_notes := func(input string, idx int) bool {

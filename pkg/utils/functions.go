@@ -23,8 +23,8 @@ import (
 // 	UnixTimestampToShortTimeStr(unix_timestamp int64) string
 // 	UnixTimestampForCorrespondingCurrentYear(month int, day int) int64
 // 	UnixTimestampForCorrespondingCurrentYearMonth(day int) int64
-// 	IntInSlice(a int, list []int) bool
-// 	GetCommonIntMembers(arr1 []int, arr2 []int) []int
+// 	IntPresentInSlice(a int, list []int) bool
+// 	GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int
 // 	PrintErrorIfPresent(err error)
 // 	TrimString(str string) string
 // 	ValidateString(input string) error
@@ -96,7 +96,7 @@ func UnixTimestampForCorrespondingCurrentYearMonth(day int) int64 {
 }
 
 // membership test for integer based array
-func IntInSlice(a int, list []int) bool {
+func IntPresentInSlice(a int, list []int) bool {
 	for _, b := range list {
 		if b == a {
 			return true
@@ -105,8 +105,8 @@ func IntInSlice(a int, list []int) bool {
 	return false
 }
 
-// get common elements of two integer based arrays
-func GetCommonIntMembers(arr1 []int, arr2 []int) []int {
+// get common elements of two integer based slices
+func GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int {
 	var arr []int
 	for _, e1 := range arr1 {
 		for _, e2 := range arr2 {
@@ -156,7 +156,62 @@ func ValidateDateString(input string) error {
 	}
 }
 
+// display spinner
+func Spinner(delay time.Duration) {
+	for {
+		for _, c := range `-\|/` {
+			fmt.Printf("\r%c", c)
+			time.Sleep(delay)
+		}
+	}
+}
+
+// helper function to make assertion that `go` and `want` are nearly equal
+func AssertEqual(t *testing.T, got interface{}, want interface{}) {
+	if reflect.DeepEqual(got, want) {
+		t.Logf("Matched value (by deep equality): %v", want)
+	} else if reflect.DeepEqual(fmt.Sprintf("%v", got), fmt.Sprintf("%v", want)) {
+		t.Logf("Matched value (by string conversion): %v", want)
+	} else {
+		t.Errorf("Got: %v, Want: %v", got, want)
+	}
+}
+
+// function to determine if it is time to show a repeat-based note/task
+// dependency: `CurrentUnixTimestamp`
+func IsTimeForRepeatNote(note_timestamp_current, note_timestamp_previous, note_timestamp_next, days_before, days_after int64) bool {
+	current_timestamp := CurrentUnixTimestamp()
+	day_secs := int64(24 * 60 * 60)
+	return ((current_timestamp >= note_timestamp_current-days_before*day_secs) && (current_timestamp <= note_timestamp_current+days_after*day_secs)) ||
+		((current_timestamp >= note_timestamp_previous-days_before*day_secs) && (current_timestamp <= note_timestamp_previous+days_after*day_secs)) ||
+		((current_timestamp >= note_timestamp_next-days_before*day_secs) && (current_timestamp <= note_timestamp_next+days_after*day_secs))
+}
+
+// ask option to the user
+func AskOption(options []string, label string) (int, string) {
+	if len(options) == 0 {
+		fmt.Println("No results")
+		return -1, "error"
+	}
+	// note: any item in options should not have \n character
+	// otherwise such item is observed to not getting appear
+	// in the rendered list
+	prompt := promptui.Select{
+		Label: label,
+		Items: options,
+		Size:  25,
+	}
+	index, result, err := prompt.Run()
+	if err != nil {
+		fmt.Printf("%v Prompt failed %v\n", Symbols["error"], err)
+		return -1, "error"
+	}
+	fmt.Printf("You chose %d:%q\n", index, result)
+	return index, result
+}
+
 // perform shell operation
+// note: it is better to avoid such functions
 func PerformShellOperation(exe string, args ...string) error {
 	executable, _ := exec.LookPath(exe)
 	cmd := &exec.Cmd{
@@ -187,58 +242,4 @@ func PerformCat(file_path string) error {
 // get colored wdiff between two files
 func FPerformCwdiff(old_file_path string, new_file_path string) error {
 	return PerformShellOperation("wdiff", "-n", "-w", "\033[30;41m", "-x", "\033[0m", "-y", "\033[30;42m", "-z", "\033[0m", old_file_path, new_file_path)
-}
-
-// ask option to the user
-func AskOption(options []string, label string) (int, string) {
-	if len(options) == 0 {
-		fmt.Println("No results")
-		return -1, "error"
-	}
-	// note: any item in options should not have \n character
-	// otherwise such item is observed to not getting appear
-	// in the rendered list
-	prompt := promptui.Select{
-		Label: label,
-		Items: options,
-		Size:  25,
-	}
-	index, result, err := prompt.Run()
-	if err != nil {
-		fmt.Printf("%v Prompt failed %v\n", Symbols["error"], err)
-		return -1, "error"
-	}
-	fmt.Printf("You chose %d:%q\n", index, result)
-	return index, result
-}
-
-// function to determine a repeat note should be shown
-// dependency: `CurrentUnixTimestamp`
-func IsTimeForRepeatNote(note_timestamp_current, note_timestamp_previous, note_timestamp_next, days_before, days_after int64) bool {
-	current_timestamp := CurrentUnixTimestamp()
-	day_secs := int64(24 * 60 * 60)
-	return ((current_timestamp >= note_timestamp_current-days_before*day_secs) && (current_timestamp <= note_timestamp_current+days_after*day_secs)) ||
-		((current_timestamp >= note_timestamp_previous-days_before*day_secs) && (current_timestamp <= note_timestamp_previous+days_after*day_secs)) ||
-		((current_timestamp >= note_timestamp_next-days_before*day_secs) && (current_timestamp <= note_timestamp_next+days_after*day_secs))
-}
-
-// display spinner
-func Spinner(delay time.Duration) {
-	for {
-		for _, c := range `-\|/` {
-			fmt.Printf("\r%c", c)
-			time.Sleep(delay)
-		}
-	}
-}
-
-// helper function to make assertion that go and want are nearly equal
-func AssertEqual(t *testing.T, got interface{}, want interface{}) {
-	if reflect.DeepEqual(got, want) {
-		t.Logf("Matched value (by deep equality): %v", want)
-	} else if reflect.DeepEqual(fmt.Sprintf("%v", got), fmt.Sprintf("%v", want)) {
-		t.Logf("Matched value (by string conversion): %v", want)
-	} else {
-		t.Errorf("Got: %v, Want: %v", got, want)
-	}
 }

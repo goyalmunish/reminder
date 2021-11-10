@@ -27,13 +27,13 @@ func TestUser(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
-func TestTagsBySlug(t *testing.T) {
+func TestFTagsBySlug(t *testing.T) {
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Id: 1, Slug: "a", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 2, Slug: "z", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
-	sort.Sort(models.TagsBySlug(tags))
+	sort.Sort(models.FTagsBySlug(tags))
 	var got_ids []int
 	for _, value := range tags {
 		got_ids = append(got_ids, value.Id)
@@ -60,13 +60,13 @@ func TestFBasicTags(t *testing.T) {
 	utils.AssertEqual(t, slugs, want)
 }
 
-func TestNotesByUpdatedAt(t *testing.T) {
+func TestFNotesByUpdatedAt(t *testing.T) {
 	var notes []*models.Note
 	notes = append(notes, &models.Note{Text: "1", Status: "pending", UpdatedAt: 1600000001})
 	notes = append(notes, &models.Note{Text: "2", Status: "pending", UpdatedAt: 1600000004})
 	notes = append(notes, &models.Note{Text: "3", Status: "done", UpdatedAt: 1600000003})
 	notes = append(notes, &models.Note{Text: "4", Status: "done", UpdatedAt: 1600000002})
-	sort.Sort(models.NotesByUpdatedAt(notes))
+	sort.Sort(models.FNotesByUpdatedAt(notes))
 	var got_texts []string
 	for _, value := range notes {
 		got_texts = append(got_texts, value.Text)
@@ -112,14 +112,14 @@ func TestStringRepr(t *testing.T) {
 	utils.AssertEqual(t, note.StringRepr(reminderData), want)
 }
 
-func TestSearchText(t *testing.T) {
+func TestSearchableText(t *testing.T) {
 	// case 1
 	note := models.Note{Text: "a beautiful cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
-	got := note.SearchText()
+	got := note.SearchableText()
 	utils.AssertEqual(t, got, "a beautiful cat [c1]")
 	// case 2
 	note = models.Note{Text: "a cute dog", Comments: []string{"c1", "foo bar", "c3"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
-	got = note.SearchText()
+	got = note.SearchableText()
 	utils.AssertEqual(t, got, "a cute dog [c1, foo bar, c3]")
 }
 

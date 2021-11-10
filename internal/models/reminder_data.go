@@ -92,7 +92,7 @@ func (reminderData *ReminderData) UpdateDataFile(data_file_path string) error {
 // method to get slugs of all tags
 func (reminderData *ReminderData) TagsSlugs() []string {
 	// sort tags in place
-	sort.Sort(TagsBySlug(reminderData.Tags))
+	sort.Sort(FTagsBySlug(reminderData.Tags))
 	// fetch sluts and return
 	return FTagsSlugs(reminderData.Tags)
 }
@@ -146,7 +146,7 @@ func (reminderData *ReminderData) NotesWithTagId(tag_id int, status string) []*N
 	all_notes := FNotesWithStatus(reminderData.Notes, status)
 	var notes []*Note
 	for _, note := range all_notes {
-		if utils.IntInSlice(tag_id, note.TagIds) {
+		if utils.IntPresentInSlice(tag_id, note.TagIds) {
 			notes = append(notes, note)
 		}
 	}
@@ -232,7 +232,7 @@ func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error 
 // method to update note status
 func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) {
 	repeat_tag_ids := reminderData.TagIdsForGroup("repeat")
-	note_ids_with_repeat := utils.GetCommonIntMembers(note.TagIds, repeat_tag_ids)
+	note_ids_with_repeat := utils.GetCommonMembersIntSlices(note.TagIds, repeat_tag_ids)
 	if len(note_ids_with_repeat) != 0 {
 		fmt.Printf("%v Update skipped as one of the associated tag is a \"repeat\" group tag \n", utils.Symbols["error"])
 	} else if note.Status != status {
@@ -289,7 +289,7 @@ func (reminderData *ReminderData) AskTagIds(tag_ids []int) []int {
 	var err error
 	var tag_id int
 	// make sure reminderData.Tags is sorted
-	sort.Sort(TagsBySlug(reminderData.Tags))
+	sort.Sort(FTagsBySlug(reminderData.Tags))
 	// ask user to select tag
 	option_index, _ := utils.AskOption(append(reminderData.TagsSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 	if option_index == -1 {
@@ -305,7 +305,7 @@ func (reminderData *ReminderData) AskTagIds(tag_ids []int) []int {
 		err = nil
 	}
 	// update tag_ids
-	if (err == nil) && (!utils.IntInSlice(tag_id, tag_ids)) {
+	if (err == nil) && (!utils.IntPresentInSlice(tag_id, tag_ids)) {
 		tag_ids = append(tag_ids, tag_id)
 	}
 	// check with user if another tag is to be added
@@ -396,7 +396,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // method (recursively) to print notes interactively
 func (reminderData *ReminderData) PrintNotesAndAskOptions(notes []*Note, tag_id int) error {
 	// sort notes
-	sort.Sort(NotesByUpdatedAt(notes))
+	sort.Sort(FNotesByUpdatedAt(notes))
 	texts := FNotesTexts(notes, 150)
 	// ask user to select a note
 	fmt.Println("Note: An added note appears immidiately, but if a note is moved, refresh the list by going to main menu and come back.")

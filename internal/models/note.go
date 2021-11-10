@@ -18,11 +18,11 @@ type Note struct {
 	UpdatedAt  int64    `json:"updated_at"`
 }
 
-type NotesByUpdatedAt []*Note
+type FNotesByUpdatedAt []*Note
 
-func (c NotesByUpdatedAt) Len() int           { return len(c) }
-func (c NotesByUpdatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c NotesByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
+func (c FNotesByUpdatedAt) Len() int           { return len(c) }
+func (c FNotesByUpdatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c FNotesByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
 // method to provide basic string representation of a note
 func (note *Note) String() []string {
@@ -50,7 +50,7 @@ func (note *Note) StringRepr(reminderData *ReminderData) string {
 
 // method providing string representation for searching
 // we want to full text search on Text and Comments of a note
-func (note *Note) SearchText() string {
+func (note *Note) SearchableText() string {
 	// get comments text array for note
 	var comments_text []string
 	comments_text = append(comments_text, "[")
@@ -60,15 +60,15 @@ func (note *Note) SearchText() string {
 		comments_text = append(comments_text, strings.Join(note.Comments, ", "))
 	}
 	comments_text = append(comments_text, "]")
-	// get complete search text array for note
-	var search_text []string
-	search_text = append(search_text, note.Text)
-	search_text = append(search_text, strings.Join(comments_text, ""))
-	// return search text as for note a string
-	return strings.Join(search_text, " ")
+	// get a complete searchable text array for note
+	var searchable_text []string
+	searchable_text = append(searchable_text, note.Text)
+	searchable_text = append(searchable_text, strings.Join(comments_text, ""))
+	// return searchable text for note a string
+	return strings.Join(searchable_text, " ")
 }
 
-// get info texts of given notes
+// get info-texts of given notes
 func FNotesTexts(notes []*Note, max_str_len int) []string {
 	var all_texts []string
 	for _, note := range notes {
@@ -95,6 +95,23 @@ func FNotesWithStatus(notes []*Note, status string) []*Note {
 	return result
 }
 
+// function to print given field of a note
+func fPrintNoteField(field_name string, field_value interface{}) string {
+	var strs []string
+	field_dynamic_type := fmt.Sprintf("%T", field_value)
+	if field_dynamic_type == "[]string" {
+		comments := field_value.([]string)
+		if comments != nil {
+			for _, v := range comments {
+				strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
+			}
+		}
+	} else {
+		strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", field_name, field_value))
+	}
+	return strings.Join(strs, "")
+}
+
 // prompt for new Note
 func FNewNote(tag_ids []int) *Note {
 	prompt := promptui.Prompt{
@@ -113,21 +130,4 @@ func FNewNote(tag_ids []int) *Note {
 		CreatedAt:  utils.CurrentUnixTimestamp(),
 		UpdatedAt:  utils.CurrentUnixTimestamp(),
 	}
-}
-
-// function to print given field of a note
-func fPrintNoteField(field_name string, field_value interface{}) string {
-	var strs []string
-	field_dynamic_type := fmt.Sprintf("%T", field_value)
-	if field_dynamic_type == "[]string" {
-		comments := field_value.([]string)
-		if comments != nil {
-			for _, v := range comments {
-				strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
-			}
-		}
-	} else {
-		strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", field_name, field_value))
-	}
-	return strings.Join(strs, "")
 }
