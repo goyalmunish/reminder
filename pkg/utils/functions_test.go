@@ -67,32 +67,32 @@ func TestUnixTimestampForCorrespondingCurrentYearMonth(t *testing.T) {
 	utils.AssertEqual(t, got, 2332800)
 }
 
-func TestIntInSlice(t *testing.T) {
-	utils.AssertEqual(t, utils.IntInSlice(100, []int{-100, 0, 100}), true)
-	utils.AssertEqual(t, utils.IntInSlice(-100, []int{-100, 0, 100}), true)
-	utils.AssertEqual(t, utils.IntInSlice(101, []int{-100, 0, 100}), false)
-	utils.AssertEqual(t, utils.IntInSlice(-99, []int{-100, 0, 100}), false)
+func TestIntPresentInSlice(t *testing.T) {
+	utils.AssertEqual(t, utils.IntPresentInSlice(100, []int{-100, 0, 100}), true)
+	utils.AssertEqual(t, utils.IntPresentInSlice(-100, []int{-100, 0, 100}), true)
+	utils.AssertEqual(t, utils.IntPresentInSlice(101, []int{-100, 0, 100}), false)
+	utils.AssertEqual(t, utils.IntPresentInSlice(-99, []int{-100, 0, 100}), false)
 }
 
-func TestGetCommonIntMembers(t *testing.T) {
+func TestGetCommonMembersIntSlices(t *testing.T) {
 	utils.AssertEqual(t,
-		utils.GetCommonIntMembers([]int{-100, 0, 100, 1, 10, 8, 2, -51, 4},
+		utils.GetCommonMembersIntSlices([]int{-100, 0, 100, 1, 10, 8, 2, -51, 4},
 			[]int{-21, 100, 0, 8, 4}),
 		[]int{0, 100, 8, 4})
 	utils.AssertEqual(t,
-		utils.GetCommonIntMembers([]int{-21, 100, 0, 8, 4},
+		utils.GetCommonMembersIntSlices([]int{-21, 100, 0, 8, 4},
 			[]int{-100, 0, 100, 1, 10, 8, 2, -51, 4}),
 		[]int{100, 0, 8, 4})
 	utils.AssertEqual(t,
-		utils.GetCommonIntMembers([]int{2},
+		utils.GetCommonMembersIntSlices([]int{2},
 			[]int{-100, 0, 100, 1, 10, 8, 2, -51, 4}),
 		[]int{2})
 	utils.AssertEqual(t,
-		utils.GetCommonIntMembers([]int{},
+		utils.GetCommonMembersIntSlices([]int{},
 			[]int{-100, 0, 100, 1, 10, 8, 2, -51, 4}),
 		[]int{})
 	utils.AssertEqual(t,
-		utils.GetCommonIntMembers([]int{-100, 0, 100, 1, 10, 8, 2, -51, 4},
+		utils.GetCommonMembersIntSlices([]int{-100, 0, 100, 1, 10, 8, 2, -51, 4},
 			[]int{}),
 		[]int{})
 }
