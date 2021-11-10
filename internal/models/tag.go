@@ -16,20 +16,16 @@ type Tag struct {
 	UpdatedAt int64  `json:"updated_at"`
 }
 
+// method to provide basic string representation of a tag
+func (t Tag) String() string {
+	return fmt.Sprintf("%v#%v#%v", t.Group, t.Slug, t.Id)
+}
+
 type FTagsBySlug []*Tag
 
 func (c FTagsBySlug) Len() int           { return len(c) }
 func (c FTagsBySlug) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c FTagsBySlug) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
-
-// get slugs of given tags
-func FTagsSlugs(tags []*Tag) []string {
-	var all_slugs []string
-	for _, tag := range tags {
-		all_slugs = append(all_slugs, tag.Slug)
-	}
-	return all_slugs
-}
 
 // return an array of basic tags
 // which can be used for initial setup of the application
@@ -56,6 +52,15 @@ func FBasicTags() []*Tag {
 		basic_tags = append(basic_tags, &tag)
 	}
 	return basic_tags
+}
+
+// get slugs of given tags
+func FTagsSlugs(tags []*Tag) []string {
+	var all_slugs []string
+	for _, tag := range tags {
+		all_slugs = append(all_slugs, tag.Slug)
+	}
+	return all_slugs
 }
 
 // prompt for new Tag

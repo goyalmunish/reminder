@@ -9,6 +9,7 @@ type User struct {
 	EmailId string `json:"email_id"`
 }
 
+// method to provide basic string representation of a user
 func (u User) String() string {
 	return fmt.Sprintf("{Name: %v, EmailId: %v}", u.Name, u.EmailId)
 }
