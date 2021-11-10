@@ -18,12 +18,6 @@ type Note struct {
 	UpdatedAt  int64    `json:"updated_at"`
 }
 
-type FNotesByUpdatedAt []*Note
-
-func (c FNotesByUpdatedAt) Len() int           { return len(c) }
-func (c FNotesByUpdatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c FNotesByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
-
 // method to provide basic string representation of a note
 func (note *Note) String() []string {
 	var strs []string
@@ -67,6 +61,12 @@ func (note *Note) SearchableText() string {
 	// return searchable text for note a string
 	return strings.Join(searchable_text, " ")
 }
+
+type FNotesByUpdatedAt []*Note
+
+func (c FNotesByUpdatedAt) Len() int           { return len(c) }
+func (c FNotesByUpdatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c FNotesByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
 // get info-texts of given notes
 func FNotesTexts(notes []*Note, max_str_len int) []string {

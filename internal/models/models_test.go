@@ -27,6 +27,21 @@ func TestUser(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
+func TestTag(t *testing.T) {
+	// case 1: general case
+	got := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
+	want := "tag_group1#a#1"
+	utils.AssertEqual(t, got, want)
+	// case 2: blank group
+	got = models.Tag{Id: 1, Slug: "a", Group: ""}
+	want = "#a#1"
+	utils.AssertEqual(t, got, want)
+	// case 3: omitted group
+	got = models.Tag{Id: 1, Slug: "a"}
+	want = "#a#1"
+	utils.AssertEqual(t, got, want)
+}
+
 func TestFTagsBySlug(t *testing.T) {
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Id: 1, Slug: "a", Group: "tag_group1"})
