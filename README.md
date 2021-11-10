@@ -30,7 +30,7 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 - Tasks can be **updated** (📝) and also can be enhanced with **comments** (💬).
 - Tasks can be marked **done** (✅) or **pending** (⏰).
 - Tasks can be associated with **due date** (📅). Tasks with upcoming deadlines automatically show up under the **"Pending Notes"** option.
-- **Full-text search** (🔎) among **pending** tasks.
+- **Full-text search** (🔎) among all tasks.
 - All of your **data** (📋) remains with **only you**.
 - The **data** remains in human readable and usable format. This is useful in case you choose to move away.
 - Easily take **time-stamped backups** (💾).
@@ -39,6 +39,8 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 Nothing is hidden (except your data)! The tool is Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
 
 ## How to Use?
+
+The [Screencast of Basic Features](./assets/videos/screencast_basic_features.mov) can provide you with gist of how the tool looks like and its basic functionality.
 
 Once you invoke the tool (for example, by using the [alias **`reminder`**)](#easily-run-the-tool-via-docker-recommended), you are presented with its **Main Menu**. Use **Up-Arrow** and **Down-Arrow** keys to navigate up and down:
 
@@ -66,7 +68,7 @@ Now, from within the **"List Stuff"** option, you can add a new tag using **"Add
 
 On selecting a tag (navigating to the tag and hitting **Enter** key), all of its tasks show up as a list of selectable items. You can then **navigate to a given task** and hit **Enter** key to bring up a **menu to update the task** (it lets you change its text, add comments, mark it as pending, mark it as done, add due date, change its existing tag(s)). The following figures shows you how this menu looks like:
 
-Note: The **"Pending Options"** shows you tasks that require your immediate attention. In general, tasks with a **due date** in upcoming `7` days start showing up under the **"Pending Notes"** option (until they are marked done). The tags **"repeat-monthly"** and **"repeat-annually"** are special; their tasks also show up under the **"Pending Notes** option, and close to their due dates in their respective monthly and annual frequencies. These rules are also listed under **"Pending Notes"** option as a reference.
+Note: The **"Pending Notes"** shows you tasks that require your immediate attention. In general, tasks with a **due date** in upcoming `7` days start showing up under this option (and remain there until they are marked done). The tags **"repeat-monthly"** and **"repeat-annually"** are special; tasks tagged with them also show up under the **"Pending Notes"** option close to their due dates in their respective monthly and annual frequencies. These rules are also listed under **"Pending Notes"** option as a reference.
 
 <p align="center">
   <img src="./assets/images/screen_search_04.png" width="100%">
@@ -78,7 +80,7 @@ With time, you will add more tags and hundreds of tasks under them. These **stat
   <img src="./assets/images/screen_home.png" width="100%">
 </p>
 
-The above status states that there are currently 22 tags, a total of 330 tasks, and out of them 204 tasks are in the **"pending"** state. The tasks marked as **"done"** become **invisible** (but not deleted) and also don't show up in search results.
+The above status states that there are currently 22 tags, a total of 330 tasks, and out of them 204 tasks are in the **"pending"** state. The tasks marked as **"done"** become **invisible** (but not deleted, and will still show up under **"Done Notes"** and in Search results).
 
 The **"Search Notes"** option lets you perform a **full-text search** (with each task's text and its comments) through all tasks with the **"pending"** state.
 
@@ -104,7 +106,7 @@ Additionally, from the **Main Menu**:
 
 - use the **"Exit"** option to exit the tool. You can come back it to later from where you left off (that is, with your data intact)
 - use the **"Create Backup"** option to create time-stamped backup of your data file (on host machine)
-- use the **"Done Note"** option to display done tasks (which are otherwise invisible under the **"List Stuff"** and **"Search Notes"** options)
+- use the **"Done Note"** option to display done tasks (which are otherwise invisible under the **"List Stuff"**)
 
 ## How to Run?
 
