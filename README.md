@@ -24,63 +24,63 @@ _This is a **terminal-based fully-interactive reminder tool**. It is not for eve
 
 _Apart from being **fully-interactive** and **terminal-based**, the other major benefits it comes with are:_
 
-- Easy to categorize notes/tasks with **tags** (🏷 ).
+- Easy to categorize **tasks (also referred as "notes")** with **tags** (🏷 ).
 - **Tag-groups** for managing priority levels (⬆️ ⬇️).
-- Each note/task can be **tagged with multiple keywords**.
-- Notes/tasks can be **updated** (📝) and also can be enhanced with **comments** (💬).
-- Notes/tasks can be marked **done** (✅) or **pending** (⏰).
-- Notes/tasks can be associated with **due date** (📅). Notes/tasks with upcoming deadlines automatically show up under the **"Pending Notes"** option.
-- **Full-text search** (🔎) among **pending** notes/tasks.
+- Each task can be **tagged with multiple keywords**.
+- Tasks can be **updated** (📝) and also can be enhanced with **comments** (💬).
+- Tasks can be marked **done** (✅) or **pending** (⏰).
+- Tasks can be associated with **due date** (📅). Tasks with upcoming deadlines automatically show up under the **"Pending Notes"** option.
+- **Full-text search** (🔎) among **pending** tasks.
 - All of your **data** (📋) remains with **only you**.
 - The **data** remains in human readable and usable format. This is useful in case you choose to move away.
 - Easily take **time-stamped backups** (💾).
-- Easy to update tags of existing notes/tasks.
+- Easy to update tags of existing tasks.
 
 Nothing is hidden (except your data)! The tool is Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
 
 ## How to Use?
 
-Once you invoke the tool (for example, by using the previously created alias **`reminder`**), you are presented with its **Main Menu**. Use **Up-Arrow** and **Down-Arrow** keys to navigate up and down:
+Once you invoke the tool (for example, by using the [alias **`reminder`**)](#easily-run-the-tool-via-docker-recommended), you are presented with its **Main Menu**. Use **Up-Arrow** and **Down-Arrow** keys to navigate up and down:
 
 <p align="center">
   <img src="./assets/images/screen_basic_tags_01.png" width="100%">
 </p>
 
-Note: You may like to take a good look at the options of the **Main Menu** (as shown above). You can always come back to it by pressing **Ctrl-c**.
+You may like to take a good look at the options of the **Main Menu** (as shown above), as we'll be talking about it through out this guide.
 
-Note: Choose an option by pressing **Enter** key, and use **Ctrl-c** to jump from any nested level to the **Main Menu**.
+Also note that you can choose an option by pressing **Enter** key, and use **Ctrl-c** to jump from any nested level to come back to the **Main Menu**.
 
-The **tags** are the main method of categorizing notes. In the beginning, the tag list is empty, but you can use the **"Register Basic Tags"** option (the option pointed out with the cursor in above figure) to register basic tags. Then, you can use the **"List Stuff"** option to list them out (as shown below):
+In [`reminder`](https://github.com/goyalmunish/reminder), the **tags** are the main method of categorizing tasks. When you first time start the app, the tag list is empty, but you can use the **"Register Basic Tags"** option (the option pointed out by the selection-cursor in the above figure) to register basic tags (as listed in the figure below). Then, you can use the **"List Stuff"** option to list them out (as shown below figure).
 
-Note: As we'll see, the **"List Stuff"** option is the most important option in this list. It lets you add tags, add notes, update notes; so almost 90% of use-cases. The **Main Menu** also lists options such as **"Add Note"** and **"Add Tag"** but you'll rarely have to use them directly.
+As we'll see, the **"List Stuff"** option is the most frequently used option in this list. It lets you add tags, add tasks (also referred as "notes") under those tags, update those tasks; so almost 90% of use-cases. The **Main Menu** also lists options such as **"Add Note"** and **"Add Tag"** at the root level of this menu, but you'll rarely have to use them directly, as these functionalities can be handled from within the **"List Stuff"** option in a convenient two-level tree-based hierarchy of tags and tasks.
 
 <p align="center">
   <img src="./assets/images/screen_basic_tags_02.png" width="100%">
 </p>
 
-You can add a new tag using **"Add Tag"** or choose an existing tag to add a **note** to it. For example, the following adds a new note to the **"priority-urgent"** tag:
+Now, from within the **"List Stuff"** option, you can add a new tag using **"Add Tag"** (as shown at the bottom of the above figure) or choose an existing tag to add a **task** to it. For example, the following figure shows state of the UI when you select a tag (such as **"priority-urgent"**) to add a new task under it:
 
 <p align="center">
   <img src="./assets/images/screen_add_note_01.png" width="100%">
 </p>
 
-All notes of a selected tag show up under it. From list of notes under a tag, you can **navigate to a given note** and hit **Enter** key to bring up a **menu to update it** (change its text, add comments, mark it as pending, mark it as done, add due date, change its existing tag(s)). This is how this menu looks like:
+On selecting a tag (navigating to the tag and hitting **Enter** key), all of its tasks show up as a list of selectable items. You can then **navigate to a given task** and hit **Enter** key to bring up a **menu to update the task** (it lets you change its text, add comments, mark it as pending, mark it as done, add due date, change its existing tag(s)). The following figures shows you how this menu looks like:
 
-Note: Notes with a **due date** in upcoming `7` days start showing up under **"Pending Notes"** option (until they are marked done).
+Note: The **"Pending Options"** shows you tasks that require your immediate attention. In general, tasks with a **due date** in upcoming `7` days start showing up under the **"Pending Notes"** option (until they are marked done). The tags **"repeat-monthly"** and **"repeat-annually"** are special; their tasks also show up under the **"Pending Notes** option, and close to their due dates in their respective monthly and annual frequencies. These rules are also listed under **"Pending Notes"** option as a reference.
 
 <p align="center">
   <img src="./assets/images/screen_search_04.png" width="100%">
 </p>
 
-With time, you will add more tags and hundreds of notes under them. This **status** will show up **on top of your main-menu screen** (as shown below):
+With time, you will add more tags and hundreds of tasks under them. These **stats** will show up **on top of your main-menu screen** (as shown below):
 
 <p align="center">
   <img src="./assets/images/screen_home.png" width="100%">
 </p>
 
-The above status states that there are currently 22 tags, a total of 330 notes, and out of them 204 notes are in the **"pending"** state. The notes marked as **"done"** become **invisible** (but not deleted) and also don't show up in search results.
+The above status states that there are currently 22 tags, a total of 330 tasks, and out of them 204 tasks are in the **"pending"** state. The tasks marked as **"done"** become **invisible** (but not deleted) and also don't show up in search results.
 
-The **"Search Notes"** option lets you perform a **full-text search** (with each note's text and its comments) through all notes with the **"pending"** state.
+The **"Search Notes"** option lets you perform a **full-text search** (with each task's text and its comments) through all tasks with the **"pending"** state.
 
 <p align="center">
   <img src="./assets/images/screen_search_01.png" width="100%">
@@ -92,9 +92,9 @@ The **result list** updates as you add or delete characters in the **search fiel
   <img src="./assets/images/screen_search_03.png" width="100%">
 </p>
 
-The figures such as 1618211581 that you see in the above results are timestamps of the comments added to the corresponding notes.
+The figures such as 1618211581 that you see in the above results are timestamps of the comments added to the corresponding tasks.
 
-You can navigate to a search entry (a note) and hit **Enter** key to bring up the **menu to update it** (similar to how we updated notes under a tag):
+You can navigate to a search entry (a task) and hit **Enter** key to bring up the **menu to update the task** (similar to how we updated tasks under a tag):
 
 <p align="center">
   <img src="./assets/images/screen_search_04.png" width="100%">
@@ -102,9 +102,9 @@ You can navigate to a search entry (a note) and hit **Enter** key to bring up th
 
 Additionally, from the **Main Menu**:
 
-- Use the **"Exit"** option to exit the tool. You can come back it to later from where you left off (that is, with your data intact).
-- Use the **"Create Backup"** option to create time-stamped backup of your data file (on host machine).
-- Use the **"Done Note"** option to display done notes (which are otherwise invisible under the **"List Stuff"** and **"Search Notes"** options).
+- use the **"Exit"** option to exit the tool. You can come back it to later from where you left off (that is, with your data intact)
+- use the **"Create Backup"** option to create time-stamped backup of your data file (on host machine)
+- use the **"Done Note"** option to display done tasks (which are otherwise invisible under the **"List Stuff"** and **"Search Notes"** options)
 
 ## How to Run?
 
