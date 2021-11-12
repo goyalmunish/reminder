@@ -310,7 +310,7 @@ func (reminderData *ReminderData) AskTagIds(tag_ids []int) []int {
 	}
 	// check with user if another tag is to be added
 	prompt := promptui.Prompt{
-		Label:    "Add another tag (default: no):",
+		Label:    "Add another tag: yes/no (default: no):",
 		Validate: utils.ValidateString,
 	}
 	prompt_text, err := prompt.Run()
