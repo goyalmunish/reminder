@@ -35,10 +35,10 @@ func (note *Note) String() []string {
 func (note *Note) StringRepr(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
-	basic_strs := note.String()
-	tags_str := fPrintNoteField("Tags", FTagsSlugs(reminderData.TagsFromIds(note.TagIds)))
-	basic_strs[3] = tags_str
-	strs = append(strs, basic_strs...)
+	basicStrs := note.String()
+	tagsStr := fPrintNoteField("Tags", FTagsSlugs(reminderData.TagsFromIds(note.TagIds)))
+	basicStrs[3] = tagsStr
+	strs = append(strs, basicStrs...)
 	return strings.Join(strs, "")
 }
 
@@ -46,20 +46,20 @@ func (note *Note) StringRepr(reminderData *ReminderData) string {
 // we want to full text search on Text and Comments of a note
 func (note *Note) SearchableText() string {
 	// get comments text array for note
-	var comments_text []string
-	comments_text = append(comments_text, "[")
+	var commentsText []string
+	commentsText = append(commentsText, "[")
 	if len(note.Comments) == 0 {
-		comments_text = append(comments_text, "no-comments")
+		commentsText = append(commentsText, "no-comments")
 	} else {
-		comments_text = append(comments_text, strings.Join(note.Comments, ", "))
+		commentsText = append(commentsText, strings.Join(note.Comments, ", "))
 	}
-	comments_text = append(comments_text, "]")
+	commentsText = append(commentsText, "]")
 	// get a complete searchable text array for note
-	var searchable_text []string
-	searchable_text = append(searchable_text, note.Text)
-	searchable_text = append(searchable_text, strings.Join(comments_text, ""))
+	var searchableText []string
+	searchableText = append(searchableText, note.Text)
+	searchableText = append(searchableText, strings.Join(commentsText, ""))
 	// return searchable text for note a string
-	return strings.Join(searchable_text, " ")
+	return strings.Join(searchableText, " ")
 }
 
 type FNotesByUpdatedAt []*Note
@@ -69,19 +69,19 @@ func (c FNotesByUpdatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c FNotesByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
 // get info-texts of given notes
-func FNotesTexts(notes []*Note, max_str_len int) []string {
-	var all_texts []string
+func FNotesTexts(notes []*Note, maxStrLen int) []string {
+	var allTexts []string
 	for _, note := range notes {
-		note_text := note.Text
-		if max_str_len > 0 {
-			if len(note_text) > max_str_len {
-				note_text = fmt.Sprintf("%v%v", note_text[0:(max_str_len-3)], "...")
+		noteText := note.Text
+		if maxStrLen > 0 {
+			if len(noteText) > maxStrLen {
+				noteText = fmt.Sprintf("%v%v", noteText[0:(maxStrLen-3)], "...")
 			}
 		}
-		note_text = fmt.Sprintf("%*v {C:%02d, S:%v, D:%v}", -max_str_len, note_text, len(note.Comments), strings.ToUpper(note.Status[0:1]), utils.UnixTimestampToShortTimeStr(note.CompleteBy))
-		all_texts = append(all_texts, note_text)
+		noteText = fmt.Sprintf("%*v {C:%02d, S:%v, D:%v}", -maxStrLen, noteText, len(note.Comments), strings.ToUpper(note.Status[0:1]), utils.UnixTimestampToShortTimeStr(note.CompleteBy))
+		allTexts = append(allTexts, noteText)
 	}
-	return all_texts
+	return allTexts
 }
 
 // filter notes with given status (such as "pending" status)
@@ -96,37 +96,37 @@ func FNotesWithStatus(notes []*Note, status string) []*Note {
 }
 
 // function to print given field of a note
-func fPrintNoteField(field_name string, field_value interface{}) string {
+func fPrintNoteField(fieldName string, fieldValue interface{}) string {
 	var strs []string
-	field_dynamic_type := fmt.Sprintf("%T", field_value)
-	if field_dynamic_type == "[]string" {
-		comments := field_value.([]string)
+	fieldDynamicType := fmt.Sprintf("%T", fieldValue)
+	if fieldDynamicType == "[]string" {
+		comments := fieldValue.([]string)
 		if comments != nil {
 			for _, v := range comments {
 				strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
 			}
 		}
 	} else {
-		strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", field_name, field_value))
+		strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", fieldName, fieldValue))
 	}
 	return strings.Join(strs, "")
 }
 
 // prompt for new Note
-func FNewNote(tag_ids []int) *Note {
+func FNewNote(tagIDs []int) *Note {
 	prompt := promptui.Prompt{
 		Label:    "Note Text",
 		Validate: utils.ValidateNonEmptyString,
 	}
-	note_text, err := prompt.Run()
+	noteText, err := prompt.Run()
 	utils.PrintErrorIfPresent(err)
-	note_text = utils.TrimString(note_text)
+	noteText = utils.TrimString(noteText)
 	return &Note{
-		Text:       note_text,
+		Text:       noteText,
 		Comments:   *new([]string),
 		Status:     "pending",
 		CompleteBy: 0,
-		TagIds:     tag_ids,
+		TagIds:     tagIDs,
 		CreatedAt:  utils.CurrentUnixTimestamp(),
 		UpdatedAt:  utils.CurrentUnixTimestamp(),
 	}
