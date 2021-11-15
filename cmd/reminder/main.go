@@ -34,7 +34,7 @@ func flow() {
 	fmt.Println("|    Use 'Ctrl-c' to jump from any nested level to the main menu    |")
 	fmt.Println("| ----------------------------------------------------------------- |")
 	_, result := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
-		fmt.Sprintf("%v %v %v", utils.Symbols["checkerd_flag"], "Exit", utils.Symbols["red_flag"]),
+		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
 		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Pending Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"),
@@ -46,74 +46,74 @@ func flow() {
 	// operate on main options
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
-		var all_tags_slugs_with_emoji []string
-		for _, tag_slug := range reminderData.TagsSlugs() {
-			all_tags_slugs_with_emoji = append(all_tags_slugs_with_emoji, fmt.Sprintf("%v %v", utils.Symbols["tag"], tag_slug))
+		var allTagsSlugsWithEmoji []string
+		for _, tagSlug := range reminderData.TagsSlugs() {
+			allTagsSlugsWithEmoji = append(allTagsSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["tag"], tagSlug))
 		}
-		tag_index, _ := utils.AskOption(append(all_tags_slugs_with_emoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
-		if tag_index != -1 {
-			if tag_index == len(reminderData.TagsSlugs()) {
+		tagIndex, _ := utils.AskOption(append(allTagsSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+		if tagIndex != -1 {
+			if tagIndex == len(reminderData.TagsSlugs()) {
 				// add new tag
 				reminderData.NewTagRegistration()
 			} else {
-				tag := reminderData.Tags[tag_index]
+				tag := reminderData.Tags[tagIndex]
 				notes := reminderData.NotesWithTagId(tag.Id, "pending")
 				err := reminderData.PrintNotesAndAskOptions(notes, tag.Id)
 				utils.PrintErrorIfPresent(err)
 			}
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Note"):
-		tag_ids := reminderData.AskTagIds([]int{})
-		note := models.FNewNote(tag_ids)
+		tagIDs := reminderData.AskTagIds([]int{})
+		note := models.FNewNote(tagIDs)
 		reminderData.NewNoteAppend(note)
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Tag"):
 		reminderData.NewTagRegistration()
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Pending Notes"):
-		all_notes := reminderData.Notes
-		pending_notes := models.FNotesWithStatus(all_notes, "pending")
-		var current_notes []*models.Note
-		repeat_tag_ids := reminderData.TagIdsForGroup("repeat")
-		// populating current_notes
-		for _, note := range pending_notes {
-			note_ids_with_repeat := utils.GetCommonMembersIntSlices(note.TagIds, repeat_tag_ids)
+		allNotes := reminderData.Notes
+		pendingNotes := models.FNotesWithStatus(allNotes, "pending")
+		var currentNotes []*models.Note
+		repeatTagIDs := reminderData.TagIdsForGroup("repeat")
+		// populating currentNotes
+		for _, note := range pendingNotes {
+			noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
 			// first process notes without tag with group "repeat"
 			// start showing such notes 7 days in advance from their due date, and until they are marked done
-			min_day := note.CompleteBy - 7*24*60*60
-			current_timestamp := utils.CurrentUnixTimestamp()
-			if (len(note_ids_with_repeat) == 0) && (note.CompleteBy != 0) && (current_timestamp >= min_day) {
-				current_notes = append(current_notes, note)
+			minDay := note.CompleteBy - 7*24*60*60
+			currentTimestamp := utils.CurrentUnixTimestamp()
+			if (len(noteIDsWithRepeat) == 0) && (note.CompleteBy != 0) && (currentTimestamp >= minDay) {
+				currentNotes = append(currentNotes, note)
 			}
 			// check notes with tag with group "repeat"
 			// start showing notes with "repeat-annually" 7 days in advance
 			// start showing notes with "repeat-monthly" 3 days in advance
 			// don't show such notes after their due date is past by 2 day
-			if (len(note_ids_with_repeat) > 0) && (note.CompleteBy != 0) {
+			if (len(noteIDsWithRepeat) > 0) && (note.CompleteBy != 0) {
 				// check for repeat-annually tag
-				repeat_annually_tag := reminderData.TagFromSlug("repeat-annually")
-				repeat_monthly_tag := reminderData.TagFromSlug("repeat-monthly")
-				if (repeat_annually_tag != nil) && utils.IntPresentInSlice(repeat_annually_tag.Id, note.TagIds) {
-					_, note_month, note_day := utils.UnixTimestampToTime(note.CompleteBy).Date()
-					note_timestamp_current := utils.UnixTimestampForCorrespondingCurrentYear(int(note_month), note_day)
-					note_timestamp_previous := note_timestamp_current - 365*24*60*60
-					note_timestamp_next := note_timestamp_current + 365*24*60*60
-					days_before := int64(7)
-					days_after := int64(2)
-					if utils.IsTimeForRepeatNote(note_timestamp_current, note_timestamp_previous, note_timestamp_next, days_before, days_after) {
-						current_notes = append(current_notes, note)
+				repeatAnnuallyTag := reminderData.TagFromSlug("repeat-annually")
+				repeatMonthlyTag := reminderData.TagFromSlug("repeat-monthly")
+				if (repeatAnnuallyTag != nil) && utils.IntPresentInSlice(repeatAnnuallyTag.Id, note.TagIds) {
+					_, noteMonth, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
+					noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYear(int(noteMonth), noteDay)
+					noteTimestampPrevious := noteTimestampCurrent - 365*24*60*60
+					noteTimestampNext := noteTimestampCurrent + 365*24*60*60
+					daysBefore := int64(7)
+					daysAfter := int64(2)
+					if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
+						currentNotes = append(currentNotes, note)
 					}
 				}
 				// check for repeat-monthly tag
-				if (repeat_monthly_tag != nil) && utils.IntPresentInSlice(repeat_monthly_tag.Id, note.TagIds) {
-					_, _, note_day := utils.UnixTimestampToTime(note.CompleteBy).Date()
-					note_timestamp_current := utils.UnixTimestampForCorrespondingCurrentYearMonth(note_day)
-					note_timestamp_previous := note_timestamp_current - 30*24*60*60
-					note_timestamp_next := note_timestamp_current + 30*24*60*60
-					days_before := int64(3)
-					days_after := int64(2)
-					if utils.IsTimeForRepeatNote(note_timestamp_current, note_timestamp_previous, note_timestamp_next, days_before, days_after) {
-						current_notes = append(current_notes, note)
+				if (repeatMonthlyTag != nil) && utils.IntPresentInSlice(repeatMonthlyTag.Id, note.TagIds) {
+					_, _, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
+					noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYearMonth(noteDay)
+					noteTimestampPrevious := noteTimestampCurrent - 30*24*60*60
+					noteTimestampNext := noteTimestampCurrent + 30*24*60*60
+					daysBefore := int64(3)
+					daysAfter := int64(2)
+					if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
+						currentNotes = append(currentNotes, note)
 					}
 				}
 			}
@@ -122,26 +122,26 @@ func flow() {
 		fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 		fmt.Println("  - within a week for repeat-annually and 2 days post due date (ignoring its year)")
 		fmt.Println("  - within 3 days for repeat-monthly and 2 days post due date (ignoring its year and month)")
-		err := reminderData.PrintNotesAndAskOptions(current_notes, -1)
+		err := reminderData.PrintNotesAndAskOptions(currentNotes, -1)
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
-		all_notes := reminderData.Notes
-		done_notes := models.FNotesWithStatus(all_notes, "done")
-		fmt.Printf("A total of %v notes marked as 'done':\n", len(done_notes))
-		err := reminderData.PrintNotesAndAskOptions(done_notes, -1)
+		allNotes := reminderData.Notes
+		doneNotes := models.FNotesWithStatus(allNotes, "done")
+		fmt.Printf("A total of %v notes marked as 'done':\n", len(doneNotes))
+		err := reminderData.PrintNotesAndAskOptions(doneNotes, -1)
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
 		// get texts of all notes
-		all_notes := reminderData.Notes
-		var all_texts []string
-		for _, note := range all_notes {
-			all_texts = append(all_texts, note.SearchableText())
+		allNotes := reminderData.Notes
+		var allTexts []string
+		for _, note := range allNotes {
+			allTexts = append(allTexts, note.SearchableText())
 		}
 		// function to search across notes
-		search_notes := func(input string, idx int) bool {
+		searchNotes := func(input string, idx int) bool {
 			input = strings.ToLower(input)
-			note_text := all_texts[idx]
-			if strings.Contains(strings.ToLower(note_text), input) {
+			noteText := allTexts[idx]
+			if strings.Contains(strings.ToLower(noteText), input) {
 				return true
 			}
 			return false
@@ -149,16 +149,16 @@ func flow() {
 		// display prompt
 		prompt := promptui.Select{
 			Label:             "Notes",
-			Items:             all_texts,
+			Items:             allTexts,
 			Size:              25,
 			StartInSearchMode: true,
-			Searcher:          search_notes,
+			Searcher:          searchNotes,
 		}
-		fmt.Printf("Searching through a total of %v notes:\n", len(all_texts))
+		fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
 		index, _, err := prompt.Run()
 		utils.PrintErrorIfPresent(err)
 		if index >= 0 {
-			note := all_notes[index]
+			note := allNotes[index]
 			reminderData.PrintNoteAndAskOptions(note)
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
@@ -201,7 +201,7 @@ func flow() {
 			err = utils.PerformCat(models.DataFile)
 		}
 		utils.PrintErrorIfPresent(err)
-	case fmt.Sprintf("%v %v %v", utils.Symbols["checkerd_flag"], "Exit", utils.Symbols["red_flag"]):
+	case fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):
 		fmt.Println("Exiting...")
 		return
 	}

@@ -49,12 +49,12 @@ func TestFTagsBySlug(t *testing.T) {
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
 	sort.Sort(models.FTagsBySlug(tags))
-	var got_ids []int
+	var got []int
 	for _, value := range tags {
-		got_ids = append(got_ids, value.Id)
+		got = append(got, value.Id)
 	}
-	want_ids := []int{1, 4, 3, 2}
-	utils.AssertEqual(t, got_ids, want_ids)
+	want := []int{1, 4, 3, 2}
+	utils.AssertEqual(t, got, want)
 }
 
 func TestFTagsSlugs(t *testing.T) {
@@ -69,8 +69,8 @@ func TestFTagsSlugs(t *testing.T) {
 }
 
 func TestFBasicTags(t *testing.T) {
-	basic_tags := models.FBasicTags()
-	slugs := models.FTagsSlugs(basic_tags)
+	basicTags := models.FBasicTags()
+	slugs := models.FTagsSlugs(basicTags)
 	want := "[current priority-urgent priority-medium priority-low repeat-annually repeat-monthly tips]"
 	utils.AssertEqual(t, slugs, want)
 }
@@ -82,12 +82,12 @@ func TestFNotesByUpdatedAt(t *testing.T) {
 	notes = append(notes, &models.Note{Text: "3", Status: "done", UpdatedAt: 1600000003})
 	notes = append(notes, &models.Note{Text: "4", Status: "done", UpdatedAt: 1600000002})
 	sort.Sort(models.FNotesByUpdatedAt(notes))
-	var got_texts []string
+	var gotTexts []string
 	for _, value := range notes {
-		got_texts = append(got_texts, value.Text)
+		gotTexts = append(gotTexts, value.Text)
 	}
-	want_texts := []string{"2", "3", "4", "1"}
-	utils.AssertEqual(t, got_texts, want_texts)
+	wantTexts := []string{"2", "3", "4", "1"}
+	utils.AssertEqual(t, gotTexts, wantTexts)
 }
 
 func TestNoteString(t *testing.T) {
@@ -179,49 +179,49 @@ func TestFNotesWithStatus(t *testing.T) {
 }
 
 func TestFMakeSureFileExists(t *testing.T) {
-	var data_file_path = "temp_test_dir/mydata.json"
+	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
-	defer os.RemoveAll(path.Dir(data_file_path))
+	defer os.RemoveAll(path.Dir(dataFilePath))
 	// make sure file doesn't exists already
-	_, err := os.Stat(data_file_path)
+	_, err := os.Stat(dataFilePath)
 	utils.AssertEqual(t, err != nil, true)
 	errors.Is(err, fs.ErrNotExist)
 	// attempt to create the file and required dirs
-	models.FMakeSureFileExists(data_file_path)
+	models.FMakeSureFileExists(dataFilePath)
 	// prove that the file was created
-	_, err = os.Stat(data_file_path)
+	_, err = os.Stat(dataFilePath)
 	utils.AssertEqual(t, err == nil, true)
 }
 
 func TestFReadDataFile(t *testing.T) {
-	var data_file_path = "temp_test_dir/mydata.json"
+	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
-	defer os.RemoveAll(path.Dir(data_file_path))
+	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	models.FMakeSureFileExists(data_file_path)
+	models.FMakeSureFileExists(dataFilePath)
 	// attempt to read file and parse it
-	reminder_data := models.FReadDataFile(data_file_path)
-	utils.AssertEqual(t, reminder_data.UpdatedAt > 0, true)
+	reminderData := models.FReadDataFile(dataFilePath)
+	utils.AssertEqual(t, reminderData.UpdatedAt > 0, true)
 }
 
 func TestUpdateDataFile(t *testing.T) {
-	var data_file_path = "temp_test_dir/mydata.json"
+	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
-	defer os.RemoveAll(path.Dir(data_file_path))
+	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	models.FMakeSureFileExists(data_file_path)
-	reminder_data := models.FReadDataFile(data_file_path)
-	// old_updated_at := reminder_data.UpdatedAt
-	test_user := models.User{Name: "Test User", EmailId: "user@test.com"}
-	reminder_data.User = &test_user
-	reminder_data.UpdateDataFile(data_file_path)
-	reminder_data_re := models.FReadDataFile(data_file_path)
-	// utils.AssertEqual(t, reminder_data_re.UpdatedAt > old_updated_at, true)
-	utils.AssertEqual(t, reminder_data_re.User.EmailId == test_user.EmailId, true)
+	models.FMakeSureFileExists(dataFilePath)
+	reminderData := models.FReadDataFile(dataFilePath)
+	// old_updated_at := reminderData.UpdatedAt
+	testUser := models.User{Name: "Test User", EmailId: "user@test.com"}
+	reminderData.User = &testUser
+	reminderData.UpdateDataFile(dataFilePath)
+	remiderDataRe := models.FReadDataFile(dataFilePath)
+	// utils.AssertEqual(t, remiderDataRe.UpdatedAt > old_updated_at, true)
+	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)
 }
 
 func TestTagsSlug(t *testing.T) {
-	reminder_data := models.ReminderData{
+	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
 		Tags:  []*models.Tag{},
@@ -232,14 +232,14 @@ func TestTagsSlug(t *testing.T) {
 	tags = append(tags, &models.Tag{Id: 2, Slug: "z", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
-	reminder_data.Tags = tags
-	got_slugs := reminder_data.TagsSlugs()
-	want_slugs := []string{"a", "b", "c", "z"}
-	utils.AssertEqual(t, got_slugs, want_slugs)
+	reminderData.Tags = tags
+	gotSlugs := reminderData.TagsSlugs()
+	wantSlugs := []string{"a", "b", "c", "z"}
+	utils.AssertEqual(t, gotSlugs, wantSlugs)
 }
 
 func TestTagsFromIds(t *testing.T) {
-	reminder_data := models.ReminderData{
+	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
 		Tags:  []*models.Tag{},
@@ -254,26 +254,26 @@ func TestTagsFromIds(t *testing.T) {
 	tags = append(tags, &tag3)
 	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
 	tags = append(tags, &tag4)
-	reminder_data.Tags = tags
+	reminderData.Tags = tags
 	// case 1
-	tag_ids := []int{1, 3}
-	got_slugs := reminder_data.TagsFromIds(tag_ids)
-	want_slugs := []*models.Tag{&tag1, &tag3}
-	utils.AssertEqual(t, got_slugs, want_slugs)
+	tagIDs := []int{1, 3}
+	gotSlugs := reminderData.TagsFromIds(tagIDs)
+	wantSlugs := []*models.Tag{&tag1, &tag3}
+	utils.AssertEqual(t, gotSlugs, wantSlugs)
 	// case 2
-	tag_ids = []int{}
-	got_slugs = reminder_data.TagsFromIds(tag_ids)
-	want_slugs = []*models.Tag{}
-	utils.AssertEqual(t, got_slugs, want_slugs)
+	tagIDs = []int{}
+	gotSlugs = reminderData.TagsFromIds(tagIDs)
+	wantSlugs = []*models.Tag{}
+	utils.AssertEqual(t, gotSlugs, wantSlugs)
 	// case 3
-	tag_ids = []int{1, 4, 2, 3}
-	got_slugs = reminder_data.TagsFromIds(tag_ids)
-	want_slugs = []*models.Tag{&tag1, &tag4, &tag2, &tag3}
-	utils.AssertEqual(t, got_slugs, want_slugs)
+	tagIDs = []int{1, 4, 2, 3}
+	gotSlugs = reminderData.TagsFromIds(tagIDs)
+	wantSlugs = []*models.Tag{&tag1, &tag4, &tag2, &tag3}
+	utils.AssertEqual(t, gotSlugs, wantSlugs)
 }
 
 func TestTagFromSlug(t *testing.T) {
-	reminder_data := models.ReminderData{
+	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
 		Tags:  []*models.Tag{},
@@ -288,17 +288,17 @@ func TestTagFromSlug(t *testing.T) {
 	tags = append(tags, &tag3)
 	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
 	tags = append(tags, &tag4)
-	reminder_data.Tags = tags
+	reminderData.Tags = tags
 	// case 1
-	utils.AssertEqual(t, reminder_data.TagFromSlug("a"), &tag1)
+	utils.AssertEqual(t, reminderData.TagFromSlug("a"), &tag1)
 	// case 2
-	utils.AssertEqual(t, reminder_data.TagFromSlug("a1"), &tag2)
+	utils.AssertEqual(t, reminderData.TagFromSlug("a1"), &tag2)
 	// case 3
-	utils.AssertEqual(t, reminder_data.TagFromSlug("no_slug"), nil)
+	utils.AssertEqual(t, reminderData.TagFromSlug("no_slug"), nil)
 }
 
 func TestTagIdsForGroup(t *testing.T) {
-	reminder_data := models.ReminderData{
+	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
 		Tags:  []*models.Tag{},
@@ -313,17 +313,17 @@ func TestTagIdsForGroup(t *testing.T) {
 	tags = append(tags, &tag3)
 	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
 	tags = append(tags, &tag4)
-	reminder_data.Tags = tags
+	reminderData.Tags = tags
 	// case 1
-	utils.AssertEqual(t, reminder_data.TagIdsForGroup("tag_group1"), []int{1, 2, 3})
+	utils.AssertEqual(t, reminderData.TagIdsForGroup("tag_group1"), []int{1, 2, 3})
 	// case 2
-	utils.AssertEqual(t, reminder_data.TagIdsForGroup("tag_group2"), []int{4})
+	utils.AssertEqual(t, reminderData.TagIdsForGroup("tag_group2"), []int{4})
 	// case 3
-	utils.AssertEqual(t, reminder_data.TagIdsForGroup("tag_group_NO"), []int{})
+	utils.AssertEqual(t, reminderData.TagIdsForGroup("tag_group_NO"), []int{})
 }
 
 func TestNextPossibleTagId(t *testing.T) {
-	reminder_data := models.ReminderData{
+	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
 		Tags:  []*models.Tag{},
@@ -338,12 +338,12 @@ func TestNextPossibleTagId(t *testing.T) {
 	tags = append(tags, &tag3)
 	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
 	tags = append(tags, &tag4)
-	reminder_data.Tags = tags
-	utils.AssertEqual(t, reminder_data.NextPossibleTagId(), 4)
+	reminderData.Tags = tags
+	utils.AssertEqual(t, reminderData.NextPossibleTagId(), 4)
 }
 
 func TestNotesWithTagId(t *testing.T) {
-	reminder_data := models.ReminderData{
+	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
 		Tags:  []*models.Tag{},
@@ -358,7 +358,7 @@ func TestNotesWithTagId(t *testing.T) {
 	tags = append(tags, &tag3)
 	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
 	tags = append(tags, &tag4)
-	reminder_data.Tags = tags
+	reminderData.Tags = tags
 	// create notes
 	var notes []*models.Note
 	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
@@ -371,26 +371,26 @@ func TestNotesWithTagId(t *testing.T) {
 	notes = append(notes, &note4)
 	note5 := models.Note{Text: "5", Status: "pending", UpdatedAt: 1600000005}
 	notes = append(notes, &note5)
-	reminder_data.Notes = notes
+	reminderData.Notes = notes
 	// searching notes
 	// case 1
-	utils.AssertEqual(t, reminder_data.NotesWithTagId(2, "pending"), []*models.Note{&note2})
+	utils.AssertEqual(t, reminderData.NotesWithTagId(2, "pending"), []*models.Note{&note2})
 	// case 2
-	utils.AssertEqual(t, reminder_data.NotesWithTagId(2, "done"), []*models.Note{&note3})
+	utils.AssertEqual(t, reminderData.NotesWithTagId(2, "done"), []*models.Note{&note3})
 	// case 3
-	utils.AssertEqual(t, reminder_data.NotesWithTagId(4, "pending"), []*models.Note{&note1, &note2})
+	utils.AssertEqual(t, reminderData.NotesWithTagId(4, "pending"), []*models.Note{&note1, &note2})
 	// case 4
-	utils.AssertEqual(t, reminder_data.NotesWithTagId(1, "done"), []*models.Note{})
+	utils.AssertEqual(t, reminderData.NotesWithTagId(1, "done"), []*models.Note{})
 }
 
 func TestRegisterBasicTags(t *testing.T) {
-	var data_file_path = "temp_test_dir/mydata.json"
+	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
-	defer os.RemoveAll(path.Dir(data_file_path))
+	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	models.FMakeSureFileExists(data_file_path)
-	reminder_data := models.FReadDataFile(data_file_path)
+	models.FMakeSureFileExists(dataFilePath)
+	reminderData := models.FReadDataFile(dataFilePath)
 	// register basic tags
-	reminder_data.RegisterBasicTags()
-	utils.AssertEqual(t, len(reminder_data.Tags), 7)
+	reminderData.RegisterBasicTags()
+	utils.AssertEqual(t, len(reminderData.Tags), 7)
 }

@@ -17,10 +17,10 @@ import (
 
 // type StandaloneFunctions interface {
 // 	CurrentUnixTimestamp() int64
-// 	UnixTimestampToTime(unix_timestamp int64) time.Time
-// 	UnixTimestampToTimeStr(unix_timestamp int64, time_format string) string
-// 	UnixTimestampToLongTimeStr(unix_timestamp int64) string
-// 	UnixTimestampToShortTimeStr(unix_timestamp int64) string
+// 	UnixTimestampToTime(unixTimestamp int64) time.Time
+// 	UnixTimestampToTimeStr(unixTimestamp int64, timeFormat string) string
+// 	UnixTimestampToLongTimeStr(unixTimestamp int64) string
+// 	UnixTimestampToShortTimeStr(unixTimestamp int64) string
 // 	UnixTimestampForCorrespondingCurrentYear(month int, day int) int64
 // 	UnixTimestampForCorrespondingCurrentYearMonth(day int) int64
 // 	IntPresentInSlice(a int, list []int) bool
@@ -31,12 +31,12 @@ import (
 // 	ValidateNonEmptyString(input string) error
 // 	ValidateDateString(input string) error
 // 	PerformShellOperation(exe string, args ...string) error
-// 	PerformFilePresence(file_path string) error
-// 	PerformWhich(shell_cmd string) error
-// 	PerformCat(file_path string) error
-// 	FPerformCwdiff(old_file_path string, new_file_path string) error
+// 	PerformFilePresence(filePath string) error
+// 	PerformWhich(shellCmd string) error
+// 	PerformCat(filePath string) error
+// 	FPerformCwdiff(oldFilePath string, newFilePath string) error
 // 	AskOption(options []string, label string) (int, string)
-// 	IsTimeForRepeatNote(note_timestamp_current, note_timestamp_previous, note_timestamp_next, days_before, days_after int64) bool
+// 	IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter int64) bool
 // 	Spinner(delay time.Duration)
 // 	AssertEqual(t *testing.T, got interface{}, want interface{})
 // }
@@ -54,45 +54,45 @@ func CurrentUnixTimestamp() int64 {
 }
 
 // convert unix timestamp to time
-func UnixTimestampToTime(unix_timestamp int64) time.Time {
-	return time.Unix(unix_timestamp, 0).UTC()
+func UnixTimestampToTime(unixTimestamp int64) time.Time {
+	return time.Unix(unixTimestamp, 0).UTC()
 }
 
 // convert unix timestamp to time string
-func UnixTimestampToTimeStr(unix_timestamp int64, time_format string) string {
-	var time_as_str string
-	if unix_timestamp > 0 {
-		time_as_str = UnixTimestampToTime(unix_timestamp).Format(time_format)
+func UnixTimestampToTimeStr(unixTimestamp int64, timeFormat string) string {
+	var timeAsStr string
+	if unixTimestamp > 0 {
+		timeAsStr = UnixTimestampToTime(unixTimestamp).Format(timeFormat)
 	} else {
-		time_as_str = "nil"
+		timeAsStr = "nil"
 	}
-	return time_as_str
+	return timeAsStr
 }
 
 // convert unix timestamp to long time string
-func UnixTimestampToLongTimeStr(unix_timestamp int64) string {
-	return UnixTimestampToTimeStr(unix_timestamp, time.RFC850)
+func UnixTimestampToLongTimeStr(unixTimestamp int64) string {
+	return UnixTimestampToTimeStr(unixTimestamp, time.RFC850)
 }
 
 // convert unix timestamp to short time string
-func UnixTimestampToShortTimeStr(unix_timestamp int64) string {
-	return UnixTimestampToTimeStr(unix_timestamp, "02-Jan-06")
+func UnixTimestampToShortTimeStr(unixTimestamp int64) string {
+	return UnixTimestampToTimeStr(unixTimestamp, "02-Jan-06")
 }
 
 // get unix timestamp for date corresponding to current year
 func UnixTimestampForCorrespondingCurrentYear(month int, day int) int64 {
-	current_year, _, _ := CurrentTime().Date()
+	currentYear, _, _ := CurrentTime().Date()
 	format := "2006-1-2"
-	time_value, _ := time.Parse(format, fmt.Sprintf("%v-%v-%v", current_year, month, day))
-	return int64(time_value.Unix())
+	timeValue, _ := time.Parse(format, fmt.Sprintf("%v-%v-%v", currentYear, month, day))
+	return int64(timeValue.Unix())
 }
 
 // get unix timestamp for date corresponding to current year and current month
 func UnixTimestampForCorrespondingCurrentYearMonth(day int) int64 {
-	current_year, current_month, _ := CurrentTime().Date()
+	currentYear, currentMonth, _ := CurrentTime().Date()
 	format := "2006-1-2"
-	time_value, _ := time.Parse(format, fmt.Sprintf("%v-%v-%v", current_year, int(current_month), day))
-	return int64(time_value.Unix())
+	timeValue, _ := time.Parse(format, fmt.Sprintf("%v-%v-%v", currentYear, int(currentMonth), day))
+	return int64(timeValue.Unix())
 }
 
 // membership test for integer based array
@@ -179,12 +179,12 @@ func AssertEqual(t *testing.T, got interface{}, want interface{}) {
 
 // function to determine if it is time to show a repeat-based note/task
 // dependency: `CurrentUnixTimestamp`
-func IsTimeForRepeatNote(note_timestamp_current, note_timestamp_previous, note_timestamp_next, days_before, days_after int64) bool {
-	current_timestamp := CurrentUnixTimestamp()
-	day_secs := int64(24 * 60 * 60)
-	return ((current_timestamp >= note_timestamp_current-days_before*day_secs) && (current_timestamp <= note_timestamp_current+days_after*day_secs)) ||
-		((current_timestamp >= note_timestamp_previous-days_before*day_secs) && (current_timestamp <= note_timestamp_previous+days_after*day_secs)) ||
-		((current_timestamp >= note_timestamp_next-days_before*day_secs) && (current_timestamp <= note_timestamp_next+days_after*day_secs))
+func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter int64) bool {
+	currentTimestamp := CurrentUnixTimestamp()
+	daysSecs := int64(24 * 60 * 60)
+	return ((currentTimestamp >= noteTimestampCurrent-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampCurrent+daysAfter*daysSecs)) ||
+		((currentTimestamp >= noteTimestampPrevious-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampPrevious+daysAfter*daysSecs)) ||
+		((currentTimestamp >= noteTimestampNext-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampNext+daysAfter*daysSecs))
 }
 
 // ask option to the user
@@ -225,21 +225,21 @@ func PerformShellOperation(exe string, args ...string) error {
 }
 
 // check presence of a file
-func PerformFilePresence(file_path string) error {
-	return PerformShellOperation("test", "-f", file_path)
+func PerformFilePresence(filePath string) error {
+	return PerformShellOperation("test", "-f", filePath)
 }
 
 // check if a shell command is available
-func PerformWhich(shell_cmd string) error {
-	return PerformShellOperation("which", shell_cmd)
+func PerformWhich(shellCmd string) error {
+	return PerformShellOperation("which", shellCmd)
 }
 
 // cat a file
-func PerformCat(file_path string) error {
-	return PerformShellOperation("cat", file_path)
+func PerformCat(filePath string) error {
+	return PerformShellOperation("cat", filePath)
 }
 
 // get colored wdiff between two files
-func FPerformCwdiff(old_file_path string, new_file_path string) error {
-	return PerformShellOperation("wdiff", "-n", "-w", "\033[30;41m", "-x", "\033[0m", "-y", "\033[30;42m", "-z", "\033[0m", old_file_path, new_file_path)
+func FPerformCwdiff(oldFilePath string, newFilePath string) error {
+	return PerformShellOperation("wdiff", "-n", "-w", "\033[30;41m", "-x", "\033[0m", "-y", "\033[30;42m", "-z", "\033[0m", oldFilePath, newFilePath)
 }

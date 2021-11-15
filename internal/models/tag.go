@@ -32,57 +32,57 @@ func (c FTagsBySlug) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
 // here some of the tags will have special meaning/functionality
 // such as repeat-annually and repeat-monthly
 func FBasicTags() []*Tag {
-	basic_tags_map := []map[string]string{{"slug": "current", "group": ""},
+	basicTagsMap := []map[string]string{{"slug": "current", "group": ""},
 		{"slug": "priority-urgent", "group": "priority"},
 		{"slug": "priority-medium", "group": "priority"},
 		{"slug": "priority-low", "group": "priority"},
 		{"slug": "repeat-annually", "group": "repeat"},
 		{"slug": "repeat-monthly", "group": "repeat"},
 		{"slug": "tips", "group": "tips"}}
-	var basic_tags []*Tag
-	for index, tag_map := range basic_tags_map {
+	var basicTags []*Tag
+	for index, tagMap := range basicTagsMap {
 		tag := Tag{
 			Id:        index,
-			Slug:      tag_map["slug"],
-			Group:     tag_map["group"],
+			Slug:      tagMap["slug"],
+			Group:     tagMap["group"],
 			CreatedAt: utils.CurrentUnixTimestamp(),
 			UpdatedAt: utils.CurrentUnixTimestamp(),
 		}
 		fmt.Println(tag)
-		basic_tags = append(basic_tags, &tag)
+		basicTags = append(basicTags, &tag)
 	}
-	return basic_tags
+	return basicTags
 }
 
 // get slugs of given tags
 func FTagsSlugs(tags []*Tag) []string {
-	var all_slugs []string
+	var allSlugs []string
 	for _, tag := range tags {
-		all_slugs = append(all_slugs, tag.Slug)
+		allSlugs = append(allSlugs, tag.Slug)
 	}
-	return all_slugs
+	return allSlugs
 }
 
 // prompt for new Tag
-func FNewTag(tag_id int) *Tag {
+func FNewTag(tagID int) *Tag {
 	prompt := promptui.Prompt{
 		Label:    "Tag Slug",
 		Validate: utils.ValidateNonEmptyString,
 	}
-	tag_slug, err := prompt.Run()
+	tagSlug, err := prompt.Run()
 	utils.PrintErrorIfPresent(err)
-	tag_slug = strings.ToLower(tag_slug)
+	tagSlug = strings.ToLower(tagSlug)
 	prompt = promptui.Prompt{
 		Label:    "Tag Group",
 		Validate: utils.ValidateString,
 	}
-	tag_group, err := prompt.Run()
-	tag_group = strings.ToLower(tag_group)
+	tagGroup, err := prompt.Run()
+	tagGroup = strings.ToLower(tagGroup)
 	utils.PrintErrorIfPresent(err)
 	return &Tag{
-		Id:        tag_id,
-		Slug:      tag_slug,
-		Group:     tag_group,
+		Id:        tagID,
+		Slug:      tagSlug,
+		Group:     tagGroup,
 		CreatedAt: utils.CurrentUnixTimestamp(),
 		UpdatedAt: utils.CurrentUnixTimestamp(),
 	}

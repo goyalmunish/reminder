@@ -28,10 +28,10 @@ func TestCurrentUnixTimestamp(t *testing.T) {
 }
 
 func TestUnixTimestampToTime(t *testing.T) {
-	current_time := utils.CurrentTime()
-	current_timestamp := current_time.Unix()
-	output := utils.UnixTimestampToTime(current_timestamp)
-	utils.AssertEqual(t, output.Format(time.UnixDate), current_time.Format(time.UnixDate))
+	currentTime := utils.CurrentTime()
+	currentTimestamp := currentTime.Unix()
+	output := utils.UnixTimestampToTime(currentTimestamp)
+	utils.AssertEqual(t, output.Format(time.UnixDate), currentTime.Format(time.UnixDate))
 }
 
 func TestUnixTimestampToTimeStr(t *testing.T) {
@@ -128,17 +128,17 @@ func TestValidateDateString(t *testing.T) {
 }
 
 func TestPerformShellOperation(t *testing.T) {
-	dummy_file := "dummy_file"
-	defer utils.PerformShellOperation("rm -f", dummy_file)
+	dummyFile := "dummyFile"
+	defer utils.PerformShellOperation("rm -f", dummyFile)
 	// attempt to delete a non-existing file
-	err := utils.PerformShellOperation("rm", dummy_file)
+	err := utils.PerformShellOperation("rm", dummyFile)
 	utils.AssertEqual(t, err, errors.New("exit status 1"))
 	// create and delete a file
-	err = utils.PerformShellOperation("touch", dummy_file)
+	err = utils.PerformShellOperation("touch", dummyFile)
 	utils.AssertEqual(t, err, nil)
-	err = utils.PerformShellOperation("ls", "-lhFa", dummy_file)
+	err = utils.PerformShellOperation("ls", "-lhFa", dummyFile)
 	utils.AssertEqual(t, err, nil)
-	err = utils.PerformShellOperation("rm", dummy_file)
+	err = utils.PerformShellOperation("rm", dummyFile)
 	utils.AssertEqual(t, err, nil)
 	// attempt to invoke a command that do not exist
 	err = utils.PerformShellOperation("command_do_not_exist")

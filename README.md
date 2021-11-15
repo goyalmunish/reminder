@@ -20,7 +20,7 @@
 
 ## Yet Another Reminder Tool/App. Why?
 
-_This is a **terminal-based fully-interactive reminder tool**. It is not for everybody, but for the folks with a software engineering background who need the **speed** of the command-line and have to manage many day-to-day to-do items (like meeting minutes, reminders about ad-hoc tasks, etc.) in an organized way._
+_This is a simple **terminal-based fully-interactive reminder tool**. It is not for everybody, but for the folks with a software engineering background who need the **speed** of the command-line and have to manage many day-to-day to-do items (like meeting minutes, reminders about ad-hoc tasks, etc.) in an organized way._
 
 _Apart from being **fully-interactive** and **terminal-based**, the other major features it comes with are:_
 
@@ -28,7 +28,7 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 - List and **manage tasks** (change status, update text, add comments, update due-date, etc) of a given tag.
 - Each task can be associated with **multiple tags**, and so show up under all of its tags.
 - A given task:
-    - can be **updated** (📝) with its text, and also can be enhanced with **comments** (💬)
+    - can be **updated** (📝) with its text, and also can be enhanced with time-stamped **comments** (💬); so that you can track how and when the progress happened
     - can be marked **done** (✅) or **pending** (⏰); marking it as "done" makes it invisible
     - can be associated with **due-date** (📅); tasks with upcoming deadlines automatically show up under the **"Pending Notes"** option under **Main Menu**
 - **Full-text search** (🔎) among all tasks.
