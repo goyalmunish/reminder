@@ -32,7 +32,7 @@ func (c Tags) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
 // which can be used for initial setup of the application
 // here some of the tags will have special meaning/functionality
 // such as repeat-annually and repeat-monthly
-func FBasicTags() []*Tag {
+func FBasicTags() Tags {
 	basicTagsMap := []map[string]string{{"slug": "current", "group": ""},
 		{"slug": "priority-urgent", "group": "priority"},
 		{"slug": "priority-medium", "group": "priority"},
@@ -40,7 +40,7 @@ func FBasicTags() []*Tag {
 		{"slug": "repeat-annually", "group": "repeat"},
 		{"slug": "repeat-monthly", "group": "repeat"},
 		{"slug": "tips", "group": "tips"}}
-	var basicTags []*Tag
+	var basicTags Tags
 	for index, tagMap := range basicTagsMap {
 		tag := Tag{
 			Id:        index,
@@ -56,7 +56,7 @@ func FBasicTags() []*Tag {
 }
 
 // get slugs of given tags
-func FTagsSlugs(tags []*Tag) []string {
+func FTagsSlugs(tags Tags) []string {
 	var allSlugs []string
 	for _, tag := range tags {
 		allSlugs = append(allSlugs, tag.Slug)

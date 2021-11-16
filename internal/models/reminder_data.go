@@ -20,7 +20,7 @@ import (
 type ReminderData struct {
 	User      *User   `json:"user"`
 	Notes     []*Note `json:"notes"`
-	Tags      []*Tag  `json:"tags"`
+	Tags      Tags    `json:"tags"`
 	UpdatedAt int64   `json:"updated_at"`
 }
 
@@ -42,7 +42,7 @@ func FBlankReminder() *ReminderData {
 	return &ReminderData{
 		User:  &User{Name: name, EmailId: emailID},
 		Notes: []*Note{},
-		Tags:  []*Tag{},
+		Tags:  Tags{},
 	}
 }
 
@@ -98,9 +98,9 @@ func (reminderData *ReminderData) TagsSlugs() []string {
 }
 
 // method to get tags from tagIDs
-func (reminderData *ReminderData) TagsFromIds(tagIDs []int) []*Tag {
+func (reminderData *ReminderData) TagsFromIds(tagIDs []int) Tags {
 	allTags := reminderData.Tags
-	var tags []*Tag
+	var tags Tags
 	for _, tagID := range tagIDs {
 		for _, tag := range allTags {
 			if tagID == tag.Id {
