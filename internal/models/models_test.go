@@ -138,24 +138,24 @@ func TestSearchableText(t *testing.T) {
 	utils.AssertEqual(t, got, "a cute dog [c1, foo bar, c3]")
 }
 
-func TestFNotesTexts(t *testing.T) {
-	var notes []*models.Note
+func TestTexts(t *testing.T) {
+	var notes models.Notes
 	notes = append(notes, &models.Note{Text: "beautiful little cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231})
 	notes = append(notes, &models.Note{Text: "cute brown dog", Comments: []string{"c1", "foo bar", "c3", "baz"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
 	// case 1
-	got := models.FNotesTexts(notes, 0)
+	got := notes.Texts(0)
 	want := "[beautiful little cat {C:01, S:P, D:03-Jan-21} cute brown dog {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 2
-	got = models.FNotesTexts(notes, 5)
+	got = notes.Texts(5)
 	want = "[be... {C:01, S:P, D:03-Jan-21} cu... {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 3
-	got = models.FNotesTexts(notes, 15)
+	got = notes.Texts(15)
 	want = "[beautiful li... {C:01, S:P, D:03-Jan-21} cute brown dog  {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 4
-	got = models.FNotesTexts(notes, 25)
+	got = notes.Texts(25)
 	want = "[beautiful little cat      {C:01, S:P, D:03-Jan-21} cute brown dog            {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 }

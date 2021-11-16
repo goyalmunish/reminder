@@ -68,8 +68,8 @@ func (c Notes) Len() int           { return len(c) }
 func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
-// get info-texts of given notes
-func FNotesTexts(notes Notes, maxStrLen int) []string {
+// get info-texts
+func (notes Notes) Texts(maxStrLen int) []string {
 	var allTexts []string
 	for _, note := range notes {
 		noteText := note.Text
