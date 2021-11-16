@@ -143,7 +143,7 @@ func (reminderData *ReminderData) NextPossibleTagId() int {
 
 // method to get all notes with given tagID and given status
 func (reminderData *ReminderData) NotesWithTagId(tagID int, status string) Notes {
-	allNotes := FNotesWithStatus(reminderData.Notes, status)
+	allNotes := reminderData.Notes.WithStatus(status)
 	var notes Notes
 	for _, note := range allNotes {
 		if utils.IntPresentInSlice(tagID, note.TagIds) {

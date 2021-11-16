@@ -160,8 +160,8 @@ func TestTexts(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
-func TestFNotesWithStatus(t *testing.T) {
-	var notes []*models.Note
+func TestWithStatus(t *testing.T) {
+	var notes models.Notes
 	note1 := models.Note{Text: "big fat cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	notes = append(notes, &note1)
 	note2 := models.Note{Text: "cute brown dog", Comments: []string{"c1", "foo bar"}, Status: "done", TagIds: []int{1, 3}, CompleteBy: 1609669232}
@@ -169,11 +169,11 @@ func TestFNotesWithStatus(t *testing.T) {
 	note3 := models.Note{Text: "little hamster", Comments: []string{"foo bar", "c3"}, Status: "pending", TagIds: []int{1}, CompleteBy: 1609669233}
 	notes = append(notes, &note3)
 	// case 1
-	got := models.FNotesWithStatus(notes, "pending")
+	got := notes.WithStatus("pending")
 	want := []*models.Note{&note1, &note3}
 	utils.AssertEqual(t, got, want)
 	// case 2
-	got = models.FNotesWithStatus(notes, "done")
+	got = notes.WithStatus("done")
 	want = []*models.Note{&note2}
 	utils.AssertEqual(t, got, want)
 }

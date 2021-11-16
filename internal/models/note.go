@@ -85,7 +85,7 @@ func (notes Notes) Texts(maxStrLen int) []string {
 }
 
 // filter notes with given status (such as "pending" status)
-func FNotesWithStatus(notes Notes, status string) Notes {
+func (notes Notes) WithStatus(status string) Notes {
 	var result Notes
 	for _, note := range notes {
 		if note.Status == status {
