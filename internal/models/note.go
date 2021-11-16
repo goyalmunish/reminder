@@ -32,7 +32,7 @@ func (note *Note) String() []string {
 }
 
 // method to print note with its tags slugs
-func (note *Note) StringRepr(reminderData *ReminderData) string {
+func (note *Note) ExternalRepr(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
 	basicStrs := note.String()

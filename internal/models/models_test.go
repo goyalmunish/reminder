@@ -105,7 +105,7 @@ func TestNoteString(t *testing.T) {
 	utils.AssertEqual(t, note.String(), want)
 }
 
-func TestStringRepr(t *testing.T) {
+func TestExternalRepr(t *testing.T) {
 	note := &models.Note{Text: "dummy text", Comments: []string{"c1", "c2", "c3"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Id: 0, Slug: "tag_0", Group: "tag_group1"})
@@ -124,7 +124,7 @@ func TestStringRepr(t *testing.T) {
   |     CreatedAt:  nil
   |     UpdatedAt:  nil
 `
-	utils.AssertEqual(t, note.StringRepr(reminderData), want)
+	utils.AssertEqual(t, note.ExternalRepr(reminderData), want)
 }
 
 func TestSearchableText(t *testing.T) {

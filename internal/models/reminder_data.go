@@ -330,7 +330,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 
 // method to print note and display options
 func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
-	fmt.Print(note.StringRepr(reminderData))
+	fmt.Print(note.ExternalRepr(reminderData))
 	_, noteOption := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
 		fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"),
@@ -344,15 +344,15 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"):
 		fmt.Println("No changes made")
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
 		return "main-menu"
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
 		reminderData.UpdateNoteStatus(note, "done")
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"):
 		reminderData.UpdateNoteStatus(note, "pending")
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
 		prompt := promptui.Prompt{
 			Label:    "Due Date (YYYY-MM-DD)",
@@ -361,7 +361,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		promptText, err := prompt.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpdateNoteCompleteBy(note, promptText)
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
 		prompt := promptui.Prompt{
 			Label:    "New Comment",
@@ -370,7 +370,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		promptText, err := prompt.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.AddNoteComment(note, promptText)
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
 		prompt := promptui.Prompt{
 			Label:    "New Text",
@@ -380,12 +380,12 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		promptText, err := prompt.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpateNoteText(note, promptText)
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"):
 		tagIDs := reminderData.AskTagIds([]int{})
 		if len(tagIDs) > 0 {
 			reminderData.UpdateNoteTags(note, tagIDs)
-			fmt.Print(note.StringRepr(reminderData))
+			fmt.Print(note.ExternalRepr(reminderData))
 		} else {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["error"])
 		}
