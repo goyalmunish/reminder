@@ -32,7 +32,7 @@ func (note *Note) String() []string {
 }
 
 // method to print note with its tags slugs
-func (note *Note) StringRepr(reminderData *ReminderData) string {
+func (note *Note) ExternalRepr(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
 	basicStrs := note.String()
@@ -43,7 +43,7 @@ func (note *Note) StringRepr(reminderData *ReminderData) string {
 }
 
 // method providing string representation for searching
-// we want to full text search on Text and Comments of a note
+// we want to perform full text search on Text and Comments of a note
 func (note *Note) SearchableText() string {
 	// get comments text array for note
 	var commentsText []string
@@ -62,14 +62,14 @@ func (note *Note) SearchableText() string {
 	return strings.Join(searchableText, " ")
 }
 
-type FNotesByUpdatedAt []*Note
+type Notes []*Note
 
-func (c FNotesByUpdatedAt) Len() int           { return len(c) }
-func (c FNotesByUpdatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c FNotesByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
+func (c Notes) Len() int           { return len(c) }
+func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
-// get info-texts of given notes
-func FNotesTexts(notes []*Note, maxStrLen int) []string {
+// get info-texts
+func (notes Notes) Texts(maxStrLen int) []string {
 	var allTexts []string
 	for _, note := range notes {
 		noteText := note.Text
@@ -85,8 +85,8 @@ func FNotesTexts(notes []*Note, maxStrLen int) []string {
 }
 
 // filter notes with given status (such as "pending" status)
-func FNotesWithStatus(notes []*Note, status string) []*Note {
-	var result []*Note
+func (notes Notes) WithStatus(status string) Notes {
+	var result Notes
 	for _, note := range notes {
 		if note.Status == status {
 			result = append(result, note)

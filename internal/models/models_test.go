@@ -42,13 +42,13 @@ func TestTag(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
-func TestFTagsBySlug(t *testing.T) {
+func TestTags(t *testing.T) {
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Id: 1, Slug: "a", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 2, Slug: "z", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
-	sort.Sort(models.FTagsBySlug(tags))
+	sort.Sort(models.Tags(tags))
 	var got []int
 	for _, value := range tags {
 		got = append(got, value.Id)
@@ -75,13 +75,13 @@ func TestFBasicTags(t *testing.T) {
 	utils.AssertEqual(t, slugs, want)
 }
 
-func TestFNotesByUpdatedAt(t *testing.T) {
+func TestNotes(t *testing.T) {
 	var notes []*models.Note
 	notes = append(notes, &models.Note{Text: "1", Status: "pending", UpdatedAt: 1600000001})
 	notes = append(notes, &models.Note{Text: "2", Status: "pending", UpdatedAt: 1600000004})
 	notes = append(notes, &models.Note{Text: "3", Status: "done", UpdatedAt: 1600000003})
 	notes = append(notes, &models.Note{Text: "4", Status: "done", UpdatedAt: 1600000002})
-	sort.Sort(models.FNotesByUpdatedAt(notes))
+	sort.Sort(models.Notes(notes))
 	var gotTexts []string
 	for _, value := range notes {
 		gotTexts = append(gotTexts, value.Text)
@@ -105,7 +105,7 @@ func TestNoteString(t *testing.T) {
 	utils.AssertEqual(t, note.String(), want)
 }
 
-func TestStringRepr(t *testing.T) {
+func TestExternalRepr(t *testing.T) {
 	note := &models.Note{Text: "dummy text", Comments: []string{"c1", "c2", "c3"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Id: 0, Slug: "tag_0", Group: "tag_group1"})
@@ -124,7 +124,7 @@ func TestStringRepr(t *testing.T) {
   |     CreatedAt:  nil
   |     UpdatedAt:  nil
 `
-	utils.AssertEqual(t, note.StringRepr(reminderData), want)
+	utils.AssertEqual(t, note.ExternalRepr(reminderData), want)
 }
 
 func TestSearchableText(t *testing.T) {
@@ -138,30 +138,30 @@ func TestSearchableText(t *testing.T) {
 	utils.AssertEqual(t, got, "a cute dog [c1, foo bar, c3]")
 }
 
-func TestFNotesTexts(t *testing.T) {
-	var notes []*models.Note
+func TestTexts(t *testing.T) {
+	var notes models.Notes
 	notes = append(notes, &models.Note{Text: "beautiful little cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231})
 	notes = append(notes, &models.Note{Text: "cute brown dog", Comments: []string{"c1", "foo bar", "c3", "baz"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
 	// case 1
-	got := models.FNotesTexts(notes, 0)
+	got := notes.Texts(0)
 	want := "[beautiful little cat {C:01, S:P, D:03-Jan-21} cute brown dog {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 2
-	got = models.FNotesTexts(notes, 5)
+	got = notes.Texts(5)
 	want = "[be... {C:01, S:P, D:03-Jan-21} cu... {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 3
-	got = models.FNotesTexts(notes, 15)
+	got = notes.Texts(15)
 	want = "[beautiful li... {C:01, S:P, D:03-Jan-21} cute brown dog  {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 4
-	got = models.FNotesTexts(notes, 25)
+	got = notes.Texts(25)
 	want = "[beautiful little cat      {C:01, S:P, D:03-Jan-21} cute brown dog            {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 }
 
-func TestFNotesWithStatus(t *testing.T) {
-	var notes []*models.Note
+func TestWithStatus(t *testing.T) {
+	var notes models.Notes
 	note1 := models.Note{Text: "big fat cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	notes = append(notes, &note1)
 	note2 := models.Note{Text: "cute brown dog", Comments: []string{"c1", "foo bar"}, Status: "done", TagIds: []int{1, 3}, CompleteBy: 1609669232}
@@ -169,11 +169,11 @@ func TestFNotesWithStatus(t *testing.T) {
 	note3 := models.Note{Text: "little hamster", Comments: []string{"foo bar", "c3"}, Status: "pending", TagIds: []int{1}, CompleteBy: 1609669233}
 	notes = append(notes, &note3)
 	// case 1
-	got := models.FNotesWithStatus(notes, "pending")
+	got := notes.WithStatus("pending")
 	want := []*models.Note{&note1, &note3}
 	utils.AssertEqual(t, got, want)
 	// case 2
-	got = models.FNotesWithStatus(notes, "done")
+	got = notes.WithStatus("done")
 	want = []*models.Note{&note2}
 	utils.AssertEqual(t, got, want)
 }

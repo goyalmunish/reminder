@@ -21,17 +21,18 @@ func (t Tag) String() string {
 	return fmt.Sprintf("%v#%v#%v", t.Group, t.Slug, t.Id)
 }
 
-type FTagsBySlug []*Tag
+// collection of tags with a defined default way of sorting
+type Tags []*Tag
 
-func (c FTagsBySlug) Len() int           { return len(c) }
-func (c FTagsBySlug) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c FTagsBySlug) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
+func (c Tags) Len() int           { return len(c) }
+func (c Tags) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c Tags) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
 
 // return an array of basic tags
 // which can be used for initial setup of the application
 // here some of the tags will have special meaning/functionality
 // such as repeat-annually and repeat-monthly
-func FBasicTags() []*Tag {
+func FBasicTags() Tags {
 	basicTagsMap := []map[string]string{{"slug": "current", "group": ""},
 		{"slug": "priority-urgent", "group": "priority"},
 		{"slug": "priority-medium", "group": "priority"},
@@ -39,7 +40,7 @@ func FBasicTags() []*Tag {
 		{"slug": "repeat-annually", "group": "repeat"},
 		{"slug": "repeat-monthly", "group": "repeat"},
 		{"slug": "tips", "group": "tips"}}
-	var basicTags []*Tag
+	var basicTags Tags
 	for index, tagMap := range basicTagsMap {
 		tag := Tag{
 			Id:        index,
@@ -55,7 +56,7 @@ func FBasicTags() []*Tag {
 }
 
 // get slugs of given tags
-func FTagsSlugs(tags []*Tag) []string {
+func FTagsSlugs(tags Tags) []string {
 	var allSlugs []string
 	for _, tag := range tags {
 		allSlugs = append(allSlugs, tag.Slug)

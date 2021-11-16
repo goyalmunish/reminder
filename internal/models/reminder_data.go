@@ -18,10 +18,10 @@ import (
 )
 
 type ReminderData struct {
-	User      *User   `json:"user"`
-	Notes     []*Note `json:"notes"`
-	Tags      []*Tag  `json:"tags"`
-	UpdatedAt int64   `json:"updated_at"`
+	User      *User `json:"user"`
+	Notes     Notes `json:"notes"`
+	Tags      Tags  `json:"tags"`
+	UpdatedAt int64 `json:"updated_at"`
 }
 
 // function to create blank ReminderData object
@@ -41,8 +41,8 @@ func FBlankReminder() *ReminderData {
 	utils.PrintErrorIfPresent(err)
 	return &ReminderData{
 		User:  &User{Name: name, EmailId: emailID},
-		Notes: []*Note{},
-		Tags:  []*Tag{},
+		Notes: Notes{},
+		Tags:  Tags{},
 	}
 }
 
@@ -92,15 +92,15 @@ func (reminderData *ReminderData) UpdateDataFile(dataFilePath string) error {
 // method to get slugs of all tags
 func (reminderData *ReminderData) TagsSlugs() []string {
 	// sort tags in place
-	sort.Sort(FTagsBySlug(reminderData.Tags))
+	sort.Sort(reminderData.Tags)
 	// fetch sluts and return
 	return FTagsSlugs(reminderData.Tags)
 }
 
 // method to get tags from tagIDs
-func (reminderData *ReminderData) TagsFromIds(tagIDs []int) []*Tag {
+func (reminderData *ReminderData) TagsFromIds(tagIDs []int) Tags {
 	allTags := reminderData.Tags
-	var tags []*Tag
+	var tags Tags
 	for _, tagID := range tagIDs {
 		for _, tag := range allTags {
 			if tagID == tag.Id {
@@ -142,15 +142,15 @@ func (reminderData *ReminderData) NextPossibleTagId() int {
 }
 
 // method to get all notes with given tagID and given status
-func (reminderData *ReminderData) NotesWithTagId(tagID int, status string) []*Note {
-	allNotes := FNotesWithStatus(reminderData.Notes, status)
-	var notes []*Note
+func (reminderData *ReminderData) NotesWithTagId(tagID int, status string) Notes {
+	allNotes := reminderData.Notes.WithStatus(status)
+	var notes Notes
 	for _, note := range allNotes {
 		if utils.IntPresentInSlice(tagID, note.TagIds) {
 			notes = append(notes, note)
 		}
 	}
-	return notes
+	return Notes(notes)
 }
 
 // method to register basic tags
@@ -289,7 +289,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	var err error
 	var tagID int
 	// make sure reminderData.Tags is sorted
-	sort.Sort(FTagsBySlug(reminderData.Tags))
+	sort.Sort(reminderData.Tags)
 	// ask user to select tag
 	optionIndex, _ := utils.AskOption(append(reminderData.TagsSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 	if optionIndex == -1 {
@@ -330,7 +330,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 
 // method to print note and display options
 func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
-	fmt.Print(note.StringRepr(reminderData))
+	fmt.Print(note.ExternalRepr(reminderData))
 	_, noteOption := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
 		fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"),
@@ -344,15 +344,15 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"):
 		fmt.Println("No changes made")
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
 		return "main-menu"
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
 		reminderData.UpdateNoteStatus(note, "done")
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"):
 		reminderData.UpdateNoteStatus(note, "pending")
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
 		prompt := promptui.Prompt{
 			Label:    "Due Date (YYYY-MM-DD)",
@@ -361,7 +361,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		promptText, err := prompt.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpdateNoteCompleteBy(note, promptText)
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
 		prompt := promptui.Prompt{
 			Label:    "New Comment",
@@ -370,7 +370,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		promptText, err := prompt.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.AddNoteComment(note, promptText)
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
 		prompt := promptui.Prompt{
 			Label:    "New Text",
@@ -380,12 +380,12 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		promptText, err := prompt.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpateNoteText(note, promptText)
-		fmt.Print(note.StringRepr(reminderData))
+		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"):
 		tagIDs := reminderData.AskTagIds([]int{})
 		if len(tagIDs) > 0 {
 			reminderData.UpdateNoteTags(note, tagIDs)
-			fmt.Print(note.StringRepr(reminderData))
+			fmt.Print(note.ExternalRepr(reminderData))
 		} else {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["error"])
 		}
@@ -394,10 +394,10 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 }
 
 // method (recursively) to print notes interactively
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes []*Note, tagID int) error {
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int) error {
 	// sort notes
-	sort.Sort(FNotesByUpdatedAt(notes))
-	texts := FNotesTexts(notes, 150)
+	sort.Sort(Notes(notes))
+	texts := notes.Texts(150)
 	// ask user to select a note
 	fmt.Println("Note: An added note appears immidiately, but if a note is moved, refresh the list by going to main menu and come back.")
 	noteIndex, _ := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), "Select Note")
@@ -411,7 +411,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes []*Note, tagID i
 			note := FNewNote([]int{tagID})
 			err := reminderData.NewNoteAppend(note)
 			if err == nil {
-				var updatedNotes []*Note
+				var updatedNotes Notes
 				updatedNotes = append(updatedNotes, note)
 				updatedNotes = append(updatedNotes, notes...)
 				reminderData.PrintNotesAndAskOptions(updatedNotes, tagID)

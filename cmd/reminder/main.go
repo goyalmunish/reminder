@@ -25,7 +25,7 @@ func flow() {
 	if len(reminderData.Tags) > 0 {
 		fmt.Printf("\nStats of %q\n", models.DataFile)
 		fmt.Printf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags))
-		fmt.Printf("%4vPending Notes: %v/%v\n", "- ", len(models.FNotesWithStatus(reminderData.Notes, "pending")), len(reminderData.Notes))
+		fmt.Printf("%4vPending Notes: %v/%v\n", "- ", len(reminderData.Notes.WithStatus("pending")), len(reminderData.Notes))
 	}
 	// TEST CODE STARTS ---->
 	// TEST CODE ENDS ------>
@@ -72,7 +72,7 @@ func flow() {
 		reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Pending Notes"):
 		allNotes := reminderData.Notes
-		pendingNotes := models.FNotesWithStatus(allNotes, "pending")
+		pendingNotes := allNotes.WithStatus("pending")
 		var currentNotes []*models.Note
 		repeatTagIDs := reminderData.TagIdsForGroup("repeat")
 		// populating currentNotes
@@ -126,7 +126,7 @@ func flow() {
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
 		allNotes := reminderData.Notes
-		doneNotes := models.FNotesWithStatus(allNotes, "done")
+		doneNotes := allNotes.WithStatus("done")
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(doneNotes))
 		err := reminderData.PrintNotesAndAskOptions(doneNotes, -1)
 		utils.PrintErrorIfPresent(err)
