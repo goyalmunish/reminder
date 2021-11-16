@@ -23,16 +23,12 @@ func flow() {
 	// open the file
 	reminderData := *models.FReadDataFile(defaultDataFilePath)
 	// print data
-	if len(reminderData.Tags) > 0 {
-		fmt.Printf("\nStats of %q\n", reminderData.DataFile)
-		fmt.Printf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags))
-		fmt.Printf("%4vPending Notes: %v/%v\n", "- ", len(reminderData.Notes.WithStatus("pending")), len(reminderData.Notes))
-	}
+	fmt.Println(reminderData.Stats())
 	// TEST CODE STARTS ---->
 	// TEST CODE ENDS ------>
 	// ask the main menu
 	fmt.Println("| =========================== MAIN MENU =========================== |")
-	fmt.Println("|    Use 'Ctrl-c' to jump from any nested level to the main menu    |")
+	fmt.Println("|    Use 'Ctrl-c' to jump from any nested level to the Main Menu    |")
 	fmt.Println("| ----------------------------------------------------------------- |")
 	_, result := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
