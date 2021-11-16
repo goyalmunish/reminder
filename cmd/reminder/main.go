@@ -18,7 +18,7 @@ import (
 // recursive function for overall flow
 func flow() {
 	// make sure DataFile exists
-	defaultDataFilePath := models.defaultDataFile()
+	defaultDataFilePath := models.FDefaultDataFile()
 	models.FMakeSureFileExists(defaultDataFilePath)
 	// open the file
 	reminderData := *models.FReadDataFile(defaultDataFilePath)

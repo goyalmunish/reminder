@@ -49,7 +49,6 @@ func FBasicTags() Tags {
 			CreatedAt: utils.CurrentUnixTimestamp(),
 			UpdatedAt: utils.CurrentUnixTimestamp(),
 		}
-		fmt.Println(tag)
 		basicTags = append(basicTags, &tag)
 	}
 	return basicTags
