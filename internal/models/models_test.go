@@ -42,13 +42,13 @@ func TestTag(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
-func TestFTagsBySlug(t *testing.T) {
+func TestTags(t *testing.T) {
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Id: 1, Slug: "a", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 2, Slug: "z", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
-	sort.Sort(models.FTagsBySlug(tags))
+	sort.Sort(models.Tags(tags))
 	var got []int
 	for _, value := range tags {
 		got = append(got, value.Id)

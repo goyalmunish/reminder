@@ -92,7 +92,7 @@ func (reminderData *ReminderData) UpdateDataFile(dataFilePath string) error {
 // method to get slugs of all tags
 func (reminderData *ReminderData) TagsSlugs() []string {
 	// sort tags in place
-	sort.Sort(FTagsBySlug(reminderData.Tags))
+	sort.Sort(Tags(reminderData.Tags))
 	// fetch sluts and return
 	return FTagsSlugs(reminderData.Tags)
 }
@@ -289,7 +289,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	var err error
 	var tagID int
 	// make sure reminderData.Tags is sorted
-	sort.Sort(FTagsBySlug(reminderData.Tags))
+	sort.Sort(Tags(reminderData.Tags))
 	// ask user to select tag
 	optionIndex, _ := utils.AskOption(append(reminderData.TagsSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 	if optionIndex == -1 {

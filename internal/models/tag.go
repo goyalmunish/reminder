@@ -21,11 +21,12 @@ func (t Tag) String() string {
 	return fmt.Sprintf("%v#%v#%v", t.Group, t.Slug, t.Id)
 }
 
-type FTagsBySlug []*Tag
+// collection of tags with a defined default way of sorting
+type Tags []*Tag
 
-func (c FTagsBySlug) Len() int           { return len(c) }
-func (c FTagsBySlug) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c FTagsBySlug) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
+func (c Tags) Len() int           { return len(c) }
+func (c Tags) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c Tags) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
 
 // return an array of basic tags
 // which can be used for initial setup of the application
