@@ -396,7 +396,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // method (recursively) to print notes interactively
 func (reminderData *ReminderData) PrintNotesAndAskOptions(notes []*Note, tagID int) error {
 	// sort notes
-	sort.Sort(FNotesByUpdatedAt(notes))
+	sort.Sort(Notes(notes))
 	texts := FNotesTexts(notes, 150)
 	// ask user to select a note
 	fmt.Println("Note: An added note appears immidiately, but if a note is moved, refresh the list by going to main menu and come back.")

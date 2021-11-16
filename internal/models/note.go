@@ -43,7 +43,7 @@ func (note *Note) ExternalRepr(reminderData *ReminderData) string {
 }
 
 // method providing string representation for searching
-// we want to full text search on Text and Comments of a note
+// we want to perform full text search on Text and Comments of a note
 func (note *Note) SearchableText() string {
 	// get comments text array for note
 	var commentsText []string
@@ -62,11 +62,11 @@ func (note *Note) SearchableText() string {
 	return strings.Join(searchableText, " ")
 }
 
-type FNotesByUpdatedAt []*Note
+type Notes []*Note
 
-func (c FNotesByUpdatedAt) Len() int           { return len(c) }
-func (c FNotesByUpdatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c FNotesByUpdatedAt) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
+func (c Notes) Len() int           { return len(c) }
+func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
 // get info-texts of given notes
 func FNotesTexts(notes []*Note, maxStrLen int) []string {

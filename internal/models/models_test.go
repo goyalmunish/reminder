@@ -75,13 +75,13 @@ func TestFBasicTags(t *testing.T) {
 	utils.AssertEqual(t, slugs, want)
 }
 
-func TestFNotesByUpdatedAt(t *testing.T) {
+func TestNotes(t *testing.T) {
 	var notes []*models.Note
 	notes = append(notes, &models.Note{Text: "1", Status: "pending", UpdatedAt: 1600000001})
 	notes = append(notes, &models.Note{Text: "2", Status: "pending", UpdatedAt: 1600000004})
 	notes = append(notes, &models.Note{Text: "3", Status: "done", UpdatedAt: 1600000003})
 	notes = append(notes, &models.Note{Text: "4", Status: "done", UpdatedAt: 1600000002})
-	sort.Sort(models.FNotesByUpdatedAt(notes))
+	sort.Sort(models.Notes(notes))
 	var gotTexts []string
 	for _, value := range notes {
 		gotTexts = append(gotTexts, value.Text)
