@@ -18,10 +18,10 @@ import (
 )
 
 type ReminderData struct {
-	User      *User   `json:"user"`
-	Notes     []*Note `json:"notes"`
-	Tags      Tags    `json:"tags"`
-	UpdatedAt int64   `json:"updated_at"`
+	User      *User `json:"user"`
+	Notes     Notes `json:"notes"`
+	Tags      Tags  `json:"tags"`
+	UpdatedAt int64 `json:"updated_at"`
 }
 
 // function to create blank ReminderData object
@@ -41,7 +41,7 @@ func FBlankReminder() *ReminderData {
 	utils.PrintErrorIfPresent(err)
 	return &ReminderData{
 		User:  &User{Name: name, EmailId: emailID},
-		Notes: []*Note{},
+		Notes: Notes{},
 		Tags:  Tags{},
 	}
 }
@@ -142,15 +142,15 @@ func (reminderData *ReminderData) NextPossibleTagId() int {
 }
 
 // method to get all notes with given tagID and given status
-func (reminderData *ReminderData) NotesWithTagId(tagID int, status string) []*Note {
+func (reminderData *ReminderData) NotesWithTagId(tagID int, status string) Notes {
 	allNotes := FNotesWithStatus(reminderData.Notes, status)
-	var notes []*Note
+	var notes Notes
 	for _, note := range allNotes {
 		if utils.IntPresentInSlice(tagID, note.TagIds) {
 			notes = append(notes, note)
 		}
 	}
-	return notes
+	return Notes(notes)
 }
 
 // method to register basic tags
@@ -394,7 +394,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 }
 
 // method (recursively) to print notes interactively
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes []*Note, tagID int) error {
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int) error {
 	// sort notes
 	sort.Sort(Notes(notes))
 	texts := FNotesTexts(notes, 150)
@@ -411,7 +411,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes []*Note, tagID i
 			note := FNewNote([]int{tagID})
 			err := reminderData.NewNoteAppend(note)
 			if err == nil {
-				var updatedNotes []*Note
+				var updatedNotes Notes
 				updatedNotes = append(updatedNotes, note)
 				updatedNotes = append(updatedNotes, notes...)
 				reminderData.PrintNotesAndAskOptions(updatedNotes, tagID)

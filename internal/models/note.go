@@ -69,7 +69,7 @@ func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
 // get info-texts of given notes
-func FNotesTexts(notes []*Note, maxStrLen int) []string {
+func FNotesTexts(notes Notes, maxStrLen int) []string {
 	var allTexts []string
 	for _, note := range notes {
 		noteText := note.Text
@@ -85,8 +85,8 @@ func FNotesTexts(notes []*Note, maxStrLen int) []string {
 }
 
 // filter notes with given status (such as "pending" status)
-func FNotesWithStatus(notes []*Note, status string) []*Note {
-	var result []*Note
+func FNotesWithStatus(notes Notes, status string) Notes {
+	var result Notes
 	for _, note := range notes {
 		if note.Status == status {
 			result = append(result, note)
