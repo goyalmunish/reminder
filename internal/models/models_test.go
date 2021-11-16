@@ -17,8 +17,9 @@ import (
 )
 
 func TestDataFile(t *testing.T) {
-	utils.AssertEqual(t, strings.HasPrefix(models.DataFile, "/"), true)
-	utils.AssertEqual(t, strings.HasSuffix(models.DataFile, ".json"), true)
+	defaultDataFilePath := models.FDefaultDataFile()
+	utils.AssertEqual(t, strings.HasPrefix(defaultDataFilePath, "/"), true)
+	utils.AssertEqual(t, strings.HasSuffix(defaultDataFilePath, ".json"), true)
 }
 
 func TestUser(t *testing.T) {

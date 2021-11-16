@@ -18,70 +18,14 @@ import (
 )
 
 type ReminderData struct {
-	User      *User `json:"user"`
-	Notes     Notes `json:"notes"`
-	Tags      Tags  `json:"tags"`
-	DataFile  string
-	UpdatedAt int64 `json:"updated_at"`
+	User      *User  `json:"user"`
+	Notes     Notes  `json:"notes"`
+	Tags      Tags   `json:"tags"`
+	DataFile  string `json:"data_file"`
+	UpdatedAt int64  `json:"updated_at"`
 }
 
-func defaultDataFile() string {
-	return path.Join(os.Getenv("HOME"), "reminder", "data.json")
-}
-
-// function to create blank ReminderData object
-func FBlankReminder() *ReminderData {
-	fmt.Println("Initializing the data file. Please provide following data.")
-	prompt := promptui.Prompt{
-		Label:    "User Name",
-		Validate: utils.ValidateNonEmptyString,
-	}
-	name, err := prompt.Run()
-	utils.PrintErrorIfPresent(err)
-	prompt = promptui.Prompt{
-		Label:    "User Email",
-		Validate: utils.ValidateNonEmptyString,
-	}
-	emailID, err := prompt.Run()
-	utils.PrintErrorIfPresent(err)
-	return &ReminderData{
-		User:     &User{Name: name, EmailId: emailID},
-		Notes:    Notes{},
-		Tags:     Tags{},
-		DataFile: defaultDataFile(),
-	}
-}
-
-// function/methods related to serialization
-
-// function to make sure dataFilePath exists
-func FMakeSureFileExists(dataFilePath string) {
-	_, err := os.Stat(dataFilePath)
-	if err != nil {
-		fmt.Printf("Error finding existing data file: %v\n", err)
-		if errors.Is(err, fs.ErrNotExist) {
-			fmt.Printf("Generating new data file %v.\n", dataFilePath)
-			os.MkdirAll(path.Dir(dataFilePath), 0777)
-			reminderData := *FBlankReminder()
-			reminderData.DataFile = dataFilePath
-			err = reminderData.UpdateDataFile()
-		}
-	}
-	utils.PrintErrorIfPresent(err)
-}
-
-// function to read data file
-func FReadDataFile(dataFilePath string) *ReminderData {
-	var reminderData ReminderData
-	// read byte data from file
-	byteValue, err := ioutil.ReadFile(dataFilePath)
-	utils.PrintErrorIfPresent(err)
-	// parse json data
-	err = json.Unmarshal(byteValue, &reminderData)
-	utils.PrintErrorIfPresent(err)
-	// close the file
-	return &reminderData
-}
+// methods
 
 // method to update data file
 func (reminderData *ReminderData) UpdateDataFile() error {
@@ -95,8 +39,6 @@ func (reminderData *ReminderData) UpdateDataFile() error {
 	utils.PrintErrorIfPresent(err)
 	return err
 }
-
-// methods depending on other models
 
 // method to get slugs of all tags
 func (reminderData *ReminderData) TagsSlugs() []string {
@@ -169,7 +111,7 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 		basicTags := FBasicTags()
 		reminderData.Tags = basicTags
 		reminderData.UpdateDataFile()
-		fmt.Println("Added!")
+		fmt.Printf("Added basic tags: %v\n", reminderData.Tags)
 	} else {
 		fmt.Printf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["error"])
 	}
@@ -438,4 +380,62 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		}
 	}
 	return nil
+}
+
+// functions
+
+func FDefaultDataFile() string {
+	return path.Join(os.Getenv("HOME"), "reminder", "data.json")
+}
+
+// function to create blank ReminderData object
+func FBlankReminder() *ReminderData {
+	fmt.Println("Initializing the data file. Please provide following data.")
+	prompt := promptui.Prompt{
+		Label:    "User Name",
+		Validate: utils.ValidateNonEmptyString,
+	}
+	name, err := prompt.Run()
+	utils.PrintErrorIfPresent(err)
+	prompt = promptui.Prompt{
+		Label:    "User Email",
+		Validate: utils.ValidateNonEmptyString,
+	}
+	emailID, err := prompt.Run()
+	utils.PrintErrorIfPresent(err)
+	return &ReminderData{
+		User:     &User{Name: name, EmailId: emailID},
+		Notes:    Notes{},
+		Tags:     Tags{},
+		DataFile: FDefaultDataFile(),
+	}
+}
+
+// function to make sure dataFilePath exists
+func FMakeSureFileExists(dataFilePath string) {
+	_, err := os.Stat(dataFilePath)
+	if err != nil {
+		fmt.Printf("Error finding existing data file: %v\n", err)
+		if errors.Is(err, fs.ErrNotExist) {
+			fmt.Printf("Generating new data file %v.\n", dataFilePath)
+			os.MkdirAll(path.Dir(dataFilePath), 0777)
+			reminderData := *FBlankReminder()
+			reminderData.DataFile = dataFilePath
+			err = reminderData.UpdateDataFile()
+		}
+	}
+	utils.PrintErrorIfPresent(err)
+}
+
+// function to read data file
+func FReadDataFile(dataFilePath string) *ReminderData {
+	var reminderData ReminderData
+	// read byte data from file
+	byteValue, err := ioutil.ReadFile(dataFilePath)
+	utils.PrintErrorIfPresent(err)
+	// parse json data
+	err = json.Unmarshal(byteValue, &reminderData)
+	utils.PrintErrorIfPresent(err)
+	// close the file
+	return &reminderData
 }
