@@ -18,11 +18,11 @@ import (
 )
 
 type ReminderData struct {
-	User      *User `json:"user"`
-	Notes     Notes `json:"notes"`
-	Tags      Tags  `json:"tags"`
-	DataFile  string
-	UpdatedAt int64 `json:"updated_at"`
+	User      *User  `json:"user"`
+	Notes     Notes  `json:"notes"`
+	Tags      Tags   `json:"tags"`
+	DataFile  string `json:"data_file"`
+	UpdatedAt int64  `json:"updated_at"`
 }
 
 func defaultDataFile() string {
