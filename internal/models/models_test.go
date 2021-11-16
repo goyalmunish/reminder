@@ -409,3 +409,21 @@ func TestRegisterBasicTags(t *testing.T) {
 	reminderData.RegisterBasicTags()
 	utils.AssertEqual(t, len(reminderData.Tags), 7)
 }
+
+func TestPrintStats(t *testing.T) {
+	var dataFilePath = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(dataFilePath))
+	// create the file and required dirs
+	models.FMakeSureFileExists(dataFilePath)
+	reminderData := models.FReadDataFile(dataFilePath)
+	// register basic tags
+	reminderData.RegisterBasicTags()
+	got := reminderData.Stats()
+	want := `
+Stats of "temp_test_dir/mydata.json"
+  - Number of Tags: 7
+  - Pending Notes: 0/0
+`
+	utils.AssertEqual(t, got, want)
+}

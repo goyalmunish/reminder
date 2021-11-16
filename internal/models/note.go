@@ -18,6 +18,12 @@ type Note struct {
 	UpdatedAt  int64    `json:"updated_at"`
 }
 
+type Notes []*Note
+
+func (c Notes) Len() int           { return len(c) }
+func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
+
 // method to provide basic string representation of a note
 func (note *Note) String() []string {
 	var strs []string
@@ -62,12 +68,6 @@ func (note *Note) SearchableText() string {
 	return strings.Join(searchableText, " ")
 }
 
-type Notes []*Note
-
-func (c Notes) Len() int           { return len(c) }
-func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
-
 // get info-texts
 func (notes Notes) Texts(maxStrLen int) []string {
 	var allTexts []string
@@ -94,6 +94,8 @@ func (notes Notes) WithStatus(status string) Notes {
 	}
 	return result
 }
+
+// functions
 
 // function to print given field of a note
 func fPrintNoteField(fieldName string, fieldValue interface{}) string {

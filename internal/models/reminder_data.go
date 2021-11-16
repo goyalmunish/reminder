@@ -382,10 +382,41 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	return nil
 }
 
+func (reminderData *ReminderData) Stats() string {
+	var stats []string
+	if len(reminderData.Tags) > 0 {
+		stats = append(stats, fmt.Sprintf("\nStats of %q\n", reminderData.DataFile))
+		stats = append(stats, fmt.Sprintf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags)))
+		stats = append(stats, fmt.Sprintf("%4vPending Notes: %v/%v\n", "- ", len(reminderData.Notes.WithStatus("pending")), len(reminderData.Notes)))
+	}
+	stats_str := ""
+	for _, elem := range stats {
+		stats_str += elem
+	}
+	return stats_str
+}
+
 // functions
 
+// function to return default data file path
 func FDefaultDataFile() string {
 	return path.Join(os.Getenv("HOME"), "reminder", "data.json")
+}
+
+// function to make sure dataFilePath exists
+func FMakeSureFileExists(dataFilePath string) {
+	_, err := os.Stat(dataFilePath)
+	if err != nil {
+		fmt.Printf("Error finding existing data file: %v\n", err)
+		if errors.Is(err, fs.ErrNotExist) {
+			fmt.Printf("Generating new data file %v.\n", dataFilePath)
+			os.MkdirAll(path.Dir(dataFilePath), 0751)
+			reminderData := *FBlankReminder()
+			reminderData.DataFile = dataFilePath
+			err = reminderData.UpdateDataFile()
+		}
+	}
+	utils.PrintErrorIfPresent(err)
 }
 
 // function to create blank ReminderData object
@@ -409,22 +440,6 @@ func FBlankReminder() *ReminderData {
 		Tags:     Tags{},
 		DataFile: FDefaultDataFile(),
 	}
-}
-
-// function to make sure dataFilePath exists
-func FMakeSureFileExists(dataFilePath string) {
-	_, err := os.Stat(dataFilePath)
-	if err != nil {
-		fmt.Printf("Error finding existing data file: %v\n", err)
-		if errors.Is(err, fs.ErrNotExist) {
-			fmt.Printf("Generating new data file %v.\n", dataFilePath)
-			os.MkdirAll(path.Dir(dataFilePath), 0777)
-			reminderData := *FBlankReminder()
-			reminderData.DataFile = dataFilePath
-			err = reminderData.UpdateDataFile()
-		}
-	}
-	utils.PrintErrorIfPresent(err)
 }
 
 // function to read data file
