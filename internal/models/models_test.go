@@ -1,15 +1,15 @@
 package models_test
 
 import (
-	// "fmt"
 	"errors"
+	// "fmt"
 	"io/fs"
 	"os"
 	"path"
 	"sort"
 	"strings"
 	"testing"
-	// "time"
+	"time"
 	// "github.com/golang/mock/gomock"
 
 	models "reminder/internal/models"
@@ -182,15 +182,29 @@ func TestFMakeSureFileExists(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
+
 	// make sure file doesn't exists already
 	_, err := os.Stat(dataFilePath)
 	utils.AssertEqual(t, err != nil, true)
-	errors.Is(err, fs.ErrNotExist)
-	// attempt to create the file and required dirs
+	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), true)
+	// attempt to create the file and required dirs, when the file doesn't exist already
 	models.FMakeSureFileExists(dataFilePath)
 	// prove that the file was created
-	_, err = os.Stat(dataFilePath)
-	utils.AssertEqual(t, err == nil, true)
+	stats, err := os.Stat(dataFilePath)
+	utils.AssertEqual(t, err != nil, false)
+	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), false)
+
+	// make sure that the existing file is not replaced
+	modificationTime := stats.ModTime()
+	// attempt to create the file and required dirs, when the file does exist already
+	time.Sleep(1 * time.Second)
+	models.FMakeSureFileExists(dataFilePath)
+	utils.AssertEqual(t, err != nil, false)
+	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), false)
+	stats, err = os.Stat(dataFilePath)
+	newModificationTime := stats.ModTime()
+	utils.AssertEqual(t, newModificationTime == modificationTime, true)
+
 }
 
 func TestFReadDataFile(t *testing.T) {
@@ -214,7 +228,7 @@ func TestUpdateDataFile(t *testing.T) {
 	// old_updated_at := reminderData.UpdatedAt
 	testUser := models.User{Name: "Test User", EmailId: "user@test.com"}
 	reminderData.User = &testUser
-	reminderData.UpdateDataFile(dataFilePath)
+	reminderData.UpdateDataFile()
 	remiderDataRe := models.FReadDataFile(dataFilePath)
 	// utils.AssertEqual(t, remiderDataRe.UpdatedAt > old_updated_at, true)
 	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)

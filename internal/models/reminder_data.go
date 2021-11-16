@@ -21,7 +21,12 @@ type ReminderData struct {
 	User      *User `json:"user"`
 	Notes     Notes `json:"notes"`
 	Tags      Tags  `json:"tags"`
+	DataFile  string
 	UpdatedAt int64 `json:"updated_at"`
+}
+
+func defaultDataFile() string {
+	return path.Join(os.Getenv("HOME"), "reminder", "data.json")
 }
 
 // function to create blank ReminderData object
@@ -40,9 +45,10 @@ func FBlankReminder() *ReminderData {
 	emailID, err := prompt.Run()
 	utils.PrintErrorIfPresent(err)
 	return &ReminderData{
-		User:  &User{Name: name, EmailId: emailID},
-		Notes: Notes{},
-		Tags:  Tags{},
+		User:     &User{Name: name, EmailId: emailID},
+		Notes:    Notes{},
+		Tags:     Tags{},
+		DataFile: defaultDataFile(),
 	}
 }
 
@@ -52,10 +58,13 @@ func FBlankReminder() *ReminderData {
 func FMakeSureFileExists(dataFilePath string) {
 	_, err := os.Stat(dataFilePath)
 	if err != nil {
+		fmt.Printf("Error finding existing data file: %v\n", err)
 		if errors.Is(err, fs.ErrNotExist) {
+			fmt.Printf("Generating new data file %v.\n", dataFilePath)
 			os.MkdirAll(path.Dir(dataFilePath), 0777)
 			reminderData := *FBlankReminder()
-			err = reminderData.UpdateDataFile(dataFilePath)
+			reminderData.DataFile = dataFilePath
+			err = reminderData.UpdateDataFile()
 		}
 	}
 	utils.PrintErrorIfPresent(err)
@@ -75,14 +84,14 @@ func FReadDataFile(dataFilePath string) *ReminderData {
 }
 
 // method to update data file
-func (reminderData *ReminderData) UpdateDataFile(dataFilePath string) error {
+func (reminderData *ReminderData) UpdateDataFile() error {
 	// update updated_at field
 	reminderData.UpdatedAt = utils.CurrentUnixTimestamp()
 	// marshal the data
 	byteValue, err := json.MarshalIndent(&reminderData, "", "    ")
 	utils.PrintErrorIfPresent(err)
 	// commit the byte data to file
-	err = ioutil.WriteFile(dataFilePath, byteValue, 0755)
+	err = ioutil.WriteFile(reminderData.DataFile, byteValue, 0755)
 	utils.PrintErrorIfPresent(err)
 	return err
 }
@@ -159,7 +168,7 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 		fmt.Println("Adding tags:")
 		basicTags := FBasicTags()
 		reminderData.Tags = basicTags
-		reminderData.UpdateDataFile(DataFile)
+		reminderData.UpdateDataFile()
 		fmt.Println("Added!")
 	} else {
 		fmt.Printf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["error"])
@@ -196,7 +205,7 @@ func (reminderData *ReminderData) NewTagAppend(tag *Tag) error {
 	// go ahead and append
 	fmt.Println("Tag: ", *tag)
 	reminderData.Tags = append(reminderData.Tags, tag)
-	reminderData.UpdateDataFile(DataFile)
+	reminderData.UpdateDataFile()
 	return nil
 }
 
@@ -210,7 +219,7 @@ func (reminderData *ReminderData) NewNoteAppend(note *Note) error {
 	// go ahead and append
 	fmt.Println("Note: ", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
-	reminderData.UpdateDataFile(DataFile)
+	reminderData.UpdateDataFile()
 	return nil
 }
 
@@ -223,7 +232,7 @@ func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error 
 		text := "(" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + "): " + text
 		note.Comments = append(note.Comments, text)
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		reminderData.UpdateDataFile(DataFile)
+		reminderData.UpdateDataFile()
 		fmt.Println("Updated the note")
 		return nil
 	}
@@ -238,7 +247,7 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) {
 	} else if note.Status != status {
 		note.Status = status
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		reminderData.UpdateDataFile(DataFile)
+		reminderData.UpdateDataFile()
 		fmt.Println("Updated the note")
 	} else {
 		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["error"])
@@ -253,7 +262,7 @@ func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
 	} else {
 		note.Text = text
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		reminderData.UpdateDataFile(DataFile)
+		reminderData.UpdateDataFile()
 		fmt.Println("Updated the note")
 		return nil
 	}
@@ -269,7 +278,7 @@ func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) 
 		timeValue, _ := time.Parse(format, text)
 		note.CompleteBy = int64(timeValue.Unix())
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		reminderData.UpdateDataFile(DataFile)
+		reminderData.UpdateDataFile()
 		fmt.Println("Updated the note")
 		return nil
 	}
@@ -279,7 +288,7 @@ func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) 
 func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) {
 	note.TagIds = tagIDs
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
-	reminderData.UpdateDataFile(DataFile)
+	reminderData.UpdateDataFile()
 	fmt.Println("Updated the note")
 }
 
