@@ -145,7 +145,7 @@ func ChopStrings(texts []string, length int) []string {
 		if len(str) <= length {
 			choppedStrings = append(choppedStrings, str)
 		} else {
-			choppedStrings = append(choppedStrings, str[0:length-2] + "..")
+			choppedStrings = append(choppedStrings, str[0:length-2]+"..")
 		}
 	}
 	return choppedStrings
@@ -231,18 +231,17 @@ func AskOption(options []string, label string) (int, string) {
 	return index, result
 }
 
-// perform shell operation
+// perform shell operation and return its output
 // note: it is better to avoid such functions
-func PerformShellOperation(exe string, args ...string) error {
+func PerformShellOperation(exe string, args ...string) (string, error) {
 	executable, _ := exec.LookPath(exe)
 	cmd := &exec.Cmd{
-		Path:   executable,
-		Args:   append([]string{executable}, args...),
-		Stdout: os.Stdout,
-		Stdin:  os.Stdin,
+		Path:  executable,
+		Args:  append([]string{executable}, args...),
+		Stdin: os.Stdin,
 	}
-	err := cmd.Run()
-	return err
+	bytes, err := cmd.Output()
+	return string(bytes), err
 }
 
 // get terminal size
@@ -264,20 +263,28 @@ func TerminalSize() (height int, width int) {
 
 // check presence of a file
 func PerformFilePresence(filePath string) error {
-	return PerformShellOperation("test", "-f", filePath)
+	output, err := PerformShellOperation("test", "-f", filePath)
+	fmt.Println(output)
+	return err
 }
 
 // check if a shell command is available
 func PerformWhich(shellCmd string) error {
-	return PerformShellOperation("which", shellCmd)
+	output, err := PerformShellOperation("which", shellCmd)
+	fmt.Println(output)
+	return err
 }
 
 // cat a file
 func PerformCat(filePath string) error {
-	return PerformShellOperation("cat", filePath)
+	output, err := PerformShellOperation("cat", filePath)
+	fmt.Println(output)
+	return err
 }
 
 // get colored wdiff between two files
 func FPerformCwdiff(oldFilePath string, newFilePath string) error {
-	return PerformShellOperation("wdiff", "-n", "-w", "\033[30;41m", "-x", "\033[0m", "-y", "\033[30;42m", "-z", "\033[0m", oldFilePath, newFilePath)
+	output, err := PerformShellOperation("wdiff", "-n", "-w", "\033[30;41m", "-x", "\033[0m", "-y", "\033[30;42m", "-z", "\033[0m", oldFilePath, newFilePath)
+	fmt.Println(output)
+	return err
 }
