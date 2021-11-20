@@ -2,8 +2,9 @@ package models
 
 import (
 	"fmt"
-	"github.com/manifoldco/promptui"
 	"strings"
+
+	"github.com/manifoldco/promptui"
 
 	"reminder/pkg/utils"
 )

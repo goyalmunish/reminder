@@ -198,7 +198,7 @@ func TestFMakeSureFileExists(t *testing.T) {
 	// make sure that the existing file is not replaced
 	modificationTime := stats.ModTime()
 	// attempt to create the file and required dirs, when the file does exist already
-	time.Sleep(1 * time.Second)
+	time.Sleep(10 * time.Millisecond)
 	models.FMakeSureFileExists(dataFilePath)
 	utils.AssertEqual(t, err != nil, false)
 	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), false)
