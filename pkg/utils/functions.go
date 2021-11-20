@@ -245,20 +245,16 @@ func PerformShellOperation(exe string, args ...string) (string, error) {
 }
 
 // get terminal size
-func TerminalSize() (height int, width int) {
-	cmd := exec.Command("stty", "size")
-	cmd.Stdin = os.Stdin
-	out, err := cmd.Output()
+func TerminalSize() (int, int) {
+	out, err := PerformShellOperation("stty", "size")
 	if err != nil {
 		log.Fatal(err)
 	}
 	output := strings.TrimSpace(string(out))
 	dims := strings.Split(output, " ")
-	height, _ = strconv.Atoi(dims[0])
-	width, _ = strconv.Atoi(dims[1])
-	fmt.Println(height)
-	fmt.Println(width)
-	return
+	height, _ := strconv.Atoi(dims[0])
+	width, _ := strconv.Atoi(dims[1])
+	return height, width
 }
 
 // check presence of a file

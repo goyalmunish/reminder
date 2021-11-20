@@ -141,6 +141,7 @@ func TestValidateDateString(t *testing.T) {
 }
 
 func TestTerminalSize(t *testing.T) {
+	// perhaps stty command doesn't work in tests
 	// height, width := utils.TerminalSize()
 	// utils.AssertEqual(t, height > 0, true)
 	// utils.AssertEqual(t, width > 0, true)
@@ -152,16 +153,16 @@ func TestPerformShellOperation(t *testing.T) {
 	// attempt to delete a non-existing file
 	_, err := utils.PerformShellOperation("rm", dummyFile)
 	utils.AssertEqual(t, err, errors.New("exit status 1"))
-	// // create and delete a file
-	// _, err = utils.PerformShellOperation("touch", dummyFile)
-	// utils.AssertEqual(t, err, nil)
-	// _, err = utils.PerformShellOperation("ls", "-lhFa", dummyFile)
-	// utils.AssertEqual(t, err, nil)
-	// _, err = utils.PerformShellOperation("rm", dummyFile)
-	// utils.AssertEqual(t, err, nil)
-	// // attempt to invoke a command that do not exist
-	// _, err = utils.PerformShellOperation("command_do_not_exist")
-	// utils.AssertEqual(t, err, errors.New("fork/exec : no such file or directory"))
-	// _, err = utils.PerformShellOperation("command_do_not_exist", "arg1", "arg2")
-	// utils.AssertEqual(t, err, errors.New("fork/exec : no such file or directory"))
+	// create and delete a file
+	_, err = utils.PerformShellOperation("touch", dummyFile)
+	utils.AssertEqual(t, err, nil)
+	_, err = utils.PerformShellOperation("ls", "-lhFa", dummyFile)
+	utils.AssertEqual(t, err, nil)
+	_, err = utils.PerformShellOperation("rm", dummyFile)
+	utils.AssertEqual(t, err, nil)
+	// attempt to invoke a command that do not exist
+	_, err = utils.PerformShellOperation("command_do_not_exist")
+	utils.AssertEqual(t, err, errors.New("fork/exec : no such file or directory"))
+	_, err = utils.PerformShellOperation("command_do_not_exist", "arg1", "arg2")
+	utils.AssertEqual(t, err, errors.New("fork/exec : no such file or directory"))
 }
