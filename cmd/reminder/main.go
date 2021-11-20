@@ -145,10 +145,9 @@ func flow() {
 			return false
 		}
 		// display prompt
-		_, width := utils.TerminalSize()
 		prompt := promptui.Select{
 			Label:             "Notes",
-			Items:             utils.ChopStrings(allTexts, width-10),
+			Items:             utils.ChopStrings(allTexts, utils.TerminalWidth()-10),
 			Size:              25,
 			StartInSearchMode: true,
 			Searcher:          searchNotes,

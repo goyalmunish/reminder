@@ -257,6 +257,12 @@ func TerminalSize() (int, int) {
 	return height, width
 }
 
+// get terminal width
+func TerminalWidth() int {
+	_, width := TerminalSize()
+	return width
+}
+
 // check presence of a file
 func PerformFilePresence(filePath string) error {
 	output, err := PerformShellOperation("test", "-f", filePath)
