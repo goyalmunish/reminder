@@ -140,6 +140,12 @@ func TestValidateDateString(t *testing.T) {
 	utils.AssertEqual(t, utils.ValidateDateString("2020"), errors.New("Invalid input"))
 }
 
+func TestTerminalSize(t *testing.T) {
+	// height, width := utils.TerminalSize()
+	// utils.AssertEqual(t, height > 0, true)
+	// utils.AssertEqual(t, width > 0, true)
+}
+
 func TestPerformShellOperation(t *testing.T) {
 	dummyFile := "dummyFile"
 	defer utils.PerformShellOperation("rm -f", dummyFile)

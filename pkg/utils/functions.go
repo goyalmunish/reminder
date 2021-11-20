@@ -3,10 +3,12 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -241,6 +243,23 @@ func PerformShellOperation(exe string, args ...string) error {
 	}
 	err := cmd.Run()
 	return err
+}
+
+// get terminal size
+func TerminalSize() (height int, width int) {
+	cmd := exec.Command("stty", "size")
+	cmd.Stdin = os.Stdin
+	out, err := cmd.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	output := strings.TrimSpace(string(out))
+	dims := strings.Split(output, " ")
+	height, _ = strconv.Atoi(dims[0])
+	width, _ = strconv.Atoi(dims[1])
+	fmt.Println(height)
+	fmt.Println(width)
+	return
 }
 
 // check presence of a file
