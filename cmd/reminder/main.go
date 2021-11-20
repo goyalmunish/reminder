@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/manifoldco/promptui"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -10,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/manifoldco/promptui"
 
 	"reminder/internal/models"
 	"reminder/pkg/utils"
@@ -146,7 +147,7 @@ func flow() {
 		// display prompt
 		prompt := promptui.Select{
 			Label:             "Notes",
-			Items:             allTexts,
+			Items:             utils.ChopStrings(allTexts, 125),
 			Size:              25,
 			StartInSearchMode: true,
 			Searcher:          searchNotes,
