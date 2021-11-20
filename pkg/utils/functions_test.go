@@ -16,6 +16,7 @@ import (
 	"errors"
 	"testing"
 	"time"
+
 	// "github.com/golang/mock/gomock"
 
 	utils "reminder/pkg/utils"
@@ -106,6 +107,18 @@ func TestTrimString(t *testing.T) {
 	utils.AssertEqual(t, utils.TrimString("   str"), "str")
 	utils.AssertEqual(t, utils.TrimString("str   "), "str")
 	utils.AssertEqual(t, utils.TrimString("  str "), "str")
+}
+
+func TestChopStrings(t *testing.T) {
+	strings := []string{"0123456789", "ABCDEFG", "0123"}
+	utils.AssertEqual(t, utils.ChopStrings(strings, 2), strings)
+	utils.AssertEqual(t, utils.ChopStrings(strings, 1), strings)
+	utils.AssertEqual(t, utils.ChopStrings(strings, 0), strings)
+	utils.AssertEqual(t, utils.ChopStrings(strings, -1), strings)
+	want := []string{"012..", "ABC..", "0123"}
+	utils.AssertEqual(t, utils.ChopStrings(strings, 5), want)
+	want = []string{"0123456..", "ABCDEFG", "0123"}
+	utils.AssertEqual(t, utils.ChopStrings(strings, 9), want)
 }
 
 func TestValidateString(t *testing.T) {

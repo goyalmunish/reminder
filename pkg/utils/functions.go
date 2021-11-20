@@ -3,7 +3,6 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/manifoldco/promptui"
 	"os"
 	"os/exec"
 	"reflect"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/manifoldco/promptui"
 )
 
 // fmt.Sprintf("%v %v", Symbols["tag"], "Update tags"):
@@ -130,6 +131,24 @@ func TrimString(str string) string {
 	return strings.TrimSpace(str)
 }
 
+// return a chopped strings (to a desired length)
+func ChopStrings(texts []string, length int) []string {
+	// return original texts (actually copy of what was passed)
+	// if length value is not positive (considert ".." at the end)
+	if length <= 2 {
+		return texts
+	}
+	choppedStrings := []string{}
+	for _, str := range texts {
+		if len(str) <= length {
+			choppedStrings = append(choppedStrings, str)
+		} else {
+			choppedStrings = append(choppedStrings, str[0:length-2] + "..")
+		}
+	}
+	return choppedStrings
+}
+
 // validate that input is string
 func ValidateString(input string) error {
 	return nil
@@ -159,7 +178,7 @@ func ValidateDateString(input string) error {
 // display spinner
 func Spinner(delay time.Duration) {
 	for {
-		for _, c := range `-\|/` {
+		for _, c := range `–\|/` {
 			fmt.Printf("\r%c", c)
 			time.Sleep(delay)
 		}
