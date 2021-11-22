@@ -21,9 +21,9 @@ func flow() {
 	// make sure DataFile exists
 	defaultDataFilePath := models.FDefaultDataFile()
 	models.FMakeSureFileExists(defaultDataFilePath)
-	// open the file
+	// read and parse the existing data
 	reminderData := *models.FReadDataFile(defaultDataFilePath)
-	// print data
+	// print data stats
 	fmt.Println(reminderData.Stats())
 	// TEST CODE STARTS ---->
 	// TEST CODE ENDS ------>

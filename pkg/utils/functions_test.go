@@ -133,6 +133,7 @@ func TestValidateNonEmptyString(t *testing.T) {
 
 func TestValidateDateString(t *testing.T) {
 	utils.AssertEqual(t, utils.ValidateDateString("2020-12-31"), nil)
+	utils.AssertEqual(t, utils.ValidateDateString("nil"), nil)
 	utils.AssertEqual(t, utils.ValidateDateString("2020-31-12"), errors.New("Invalid input"))
 	utils.AssertEqual(t, utils.ValidateDateString("2020-31-"), errors.New("Invalid input"))
 	utils.AssertEqual(t, utils.ValidateDateString("2020-31"), errors.New("Invalid input"))

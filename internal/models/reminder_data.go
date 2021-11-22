@@ -45,7 +45,7 @@ func (reminderData *ReminderData) UpdateDataFile() error {
 func (reminderData *ReminderData) TagsSlugs() []string {
 	// sort tags in place
 	sort.Sort(reminderData.Tags)
-	// fetch sluts and return
+	// fetch slugs and return
 	return FTagsSlugs(reminderData.Tags)
 }
 
@@ -212,17 +212,25 @@ func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
 }
 
 // method to update note's due date
+// if input is "nil", the existing due date is cleared
 func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
 	if len(utils.TrimString(text)) == 0 {
 		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["error"])
 		return errors.New("Note's due date is empty")
+	} else if text == "nil" {
+		note.CompleteBy = 0
+		note.UpdatedAt = utils.CurrentUnixTimestamp()
+		reminderData.UpdateDataFile()
+		fmt.Println("Cleared the due date from the note")
+		return nil
 	} else {
+		// fmt.Println(text)
 		format := "2006-1-2"
 		timeValue, _ := time.Parse(format, text)
 		note.CompleteBy = int64(timeValue.Unix())
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
 		reminderData.UpdateDataFile()
-		fmt.Println("Updated the note")
+		fmt.Println("Updated the note with new due date")
 		return nil
 	}
 }
@@ -307,7 +315,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Print(note.ExternalRepr(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
 		prompt := promptui.Prompt{
-			Label:    "Due Date (YYYY-MM-DD)",
+			Label:    "Due Date (format: YYYY-MM-DD), or enter nil to clear existing value",
 			Validate: utils.ValidateDateString,
 		}
 		promptText, err := prompt.Run()
