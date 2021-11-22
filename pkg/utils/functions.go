@@ -167,9 +167,10 @@ func ValidateNonEmptyString(input string) error {
 }
 
 // validate date string (YYYY-MM-DD)
+// nil is also valid input
 func ValidateDateString(input string) error {
 	input = TrimString(input)
-	re := regexp.MustCompile("^((19|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$")
+	re := regexp.MustCompile("^(((19|20)\\d\\d)-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])|(nil))$")
 	if re.MatchString(input) {
 		return nil
 	} else {
