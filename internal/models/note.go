@@ -45,8 +45,10 @@ func (note *Note) ExternalText(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
 	basicStrs := note.String()
-	tagsStr := fPrintNoteField("Tags", FTagsSlugs(reminderData.TagsFromIds(note.TagIds)))
+	// replace tag ids with tag slugs
+	tagsStr := fPrintNoteField("Tags", reminderData.TagsFromIds(note.TagIds).Slugs())
 	basicStrs[3] = tagsStr
+	// create final list of strings
 	strs = append(strs, basicStrs...)
 	return strings.Join(strs, "")
 }

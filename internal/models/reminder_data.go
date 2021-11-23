@@ -46,7 +46,7 @@ func (reminderData *ReminderData) TagsSlugs() []string {
 	// sort tags in place
 	sort.Sort(reminderData.Tags)
 	// fetch slugs and return
-	return FTagsSlugs(reminderData.Tags)
+	return reminderData.Tags.Slugs()
 }
 
 // method to get tags from tagIDs

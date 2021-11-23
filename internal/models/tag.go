@@ -2,8 +2,9 @@ package models
 
 import (
 	"fmt"
-	"github.com/manifoldco/promptui"
 	"strings"
+
+	"github.com/manifoldco/promptui"
 
 	"reminder/pkg/utils"
 )
@@ -55,7 +56,7 @@ func FBasicTags() Tags {
 }
 
 // get slugs of given tags
-func FTagsSlugs(tags Tags) []string {
+func (tags Tags) Slugs() []string {
 	var allSlugs []string
 	for _, tag := range tags {
 		allSlugs = append(allSlugs, tag.Slug)
