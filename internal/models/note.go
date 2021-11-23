@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/manifoldco/promptui"
 
@@ -89,7 +90,7 @@ func (note *Note) AddComment(text string) error {
 	}
 }
 
-// method to update note text
+// update note's text
 func (note *Note) UpdateText(text string) error {
 	if len(utils.TrimString(text)) == 0 {
 		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["error"])
@@ -98,6 +99,28 @@ func (note *Note) UpdateText(text string) error {
 		note.Text = text
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
 		fmt.Println("Updated the note")
+		return nil
+	}
+}
+
+// update note's due date
+// if input is "nil", the existing due date is cleared
+func (note *Note) UpdateCompleteBy(text string) error {
+	if len(utils.TrimString(text)) == 0 {
+		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["error"])
+		return errors.New("Note's due date is empty")
+	} else if text == "nil" {
+		note.CompleteBy = 0
+		note.UpdatedAt = utils.CurrentUnixTimestamp()
+		fmt.Println("Cleared the due date from the note")
+		return nil
+	} else {
+		// fmt.Println(text)
+		format := "2006-1-2"
+		timeValue, _ := time.Parse(format, text)
+		note.CompleteBy = int64(timeValue.Unix())
+		note.UpdatedAt = utils.CurrentUnixTimestamp()
+		fmt.Println("Updated the note with new due date")
 		return nil
 	}
 }
