@@ -250,6 +250,40 @@ func TestWithStatus(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
+func TestWithTagId(t *testing.T) {
+	// creating tags
+	var tags models.Tags
+	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
+	tags = append(tags, &tag1)
+	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
+	tags = append(tags, &tag2)
+	tag3 := models.Tag{Id: 3, Slug: "a2", Group: "tag_group1"}
+	tags = append(tags, &tag3)
+	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
+	tags = append(tags, &tag4)
+	// create notes
+	var notes models.Notes
+	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	notes = append(notes, &note1)
+	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, UpdatedAt: 1600000004}
+	notes = append(notes, &note2)
+	note3 := models.Note{Text: "3", Status: "done", TagIds: []int{2}, UpdatedAt: 1600000003}
+	notes = append(notes, &note3)
+	note4 := models.Note{Text: "4", Status: "done", TagIds: []int{}, UpdatedAt: 1600000002}
+	notes = append(notes, &note4)
+	note5 := models.Note{Text: "5", Status: "pending", UpdatedAt: 1600000005}
+	notes = append(notes, &note5)
+	// searching notes
+	// case 1
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "pending"), []*models.Note{&note2})
+	// case 2
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "done"), []*models.Note{&note3})
+	// case 3
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(4, "pending"), []*models.Note{&note1, &note2})
+	// case 4
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(1, "done"), []*models.Note{})
+}
+
 func TestFMakeSureFileExists(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
@@ -428,7 +462,7 @@ func TestNextPossibleTagId(t *testing.T) {
 	utils.AssertEqual(t, reminderData.NextPossibleTagId(), 4)
 }
 
-func TestNotesWithTagId(t *testing.T) {
+func TestFindNotes(t *testing.T) {
 	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
@@ -446,7 +480,7 @@ func TestNotesWithTagId(t *testing.T) {
 	tags = append(tags, &tag4)
 	reminderData.Tags = tags
 	// create notes
-	var notes []*models.Note
+	var notes models.Notes
 	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
 	notes = append(notes, &note1)
 	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, UpdatedAt: 1600000004}
@@ -460,13 +494,13 @@ func TestNotesWithTagId(t *testing.T) {
 	reminderData.Notes = notes
 	// searching notes
 	// case 1
-	utils.AssertEqual(t, reminderData.NotesWithTagId(2, "pending"), []*models.Note{&note2})
+	utils.AssertEqual(t, reminderData.FindNotes(2, "pending"), []*models.Note{&note2})
 	// case 2
-	utils.AssertEqual(t, reminderData.NotesWithTagId(2, "done"), []*models.Note{&note3})
+	utils.AssertEqual(t, reminderData.FindNotes(2, "done"), []*models.Note{&note3})
 	// case 3
-	utils.AssertEqual(t, reminderData.NotesWithTagId(4, "pending"), []*models.Note{&note1, &note2})
+	utils.AssertEqual(t, reminderData.FindNotes(4, "pending"), []*models.Note{&note1, &note2})
 	// case 4
-	utils.AssertEqual(t, reminderData.NotesWithTagId(1, "done"), []*models.Note{})
+	utils.AssertEqual(t, reminderData.FindNotes(1, "done"), []*models.Note{})
 }
 
 func TestRegisterBasicTags(t *testing.T) {

@@ -72,15 +72,8 @@ func (reminderData *ReminderData) NextPossibleTagId() int {
 }
 
 // method to get all notes with given tagID and given status
-func (reminderData *ReminderData) NotesWithTagId(tagID int, status string) Notes {
-	allNotes := reminderData.Notes.WithStatus(status)
-	var notes Notes
-	for _, note := range allNotes {
-		if utils.IntPresentInSlice(tagID, note.TagIds) {
-			notes = append(notes, note)
-		}
-	}
-	return Notes(notes)
+func (reminderData *ReminderData) FindNotes(tagID int, status string) Notes {
+	return reminderData.Notes.WithTagIdAndStatus(tagID, status)
 }
 
 // method to register basic tags

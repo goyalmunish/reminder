@@ -55,7 +55,7 @@ func flow() {
 				reminderData.NewTagRegistration()
 			} else {
 				tag := reminderData.Tags[tagIndex]
-				notes := reminderData.NotesWithTagId(tag.Id, "pending")
+				notes := reminderData.FindNotes(tag.Id, "pending")
 				err := reminderData.PrintNotesAndAskOptions(notes, tag.Id)
 				utils.PrintErrorIfPresent(err)
 			}
