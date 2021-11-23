@@ -26,6 +26,7 @@ func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
 // method to provide basic string representation (actually a slice of strings) of a note
+// with each element of slice representing certain field of the note
 func (note *Note) String() []string {
 	var strs []string
 	strs = append(strs, fPrintNoteField("Text", note.Text))
@@ -39,6 +40,7 @@ func (note *Note) String() []string {
 }
 
 // method to print note with its tags slugs
+// this is used as final external reprensentation for display of a single note
 func (note *Note) ExternalRepr(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
@@ -69,8 +71,8 @@ func (note *Note) SearchableText() string {
 	return strings.Join(searchableText, " ")
 }
 
-// get info-texts
-func (notes Notes) Texts(maxStrLen int) []string {
+// get display text of list of notes
+func (notes Notes) ExternalTexts(maxStrLen int) []string {
 	var allTexts []string
 	for _, note := range notes {
 		noteText := note.Text
