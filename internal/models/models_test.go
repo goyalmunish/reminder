@@ -250,7 +250,7 @@ func TestWithStatus(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
-func TestWithTagId(t *testing.T) {
+func TestWithTagIdAndStatus(t *testing.T) {
 	// creating tags
 	var tags models.Tags
 	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
