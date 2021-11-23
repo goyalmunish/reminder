@@ -78,7 +78,7 @@ func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error 
 	return err
 }
 
-// method to update note text
+// method to update note's text
 func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
 	err := note.UpdateText(text)
 	if err == nil {
@@ -92,6 +92,17 @@ func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
 // method to update note's due date (complete by)
 func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
 	err := note.UpdateCompleteBy(text)
+	if err == nil {
+		reminderData.UpdateDataFile()
+		fmt.Println("Updated the data file")
+		return nil
+	}
+	return err
+}
+
+// method to update note's tags
+func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error {
+	err := note.UpdateTags(tagIDs)
 	if err == nil {
 		reminderData.UpdateDataFile()
 		fmt.Println("Updated the data file")
@@ -156,14 +167,6 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) {
 	} else {
 		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["error"])
 	}
-}
-
-// method to update note tags
-func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) {
-	note.TagIds = tagIDs
-	note.UpdatedAt = utils.CurrentUnixTimestamp()
-	reminderData.UpdateDataFile()
-	fmt.Println("Updated the note")
 }
 
 // method (recursive) to ask tagIDs that are to be associated with a note

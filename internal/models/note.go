@@ -125,6 +125,15 @@ func (note *Note) UpdateCompleteBy(text string) error {
 	}
 }
 
+// update note's tags
+func (note *Note) UpdateTags(tagIDs []int) error {
+	note.TagIds = tagIDs
+	note.UpdatedAt = utils.CurrentUnixTimestamp()
+	fmt.Println("Updated the note with tags")
+	// never expecting an error here
+	return nil
+}
+
 // get display text of list of notes
 // width of each note is truncated to maxStrLen
 func (notes Notes) ExternalTexts(maxStrLen int) []string {
