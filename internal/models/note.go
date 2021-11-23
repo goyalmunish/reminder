@@ -25,7 +25,8 @@ func (c Notes) Len() int           { return len(c) }
 func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
-// method to provide basic string representation of a note
+// method to provide basic string representation (actually a slice of strings) of a note
+// with each element of slice representing certain field of the note
 func (note *Note) String() []string {
 	var strs []string
 	strs = append(strs, fPrintNoteField("Text", note.Text))
@@ -39,12 +40,15 @@ func (note *Note) String() []string {
 }
 
 // method to print note with its tags slugs
-func (note *Note) ExternalRepr(reminderData *ReminderData) string {
+// this is used as final external reprensentation for display of a single note
+func (note *Note) ExternalText(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
 	basicStrs := note.String()
-	tagsStr := fPrintNoteField("Tags", FTagsSlugs(reminderData.TagsFromIds(note.TagIds)))
+	// replace tag ids with tag slugs
+	tagsStr := fPrintNoteField("Tags", reminderData.TagsFromIds(note.TagIds).Slugs())
 	basicStrs[3] = tagsStr
+	// create final list of strings
 	strs = append(strs, basicStrs...)
 	return strings.Join(strs, "")
 }
@@ -69,8 +73,9 @@ func (note *Note) SearchableText() string {
 	return strings.Join(searchableText, " ")
 }
 
-// get info-texts
-func (notes Notes) Texts(maxStrLen int) []string {
+// get display text of list of notes
+// width of each note is truncated to maxStrLen
+func (notes Notes) ExternalTexts(maxStrLen int) []string {
 	var allTexts []string
 	for _, note := range notes {
 		noteText := note.Text

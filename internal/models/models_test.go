@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+
 	// "github.com/golang/mock/gomock"
 
 	models "reminder/internal/models"
@@ -44,7 +45,7 @@ func TestTag(t *testing.T) {
 }
 
 func TestTags(t *testing.T) {
-	var tags []*models.Tag
+	var tags models.Tags
 	tags = append(tags, &models.Tag{Id: 1, Slug: "a", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 2, Slug: "z", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
@@ -58,20 +59,20 @@ func TestTags(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
-func TestFTagsSlugs(t *testing.T) {
-	var tags []*models.Tag
+func TestSlugs(t *testing.T) {
+	var tags models.Tags
 	utils.AssertEqual(t, tags, "[]")
 	tags = append(tags, &models.Tag{Id: 1, Slug: "tag_1", Group: "tag_group"})
 	tags = append(tags, &models.Tag{Id: 2, Slug: "tag_2", Group: "tag_group"})
 	tags = append(tags, &models.Tag{Id: 3, Slug: "tag_3", Group: "tag_group"})
-	got := models.FTagsSlugs(tags)
+	got := tags.Slugs()
 	want := "[tag_1 tag_2 tag_3]"
 	utils.AssertEqual(t, got, want)
 }
 
 func TestFBasicTags(t *testing.T) {
 	basicTags := models.FBasicTags()
-	slugs := models.FTagsSlugs(basicTags)
+	slugs := basicTags.Slugs()
 	want := "[current priority-urgent priority-medium priority-low repeat-annually repeat-monthly tips]"
 	utils.AssertEqual(t, slugs, want)
 }
@@ -106,9 +107,9 @@ func TestNoteString(t *testing.T) {
 	utils.AssertEqual(t, note.String(), want)
 }
 
-func TestExternalRepr(t *testing.T) {
+func TestExternalText(t *testing.T) {
 	note := &models.Note{Text: "dummy text", Comments: []string{"c1", "c2", "c3"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
-	var tags []*models.Tag
+	var tags models.Tags
 	tags = append(tags, &models.Tag{Id: 0, Slug: "tag_0", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 1, Slug: "tag_1", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 2, Slug: "tag_2", Group: "tag_group2"})
@@ -125,7 +126,7 @@ func TestExternalRepr(t *testing.T) {
   |     CreatedAt:  nil
   |     UpdatedAt:  nil
 `
-	utils.AssertEqual(t, note.ExternalRepr(reminderData), want)
+	utils.AssertEqual(t, note.ExternalText(reminderData), want)
 }
 
 func TestSearchableText(t *testing.T) {
@@ -137,26 +138,30 @@ func TestSearchableText(t *testing.T) {
 	note = models.Note{Text: "a cute dog", Comments: []string{"c1", "foo bar", "c3"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
 	got = note.SearchableText()
 	utils.AssertEqual(t, got, "a cute dog [c1, foo bar, c3]")
+	// case 3
+	note = models.Note{Text: "a cute dog", Comments: []string{}}
+	got = note.SearchableText()
+	utils.AssertEqual(t, got, "a cute dog [no-comments]")
 }
 
-func TestTexts(t *testing.T) {
+func TestExternalTexts(t *testing.T) {
 	var notes models.Notes
 	notes = append(notes, &models.Note{Text: "beautiful little cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231})
 	notes = append(notes, &models.Note{Text: "cute brown dog", Comments: []string{"c1", "foo bar", "c3", "baz"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
 	// case 1
-	got := notes.Texts(0)
+	got := notes.ExternalTexts(0)
 	want := "[beautiful little cat {C:01, S:P, D:03-Jan-21} cute brown dog {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 2
-	got = notes.Texts(5)
+	got = notes.ExternalTexts(5)
 	want = "[be... {C:01, S:P, D:03-Jan-21} cu... {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 3
-	got = notes.Texts(15)
+	got = notes.ExternalTexts(15)
 	want = "[beautiful li... {C:01, S:P, D:03-Jan-21} cute brown dog  {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 4
-	got = notes.Texts(25)
+	got = notes.ExternalTexts(25)
 	want = "[beautiful little cat      {C:01, S:P, D:03-Jan-21} cute brown dog            {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 }
@@ -239,10 +244,10 @@ func TestTagsSlug(t *testing.T) {
 	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
-		Tags:  []*models.Tag{},
+		Tags:  models.Tags{},
 	}
 	// creating tags
-	var tags []*models.Tag
+	var tags models.Tags
 	tags = append(tags, &models.Tag{Id: 1, Slug: "a", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 2, Slug: "z", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
@@ -257,10 +262,10 @@ func TestTagsFromIds(t *testing.T) {
 	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
-		Tags:  []*models.Tag{},
+		Tags:  models.Tags{},
 	}
 	// creating tags
-	var tags []*models.Tag
+	var tags models.Tags
 	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
 	tags = append(tags, &tag1)
 	tag2 := models.Tag{Id: 2, Slug: "z", Group: "tag_group1"}
@@ -273,17 +278,17 @@ func TestTagsFromIds(t *testing.T) {
 	// case 1
 	tagIDs := []int{1, 3}
 	gotSlugs := reminderData.TagsFromIds(tagIDs)
-	wantSlugs := []*models.Tag{&tag1, &tag3}
+	wantSlugs := models.Tags{&tag1, &tag3}
 	utils.AssertEqual(t, gotSlugs, wantSlugs)
 	// case 2
 	tagIDs = []int{}
 	gotSlugs = reminderData.TagsFromIds(tagIDs)
-	wantSlugs = []*models.Tag{}
+	wantSlugs = models.Tags{}
 	utils.AssertEqual(t, gotSlugs, wantSlugs)
 	// case 3
 	tagIDs = []int{1, 4, 2, 3}
 	gotSlugs = reminderData.TagsFromIds(tagIDs)
-	wantSlugs = []*models.Tag{&tag1, &tag4, &tag2, &tag3}
+	wantSlugs = models.Tags{&tag1, &tag4, &tag2, &tag3}
 	utils.AssertEqual(t, gotSlugs, wantSlugs)
 }
 
@@ -291,10 +296,10 @@ func TestTagFromSlug(t *testing.T) {
 	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
-		Tags:  []*models.Tag{},
+		Tags:  models.Tags{},
 	}
 	// creating tags
-	var tags []*models.Tag
+	var tags models.Tags
 	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
 	tags = append(tags, &tag1)
 	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
@@ -316,10 +321,10 @@ func TestTagIdsForGroup(t *testing.T) {
 	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
-		Tags:  []*models.Tag{},
+		Tags:  models.Tags{},
 	}
 	// creating tags
-	var tags []*models.Tag
+	var tags models.Tags
 	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
 	tags = append(tags, &tag1)
 	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
@@ -341,10 +346,10 @@ func TestNextPossibleTagId(t *testing.T) {
 	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
-		Tags:  []*models.Tag{},
+		Tags:  models.Tags{},
 	}
 	// creating tags
-	var tags []*models.Tag
+	var tags models.Tags
 	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
 	tags = append(tags, &tag1)
 	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
@@ -361,10 +366,10 @@ func TestNotesWithTagId(t *testing.T) {
 	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
-		Tags:  []*models.Tag{},
+		Tags:  models.Tags{},
 	}
 	// creating tags
-	var tags []*models.Tag
+	var tags models.Tags
 	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
 	tags = append(tags, &tag1)
 	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
