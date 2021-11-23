@@ -41,7 +41,7 @@ func (note *Note) String() []string {
 
 // method to print note with its tags slugs
 // this is used as final external reprensentation for display of a single note
-func (note *Note) ExternalRepr(reminderData *ReminderData) string {
+func (note *Note) ExternalText(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
 	basicStrs := note.String()
@@ -72,6 +72,7 @@ func (note *Note) SearchableText() string {
 }
 
 // get display text of list of notes
+// width of each note is truncated to maxStrLen
 func (notes Notes) ExternalTexts(maxStrLen int) []string {
 	var allTexts []string
 	for _, note := range notes {
