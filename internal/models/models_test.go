@@ -335,6 +335,22 @@ func TestUpdateCompleteBy(t *testing.T) {
 	utils.AssertEqual(t, note1.CompleteBy, 0)
 }
 
+func TestUpdateTags(t *testing.T) {
+	// create notes
+	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	// update TagIds
+	// case 1
+	tagIds := []int{2, 5}
+	err := note1.UpdateTags(tagIds)
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, note1.TagIds, tagIds)
+	// case 2
+	tagIds = []int{}
+	err = note1.UpdateTags(tagIds)
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, note1.TagIds, tagIds)
+}
+
 func TestFMakeSureFileExists(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
