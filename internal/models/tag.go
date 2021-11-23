@@ -38,6 +38,17 @@ func (tags Tags) Slugs() []string {
 	return allSlugs
 }
 
+// method to fetch tag with given slug
+// return nil if given tag is not found
+func (tags Tags) FromSlug(slug string) *Tag {
+	for _, tag := range tags {
+		if tag.Slug == slug {
+			return tag
+		}
+	}
+	return nil
+}
+
 // method to get tags from tagIDs
 func (tags Tags) FromIds(tagIDs []int) Tags {
 	var filteredTags Tags
