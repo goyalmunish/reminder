@@ -62,6 +62,17 @@ func (tags Tags) FromIds(tagIDs []int) Tags {
 	return filteredTags
 }
 
+// method to get tag ids of given group
+func (tags Tags) IdsForGroup(group string) []int {
+	var tagIDs []int
+	for _, tag := range tags {
+		if tag.Group == group {
+			tagIDs = append(tagIDs, tag.Id)
+		}
+	}
+	return tagIDs
+}
+
 // functions
 
 // return an array of basic tags

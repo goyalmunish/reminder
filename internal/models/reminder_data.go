@@ -61,14 +61,7 @@ func (reminderData *ReminderData) TagsFromIds(tagIDs []int) Tags {
 
 // method to get tag ids for given group
 func (reminderData *ReminderData) TagIdsForGroup(group string) []int {
-	allTags := reminderData.Tags
-	var tagIDs []int
-	for _, tag := range allTags {
-		if tag.Group == group {
-			tagIDs = append(tagIDs, tag.Id)
-		}
-	}
-	return tagIDs
+	return reminderData.Tags.IdsForGroup(group)
 }
 
 // method to get next possible tagID
