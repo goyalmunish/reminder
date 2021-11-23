@@ -29,6 +29,30 @@ func (c Tags) Len() int           { return len(c) }
 func (c Tags) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Tags) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
 
+// get slugs of given tags
+func (tags Tags) Slugs() []string {
+	var allSlugs []string
+	for _, tag := range tags {
+		allSlugs = append(allSlugs, tag.Slug)
+	}
+	return allSlugs
+}
+
+// method to get tags from tagIDs
+func (tags Tags) FromIds(tagIDs []int) Tags {
+	var filteredTags Tags
+	for _, tagID := range tagIDs {
+		for _, tag := range tags {
+			if tagID == tag.Id {
+				filteredTags = append(filteredTags, tag)
+			}
+		}
+	}
+	return filteredTags
+}
+
+// functions
+
 // return an array of basic tags
 // which can be used for initial setup of the application
 // here some of the tags will have special meaning/functionality
@@ -53,15 +77,6 @@ func FBasicTags() Tags {
 		basicTags = append(basicTags, &tag)
 	}
 	return basicTags
-}
-
-// get slugs of given tags
-func (tags Tags) Slugs() []string {
-	var allSlugs []string
-	for _, tag := range tags {
-		allSlugs = append(allSlugs, tag.Slug)
-	}
-	return allSlugs
 }
 
 // prompt for new Tag

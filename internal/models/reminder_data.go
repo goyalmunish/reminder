@@ -51,16 +51,7 @@ func (reminderData *ReminderData) TagsSlugs() []string {
 
 // method to get tags from tagIDs
 func (reminderData *ReminderData) TagsFromIds(tagIDs []int) Tags {
-	allTags := reminderData.Tags
-	var tags Tags
-	for _, tagID := range tagIDs {
-		for _, tag := range allTags {
-			if tagID == tag.Id {
-				tags = append(tags, tag)
-			}
-		}
-	}
-	return tags
+	return reminderData.Tags.FromIds(tagIDs)
 }
 
 // method to get tag with given slug
