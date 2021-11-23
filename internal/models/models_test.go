@@ -2,6 +2,7 @@ package models_test
 
 import (
 	"errors"
+
 	// "fmt"
 	"io/fs"
 	"os"
@@ -284,6 +285,27 @@ func TestWithTagIdAndStatus(t *testing.T) {
 	utils.AssertEqual(t, notes.WithTagIdAndStatus(1, "done"), []*models.Note{})
 }
 
+func TestAddComment(t *testing.T) {
+	// create notes
+	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	// add comments
+	// case 1
+	err := note1.AddComment("test comment 1")
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, len(note1.Comments), 1)
+	utils.AssertEqual(t, strings.Contains(note1.Comments[0], "test comment 1"), true)
+	// case 2
+	err = note1.AddComment("test comment 2")
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, len(note1.Comments), 2)
+	utils.AssertEqual(t, strings.Contains(note1.Comments[1], "test comment 2"), true)
+	// case 3
+	err = note1.AddComment("")
+	utils.AssertEqual(t, strings.Contains(err.Error(), "Note's comment text is empty"), true)
+	utils.AssertEqual(t, len(note1.Comments), 2)
+	utils.AssertEqual(t, strings.Contains(note1.Comments[1], "test comment 2"), true)
+}
+
 func TestFMakeSureFileExists(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
@@ -353,7 +375,7 @@ func TestTagsSlug(t *testing.T) {
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
 	reminderData.Tags = tags
-	gotSlugs := reminderData.TagsSlugs()
+	gotSlugs := reminderData.TagSlugs()
 	wantSlugs := []string{"a", "b", "c", "z"}
 	utils.AssertEqual(t, gotSlugs, wantSlugs)
 }

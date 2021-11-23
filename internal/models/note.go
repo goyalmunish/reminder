@@ -1,7 +1,9 @@
 package models
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -25,7 +27,7 @@ func (c Notes) Len() int           { return len(c) }
 func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
-// method to provide basic string representation (actually a slice of strings) of a note
+// provide basic string representation (actually a slice of strings) of a note
 // with each element of slice representing certain field of the note
 func (note *Note) String() []string {
 	var strs []string
@@ -39,7 +41,7 @@ func (note *Note) String() []string {
 	return strs
 }
 
-// method to print note with its tags slugs
+// print note with its tags slugs
 // this is used as final external reprensentation for display of a single note
 func (note *Note) ExternalText(reminderData *ReminderData) string {
 	var strs []string
@@ -53,7 +55,7 @@ func (note *Note) ExternalText(reminderData *ReminderData) string {
 	return strings.Join(strs, "")
 }
 
-// method providing string representation for searching
+// provide string representation for searching
 // we want to perform full text search on Text and Comments of a note
 func (note *Note) SearchableText() string {
 	// get comments text array for note
@@ -71,6 +73,20 @@ func (note *Note) SearchableText() string {
 	searchableText = append(searchableText, strings.Join(commentsText, ""))
 	// return searchable text for note a string
 	return strings.Join(searchableText, " ")
+}
+
+// add new comment to note
+func (note *Note) AddComment(text string) error {
+	if len(utils.TrimString(text)) == 0 {
+		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["error"])
+		return errors.New("Note's comment text is empty")
+	} else {
+		text := "(" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + "): " + text
+		note.Comments = append(note.Comments, text)
+		note.UpdatedAt = utils.CurrentUnixTimestamp()
+		fmt.Println("Updated the note")
+		return nil
+	}
 }
 
 // get display text of list of notes
@@ -101,7 +117,7 @@ func (notes Notes) WithStatus(status string) Notes {
 	return result
 }
 
-// method to get all notes with given tagID and given status
+// get all notes with given tagID and given status
 func (notes Notes) WithTagIdAndStatus(tagID int, status string) Notes {
 	notesWithStatus := notes.WithStatus(status)
 	var result Notes
