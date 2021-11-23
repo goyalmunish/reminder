@@ -10,7 +10,6 @@ import (
 	"path"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/manifoldco/promptui"
 
@@ -66,6 +65,39 @@ func (reminderData *ReminderData) TagIdsForGroup(group string) []int {
 // method to get all notes with given tagID and given status
 func (reminderData *ReminderData) FindNotes(tagID int, status string) Notes {
 	return reminderData.Notes.WithTagIdAndStatus(tagID, status)
+}
+
+// method to add note's comment
+func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error {
+	err := note.AddComment(text)
+	if err == nil {
+		reminderData.UpdateDataFile()
+		fmt.Println("Updated the data file")
+		return nil
+	}
+	return err
+}
+
+// method to update note text
+func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
+	err := note.UpdateText(text)
+	if err == nil {
+		reminderData.UpdateDataFile()
+		fmt.Println("Updated the data file")
+		return nil
+	}
+	return err
+}
+
+// method to update note's due date (complete by)
+func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
+	err := note.UpdateCompleteBy(text)
+	if err == nil {
+		reminderData.UpdateDataFile()
+		fmt.Println("Updated the data file")
+		return nil
+	}
+	return err
 }
 
 // method to get next possible tagID
@@ -136,17 +168,6 @@ func (reminderData *ReminderData) NewNoteAppend(note *Note) error {
 	return nil
 }
 
-// method to add note's comment
-func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error {
-	err := note.AddComment(text)
-	if err == nil {
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the data file")
-		return nil
-	}
-	return err
-}
-
 // method to update note status
 func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) {
 	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
@@ -160,44 +181,6 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) {
 		fmt.Println("Updated the note")
 	} else {
 		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["error"])
-	}
-}
-
-// method to update note text
-func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
-	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["error"])
-		return errors.New("Note's text is empty")
-	} else {
-		note.Text = text
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the note")
-		return nil
-	}
-}
-
-// method to update note's due date
-// if input is "nil", the existing due date is cleared
-func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
-	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["error"])
-		return errors.New("Note's due date is empty")
-	} else if text == "nil" {
-		note.CompleteBy = 0
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		reminderData.UpdateDataFile()
-		fmt.Println("Cleared the due date from the note")
-		return nil
-	} else {
-		// fmt.Println(text)
-		format := "2006-1-2"
-		timeValue, _ := time.Parse(format, text)
-		note.CompleteBy = int64(timeValue.Unix())
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the note with new due date")
-		return nil
 	}
 }
 
