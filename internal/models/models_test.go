@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+
 	// "github.com/golang/mock/gomock"
 
 	models "reminder/internal/models"
@@ -137,6 +138,10 @@ func TestSearchableText(t *testing.T) {
 	note = models.Note{Text: "a cute dog", Comments: []string{"c1", "foo bar", "c3"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
 	got = note.SearchableText()
 	utils.AssertEqual(t, got, "a cute dog [c1, foo bar, c3]")
+	// case 3
+	note = models.Note{Text: "a cute dog", Comments: []string{}}
+	got = note.SearchableText()
+	utils.AssertEqual(t, got, "a cute dog [no-comments]")
 }
 
 func TestTexts(t *testing.T) {

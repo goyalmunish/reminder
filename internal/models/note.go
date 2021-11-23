@@ -25,7 +25,7 @@ func (c Notes) Len() int           { return len(c) }
 func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
-// method to provide basic string representation of a note
+// method to provide basic string representation (actually a slice of strings) of a note
 func (note *Note) String() []string {
 	var strs []string
 	strs = append(strs, fPrintNoteField("Text", note.Text))
