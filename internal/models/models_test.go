@@ -70,6 +70,34 @@ func TestSlugs(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
+func TestFromIds(t *testing.T) {
+	// creating tags
+	var tags models.Tags
+	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
+	tags = append(tags, &tag1)
+	tag2 := models.Tag{Id: 2, Slug: "z", Group: "tag_group1"}
+	tags = append(tags, &tag2)
+	tag3 := models.Tag{Id: 3, Slug: "c", Group: "tag_group1"}
+	tags = append(tags, &tag3)
+	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
+	tags = append(tags, &tag4)
+	// case 1
+	tagIDs := []int{1, 3}
+	gotSlugs := tags.FromIds(tagIDs)
+	wantSlugs := models.Tags{&tag1, &tag3}
+	utils.AssertEqual(t, gotSlugs, wantSlugs)
+	// case 2
+	tagIDs = []int{}
+	gotSlugs = tags.FromIds(tagIDs)
+	wantSlugs = models.Tags{}
+	utils.AssertEqual(t, gotSlugs, wantSlugs)
+	// case 3
+	tagIDs = []int{1, 4, 2, 3}
+	gotSlugs = tags.FromIds(tagIDs)
+	wantSlugs = models.Tags{&tag1, &tag4, &tag2, &tag3}
+	utils.AssertEqual(t, gotSlugs, wantSlugs)
+}
+
 func TestFBasicTags(t *testing.T) {
 	basicTags := models.FBasicTags()
 	slugs := basicTags.Slugs()
