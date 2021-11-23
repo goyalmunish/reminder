@@ -101,6 +101,18 @@ func (notes Notes) WithStatus(status string) Notes {
 	return result
 }
 
+// method to get all notes with given tagID and given status
+func (notes Notes) WithTagIdAndStatus(tagID int, status string) Notes {
+	notesWithStatus := notes.WithStatus(status)
+	var result Notes
+	for _, note := range notesWithStatus {
+		if utils.IntPresentInSlice(tagID, note.TagIds) {
+			result = append(result, note)
+		}
+	}
+	return result
+}
+
 // functions
 
 // function to print given field of a note
