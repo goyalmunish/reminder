@@ -89,6 +89,19 @@ func (note *Note) AddComment(text string) error {
 	}
 }
 
+// method to update note text
+func (note *Note) UpdateText(text string) error {
+	if len(utils.TrimString(text)) == 0 {
+		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["error"])
+		return errors.New("Note's text is empty")
+	} else {
+		note.Text = text
+		note.UpdatedAt = utils.CurrentUnixTimestamp()
+		fmt.Println("Updated the note")
+		return nil
+	}
+}
+
 // get display text of list of notes
 // width of each note is truncated to maxStrLen
 func (notes Notes) ExternalTexts(maxStrLen int) []string {

@@ -306,6 +306,20 @@ func TestAddComment(t *testing.T) {
 	utils.AssertEqual(t, strings.Contains(note1.Comments[1], "test comment 2"), true)
 }
 
+func TestUpdateText(t *testing.T) {
+	// create notes
+	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	// update text
+	// case 1
+	err := note1.UpdateText("updated text 1")
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, note1.Text, "updated text 1")
+	// case 2
+	err = note1.UpdateText("")
+	utils.AssertEqual(t, strings.Contains(err.Error(), "Note's text is empty"), true)
+	utils.AssertEqual(t, note1.Text, "updated text 1")
+}
+
 func TestFMakeSureFileExists(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test

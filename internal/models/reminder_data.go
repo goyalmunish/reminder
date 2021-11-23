@@ -147,6 +147,17 @@ func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error 
 	return err
 }
 
+// method to update note text
+func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
+	err := note.UpdateText(text)
+	if err == nil {
+		reminderData.UpdateDataFile()
+		fmt.Println("Updated the data file")
+		return nil
+	}
+	return err
+}
+
 // method to update note status
 func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) {
 	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
@@ -160,20 +171,6 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) {
 		fmt.Println("Updated the note")
 	} else {
 		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["error"])
-	}
-}
-
-// method to update note text
-func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
-	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["error"])
-		return errors.New("Note's text is empty")
-	} else {
-		note.Text = text
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the note")
-		return nil
 	}
 }
 
