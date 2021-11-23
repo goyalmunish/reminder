@@ -25,7 +25,7 @@ func (c Notes) Len() int           { return len(c) }
 func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
-// method to provide basic string representation (actually a slice of strings) of a note
+// provide basic string representation (actually a slice of strings) of a note
 // with each element of slice representing certain field of the note
 func (note *Note) String() []string {
 	var strs []string
@@ -39,7 +39,7 @@ func (note *Note) String() []string {
 	return strs
 }
 
-// method to print note with its tags slugs
+// print note with its tags slugs
 // this is used as final external reprensentation for display of a single note
 func (note *Note) ExternalText(reminderData *ReminderData) string {
 	var strs []string
@@ -53,7 +53,7 @@ func (note *Note) ExternalText(reminderData *ReminderData) string {
 	return strings.Join(strs, "")
 }
 
-// method providing string representation for searching
+// provide string representation for searching
 // we want to perform full text search on Text and Comments of a note
 func (note *Note) SearchableText() string {
 	// get comments text array for note
@@ -101,7 +101,7 @@ func (notes Notes) WithStatus(status string) Notes {
 	return result
 }
 
-// method to get all notes with given tagID and given status
+// get all notes with given tagID and given status
 func (notes Notes) WithTagIdAndStatus(tagID int, status string) Notes {
 	notesWithStatus := notes.WithStatus(status)
 	var result Notes

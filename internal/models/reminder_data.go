@@ -42,7 +42,7 @@ func (reminderData *ReminderData) UpdateDataFile() error {
 }
 
 // method to get slugs of all tags
-func (reminderData *ReminderData) TagsSlugs() []string {
+func (reminderData *ReminderData) TagSlugs() []string {
 	// sort tags in place
 	sort.Sort(reminderData.Tags)
 	// fetch slugs and return
@@ -64,16 +64,16 @@ func (reminderData *ReminderData) TagIdsForGroup(group string) []int {
 	return reminderData.Tags.IdsForGroup(group)
 }
 
+// method to get all notes with given tagID and given status
+func (reminderData *ReminderData) FindNotes(tagID int, status string) Notes {
+	return reminderData.Notes.WithTagIdAndStatus(tagID, status)
+}
+
 // method to get next possible tagID
 func (reminderData *ReminderData) NextPossibleTagId() int {
 	allTags := reminderData.Tags
 	allTagsLen := len(allTags)
 	return allTagsLen
-}
-
-// method to get all notes with given tagID and given status
-func (reminderData *ReminderData) FindNotes(tagID int, status string) Notes {
-	return reminderData.Notes.WithTagIdAndStatus(tagID, status)
 }
 
 // method to register basic tags
@@ -222,12 +222,12 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	// make sure reminderData.Tags is sorted
 	sort.Sort(reminderData.Tags)
 	// ask user to select tag
-	optionIndex, _ := utils.AskOption(append(reminderData.TagsSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+	optionIndex, _ := utils.AskOption(append(reminderData.TagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 	if optionIndex == -1 {
 		return []int{}
 	}
 	// get tagID
-	if optionIndex == len(reminderData.TagsSlugs()) {
+	if optionIndex == len(reminderData.TagSlugs()) {
 		// add new tag
 		err, tagID = reminderData.NewTagRegistration()
 	} else {

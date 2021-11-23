@@ -17,7 +17,7 @@ type Tag struct {
 	UpdatedAt int64  `json:"updated_at"`
 }
 
-// method to provide basic string representation of a tag
+// provide basic string representation of a tag
 func (t Tag) String() string {
 	return fmt.Sprintf("%v#%v#%v", t.Group, t.Slug, t.Id)
 }
@@ -38,7 +38,7 @@ func (tags Tags) Slugs() []string {
 	return allSlugs
 }
 
-// method to fetch tag with given slug
+// fetch tag with given slug
 // return nil if given tag is not found
 func (tags Tags) FromSlug(slug string) *Tag {
 	for _, tag := range tags {
@@ -49,7 +49,7 @@ func (tags Tags) FromSlug(slug string) *Tag {
 	return nil
 }
 
-// method to get tags from tagIDs
+// get tags from tagIDs
 func (tags Tags) FromIds(tagIDs []int) Tags {
 	var filteredTags Tags
 	for _, tagID := range tagIDs {
@@ -62,7 +62,7 @@ func (tags Tags) FromIds(tagIDs []int) Tags {
 	return filteredTags
 }
 
-// method to get tag ids of given group
+// get tag ids of given group
 func (tags Tags) IdsForGroup(group string) []int {
 	var tagIDs []int
 	for _, tag := range tags {

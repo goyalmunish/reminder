@@ -353,7 +353,7 @@ func TestTagsSlug(t *testing.T) {
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
 	reminderData.Tags = tags
-	gotSlugs := reminderData.TagsSlugs()
+	gotSlugs := reminderData.TagSlugs()
 	wantSlugs := []string{"a", "b", "c", "z"}
 	utils.AssertEqual(t, gotSlugs, wantSlugs)
 }
