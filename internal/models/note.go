@@ -1,7 +1,9 @@
 package models
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -71,6 +73,20 @@ func (note *Note) SearchableText() string {
 	searchableText = append(searchableText, strings.Join(commentsText, ""))
 	// return searchable text for note a string
 	return strings.Join(searchableText, " ")
+}
+
+// add new comment to note
+func (note *Note) AddComment(text string) error {
+	if len(utils.TrimString(text)) == 0 {
+		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["error"])
+		return errors.New("Note's comment text is empty")
+	} else {
+		text := "(" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + "): " + text
+		note.Comments = append(note.Comments, text)
+		note.UpdatedAt = utils.CurrentUnixTimestamp()
+		fmt.Println("Updated the note")
+		return nil
+	}
 }
 
 // get display text of list of notes

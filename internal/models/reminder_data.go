@@ -9,7 +9,6 @@ import (
 	"os"
 	"path"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -139,17 +138,13 @@ func (reminderData *ReminderData) NewNoteAppend(note *Note) error {
 
 // method to add note's comment
 func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error {
-	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["error"])
-		return errors.New("Note's comment text is empty")
-	} else {
-		text := "(" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + "): " + text
-		note.Comments = append(note.Comments, text)
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
+	err := note.AddComment(text)
+	if err == nil {
 		reminderData.UpdateDataFile()
-		fmt.Println("Updated the note")
+		fmt.Println("Updated the data file")
 		return nil
 	}
+	return err
 }
 
 // method to update note status
