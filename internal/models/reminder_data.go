@@ -153,14 +153,14 @@ func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	return tagID, err
 }
 
-// get next possible tagID
+// (private) get next possible tagID
 func (reminderData *ReminderData) nextPossibleTagId() int {
 	allTags := reminderData.Tags
 	allTagsLen := len(allTags)
 	return allTagsLen
 }
 
-// append a new tag
+// (private) append a new tag
 func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 	// check if tag's slug is already present
 	isNewSlug := true
@@ -197,12 +197,27 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	return note, nil
 }
 
-// append a new note
+// (private) append a new note
 func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 	fmt.Printf("Added Note: %v\n", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
 	reminderData.UpdateDataFile()
 	return nil
+}
+
+// return current status
+func (reminderData *ReminderData) Stats() string {
+	var stats []string
+	if len(reminderData.Tags) > 0 {
+		stats = append(stats, fmt.Sprintf("\nStats of %q\n", reminderData.DataFile))
+		stats = append(stats, fmt.Sprintf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags)))
+		stats = append(stats, fmt.Sprintf("%4vPending Notes: %v/%v\n", "- ", len(reminderData.Notes.WithStatus("pending")), len(reminderData.Notes)))
+	}
+	stats_str := ""
+	for _, elem := range stats {
+		stats_str += elem
+	}
+	return stats_str
 }
 
 // method (recursive) to ask tagIDs that are to be associated with a note
@@ -348,20 +363,6 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		}
 	}
 	return nil
-}
-
-func (reminderData *ReminderData) Stats() string {
-	var stats []string
-	if len(reminderData.Tags) > 0 {
-		stats = append(stats, fmt.Sprintf("\nStats of %q\n", reminderData.DataFile))
-		stats = append(stats, fmt.Sprintf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags)))
-		stats = append(stats, fmt.Sprintf("%4vPending Notes: %v/%v\n", "- ", len(reminderData.Notes.WithStatus("pending")), len(reminderData.Notes)))
-	}
-	stats_str := ""
-	for _, elem := range stats {
-		stats_str += elem
-	}
-	return stats_str
 }
 
 // functions
