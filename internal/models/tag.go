@@ -125,7 +125,7 @@ func FNewTag(tagID int) (*Tag, error) {
 	}
 	if len(utils.TrimString(tag.Slug)) == 0 {
 		// this should never be encountered because of validation in earlier step
-		fmt.Printf("%v Skipping adding tag with empty slug\n", utils.Symbols["error"])
+		fmt.Printf("%v Skipping adding tag with empty slug\n", utils.Symbols["warning"])
 		err := errors.New("Tag's slug is empty")
 		return tag, err
 	}

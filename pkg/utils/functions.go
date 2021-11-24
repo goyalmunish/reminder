@@ -225,7 +225,7 @@ func AskOption(options []string, label string) (int, string) {
 	}
 	index, result, err := prompt.Run()
 	if err != nil {
-		fmt.Printf("%v Prompt failed %v\n", Symbols["error"], err)
+		fmt.Printf("%v Prompt failed %v\n", Symbols["warning"], err)
 		return -1, "error"
 	}
 	fmt.Printf("You chose %d:%q\n", index, result)

@@ -79,7 +79,7 @@ func (note *Note) SearchableText() string {
 // add new comment to note
 func (note *Note) AddComment(text string) error {
 	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["error"])
+		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's comment text is empty")
 	} else {
 		text := "(" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + "): " + text
@@ -93,7 +93,7 @@ func (note *Note) AddComment(text string) error {
 // update note's text
 func (note *Note) UpdateText(text string) error {
 	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["error"])
+		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's text is empty")
 	} else {
 		note.Text = text
@@ -107,7 +107,7 @@ func (note *Note) UpdateText(text string) error {
 // if input is "nil", the existing due date is cleared
 func (note *Note) UpdateCompleteBy(text string) error {
 	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["error"])
+		fmt.Printf("%v Skipping updating note with empty due date\n", utils.Symbols["warning"])
 		return errors.New("Note's due date is empty")
 	} else if text == "nil" {
 		note.CompleteBy = 0
@@ -230,7 +230,7 @@ func FNewNote(tagIDs []int) (*Note, error) {
 	}
 	if len(utils.TrimString(note.Text)) == 0 {
 		// this should never be encountered because of validation in earlier step
-		fmt.Printf("%v Skipping adding note with empty text\n", utils.Symbols["error"])
+		fmt.Printf("%v Skipping adding note with empty text\n", utils.Symbols["warning"])
 		return note, errors.New("Note's text is empty")
 	}
 	return note, nil
