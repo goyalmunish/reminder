@@ -134,7 +134,7 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 		reminderData.UpdateDataFile()
 		fmt.Printf("Added basic tags: %v\n", reminderData.Tags)
 	} else {
-		fmt.Printf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["error"])
+		fmt.Printf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["warning"])
 	}
 }
 
@@ -307,7 +307,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 			reminderData.UpdateNoteTags(note, tagIDs)
 			fmt.Print(note.ExternalText(reminderData))
 		} else {
-			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["error"])
+			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["warning"])
 		}
 	}
 	return "stay"
