@@ -134,6 +134,21 @@ func (note *Note) UpdateTags(tagIDs []int) error {
 	return nil
 }
 
+// update note's status
+func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
+	noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
+	if len(noteIDsWithRepeat) != 0 {
+		fmt.Printf("%v Update skipped as one of the associated tag is a \"repeat\" group tag \n", utils.Symbols["error"])
+	} else if note.Status != status {
+		note.Status = status
+		note.UpdatedAt = utils.CurrentUnixTimestamp()
+		fmt.Println("Updated the note")
+	} else {
+		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["error"])
+	}
+	return nil
+}
+
 // get display text of list of notes
 // width of each note is truncated to maxStrLen
 func (notes Notes) ExternalTexts(maxStrLen int) []string {
