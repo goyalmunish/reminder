@@ -174,10 +174,10 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	if tagIDs == nil {
 		tagIDs = []int{}
 	}
-	note, err  := FNewNote(tagIDs)
+	note, err := FNewNote(tagIDs)
 	// validate and save data
 	if err == nil {
-		err = reminderData.NewNoteAppend(note)
+		err = reminderData.newNoteAppend(note)
 	} else {
 		utils.PrintErrorIfPresent(err)
 		return note, err
@@ -186,7 +186,7 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 }
 
 // method to append a new note
-func (reminderData *ReminderData) NewNoteAppend(note *Note) error {
+func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 	fmt.Println("Note: ", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
 	reminderData.UpdateDataFile()
