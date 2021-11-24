@@ -7,8 +7,10 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -17,11 +19,12 @@ import (
 )
 
 type ReminderData struct {
-	User      *User  `json:"user"`
-	Notes     Notes  `json:"notes"`
-	Tags      Tags   `json:"tags"`
-	DataFile  string `json:"data_file"`
-	UpdatedAt int64  `json:"updated_at"`
+	User         *User  `json:"user"`
+	Notes        Notes  `json:"notes"`
+	Tags         Tags   `json:"tags"`
+	DataFile     string `json:"data_file"`
+	LastBackupAt int64  `json:"last_backup_at"`
+	UpdatedAt    int64  `json:"updated_at"`
 }
 
 // methods
@@ -153,14 +156,14 @@ func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	return tagID, err
 }
 
-// get next possible tagID
+// (private) get next possible tagID
 func (reminderData *ReminderData) nextPossibleTagId() int {
 	allTags := reminderData.Tags
 	allTagsLen := len(allTags)
 	return allTagsLen
 }
 
-// append a new tag
+// (private) append a new tag
 func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 	// check if tag's slug is already present
 	isNewSlug := true
@@ -197,12 +200,70 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	return note, nil
 }
 
-// append a new note
+// (private) append a new note
 func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 	fmt.Printf("Added Note: %v\n", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
 	reminderData.UpdateDataFile()
 	return nil
+}
+
+// return current status
+func (reminderData *ReminderData) Stats() string {
+	var stats []string
+	if len(reminderData.Tags) > 0 {
+		stats = append(stats, fmt.Sprintf("\nStats of %q\n", reminderData.DataFile))
+		stats = append(stats, fmt.Sprintf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags)))
+		stats = append(stats, fmt.Sprintf("%4vPending Notes: %v/%v\n", "- ", len(reminderData.Notes.WithStatus("pending")), len(reminderData.Notes)))
+	}
+	stats_str := ""
+	for _, elem := range stats {
+		stats_str += elem
+	}
+	return stats_str
+}
+
+// create timestamped backup
+func (reminderData *ReminderData) CreateBackup() string {
+	// get backup file name
+	ext := path.Ext(reminderData.DataFile)
+	dstFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + ext
+	lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
+	fmt.Printf("Creating backup at %q\n", dstFile)
+	// create backup
+	byteValue, err := ioutil.ReadFile(reminderData.DataFile)
+	utils.PrintErrorIfPresent(err)
+	err = ioutil.WriteFile(dstFile, byteValue, 0644)
+	utils.PrintErrorIfPresent(err)
+	// create alias of latest backup
+	fmt.Printf("Creating synlink at %q\n", lnFile)
+	executable, _ := exec.LookPath("ln")
+	cmd := &exec.Cmd{
+		Path:   executable,
+		Args:   []string{executable, "-f", dstFile, lnFile},
+		Stdout: os.Stdout,
+		Stdin:  os.Stdin,
+	}
+	err = cmd.Run()
+	utils.PrintErrorIfPresent(err)
+	return dstFile
+}
+
+// auto backup
+func (reminderData *ReminderData) AutoBackup(gapSecs int64) string {
+	var dstFile string
+	currentTime := utils.CurrentUnixTimestamp()
+	lastBackup := reminderData.LastBackupAt
+	gap := currentTime - lastBackup
+	fmt.Printf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs)
+	if gap >= gapSecs {
+		dstFile = reminderData.CreateBackup()
+		reminderData.LastBackupAt = currentTime
+		reminderData.UpdateDataFile()
+	} else {
+		fmt.Printf("Skipping automatic backup\n")
+	}
+	return dstFile
 }
 
 // method (recursive) to ask tagIDs that are to be associated with a note
@@ -348,20 +409,6 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		}
 	}
 	return nil
-}
-
-func (reminderData *ReminderData) Stats() string {
-	var stats []string
-	if len(reminderData.Tags) > 0 {
-		stats = append(stats, fmt.Sprintf("\nStats of %q\n", reminderData.DataFile))
-		stats = append(stats, fmt.Sprintf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags)))
-		stats = append(stats, fmt.Sprintf("%4vPending Notes: %v/%v\n", "- ", len(reminderData.Notes.WithStatus("pending")), len(reminderData.Notes)))
-	}
-	stats_str := ""
-	for _, elem := range stats {
-		stats_str += elem
-	}
-	return stats_str
 }
 
 // functions
