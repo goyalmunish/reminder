@@ -7,8 +7,10 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -218,6 +220,32 @@ func (reminderData *ReminderData) Stats() string {
 		stats_str += elem
 	}
 	return stats_str
+}
+
+// create timestamped backup
+func (reminderData *ReminderData) CreateBackup() string {
+	// get backup file name
+	ext := path.Ext(reminderData.DataFile)
+	dstFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + ext
+	lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
+	fmt.Printf("Creating backup at %q\n", dstFile)
+	// create backup
+	byteValue, err := ioutil.ReadFile(reminderData.DataFile)
+	utils.PrintErrorIfPresent(err)
+	err = ioutil.WriteFile(dstFile, byteValue, 0644)
+	utils.PrintErrorIfPresent(err)
+	// create alias of latest backup
+	fmt.Printf("Creating synlink at %q\n", lnFile)
+	executable, _ := exec.LookPath("ln")
+	cmd := &exec.Cmd{
+		Path:   executable,
+		Args:   []string{executable, "-f", dstFile, lnFile},
+		Stdout: os.Stdout,
+		Stdin:  os.Stdin,
+	}
+	err = cmd.Run()
+	utils.PrintErrorIfPresent(err)
+	return dstFile
 }
 
 // method (recursive) to ask tagIDs that are to be associated with a note

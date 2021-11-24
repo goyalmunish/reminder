@@ -2,11 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"os/exec"
 	"path"
-	"strconv"
 	"strings"
 	"time"
 
@@ -159,27 +155,7 @@ func flow() {
 			reminderData.PrintNoteAndAskOptions(note)
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
-		// get backup file name
-		ext := path.Ext(reminderData.DataFile)
-		dstFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + ext
-		lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
-		fmt.Printf("Creating backup at %q\n", dstFile)
-		// create backup
-		byteValue, err := ioutil.ReadFile(reminderData.DataFile)
-		utils.PrintErrorIfPresent(err)
-		err = ioutil.WriteFile(dstFile, byteValue, 0644)
-		utils.PrintErrorIfPresent(err)
-		// create alias of latest backup
-		fmt.Printf("Creating synlink at %q\n", lnFile)
-		executable, _ := exec.LookPath("ln")
-		cmd := &exec.Cmd{
-			Path:   executable,
-			Args:   []string{executable, "-f", dstFile, lnFile},
-			Stdout: os.Stdout,
-			Stdin:  os.Stdin,
-		}
-		err = cmd.Run()
-		utils.PrintErrorIfPresent(err)
+		reminderData.CreateBackup()
 	case fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File"):
 		fmt.Printf("Printing contents (and if possible, its difference since last backup) of %q:\n", reminderData.DataFile)
 		ext := path.Ext(reminderData.DataFile)
