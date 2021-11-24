@@ -19,11 +19,12 @@ import (
 )
 
 type ReminderData struct {
-	User      *User  `json:"user"`
-	Notes     Notes  `json:"notes"`
-	Tags      Tags   `json:"tags"`
-	DataFile  string `json:"data_file"`
-	UpdatedAt int64  `json:"updated_at"`
+	User         *User  `json:"user"`
+	Notes        Notes  `json:"notes"`
+	Tags         Tags   `json:"tags"`
+	DataFile     string `json:"data_file"`
+	LastBackupAt int64  `json:"last_backup_at"`
+	UpdatedAt    int64  `json:"updated_at"`
 }
 
 // methods
@@ -246,6 +247,11 @@ func (reminderData *ReminderData) CreateBackup() string {
 	err = cmd.Run()
 	utils.PrintErrorIfPresent(err)
 	return dstFile
+}
+
+// auto backup
+func (reminderData *ReminderData) AutoBackup() string {
+	return ""
 }
 
 // method (recursive) to ask tagIDs that are to be associated with a note
