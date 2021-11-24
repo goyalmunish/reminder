@@ -62,8 +62,7 @@ func flow() {
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Note"):
 		tagIDs := reminderData.AskTagIds([]int{})
-		note := models.FNewNote(tagIDs)
-		reminderData.NewNoteAppend(note)
+		_, _ = reminderData.NewNoteRegistration(tagIDs)
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Tag"):
 		_, _ = reminderData.NewTagRegistration()
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):

@@ -162,20 +162,31 @@ func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 		return errors.New("Tag Already Exists")
 	}
 	// go ahead and append
-	fmt.Println("Tag: ", *tag)
+	fmt.Printf("Created Tag: %v\n", *tag)
 	reminderData.Tags = append(reminderData.Tags, tag)
 	reminderData.UpdateDataFile()
 	return nil
 }
 
+// register new note
+func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
+	// collect info about the note
+	if tagIDs == nil {
+		tagIDs = []int{}
+	}
+	note, err  := FNewNote(tagIDs)
+	// validate and save data
+	if err == nil {
+		err = reminderData.NewNoteAppend(note)
+	} else {
+		utils.PrintErrorIfPresent(err)
+		return note, err
+	}
+	return note, nil
+}
+
 // method to append a new note
 func (reminderData *ReminderData) NewNoteAppend(note *Note) error {
-	// validations
-	if len(utils.TrimString(note.Text)) == 0 {
-		fmt.Printf("%v Skipping adding note with empty text\n", utils.Symbols["error"])
-		return errors.New("Note's text is empty")
-	}
-	// go ahead and append
 	fmt.Println("Note: ", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
 	reminderData.UpdateDataFile()
@@ -321,8 +332,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	if noteIndex == len(texts) {
 		// add new note
 		if tagID >= 0 {
-			note := FNewNote([]int{tagID})
-			err := reminderData.NewNoteAppend(note)
+			note, err := reminderData.NewNoteRegistration([]int{tagID})
 			if err == nil {
 				var updatedNotes Notes
 				updatedNotes = append(updatedNotes, note)
