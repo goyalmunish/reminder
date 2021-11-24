@@ -127,7 +127,7 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 }
 
 // register a new tag
-func (reminderData *ReminderData) NewTagRegistration() (error, int) {
+func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	// collect and ask info about the tag
 	tagID := reminderData.nextPossibleTagId()
 	tag, err := FNewTag(tagID)
@@ -136,9 +136,9 @@ func (reminderData *ReminderData) NewTagRegistration() (error, int) {
 		err, _ = reminderData.newTagAppend(tag), tagID
 	} else {
 		utils.PrintErrorIfPresent(err)
-		return err, 0
+		return 0, err
 	}
-	return err, tagID
+	return tagID, err
 }
 
 // get next possible tagID
@@ -222,7 +222,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	// get tagID
 	if optionIndex == len(reminderData.SortedTagSlugs()) {
 		// add new tag
-		err, tagID = reminderData.NewTagRegistration()
+		tagID, err = reminderData.NewTagRegistration()
 	} else {
 		// existing tag selected
 		tagID = reminderData.Tags[optionIndex].Id
