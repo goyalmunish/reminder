@@ -194,21 +194,29 @@ func fPrintNoteField(fieldName string, fieldValue interface{}) string {
 }
 
 // prompt for new Note
-func FNewNote(tagIDs []int) *Note {
-	prompt := promptui.Prompt{
-		Label:    "Note Text",
-		Validate: utils.ValidateNonEmptyString,
-	}
-	noteText, err := prompt.Run()
-	utils.PrintErrorIfPresent(err)
-	noteText = utils.TrimString(noteText)
-	return &Note{
-		Text:       noteText,
+func FNewNote(tagIDs []int) (*Note, error) {
+	note := &Note{
 		Comments:   *new([]string),
 		Status:     "pending",
 		CompleteBy: 0,
 		TagIds:     tagIDs,
 		CreatedAt:  utils.CurrentUnixTimestamp(),
 		UpdatedAt:  utils.CurrentUnixTimestamp(),
+		// Text:       noteText,
 	}
+	prompt := promptui.Prompt{
+		Label:    "Note Text",
+		Validate: utils.ValidateNonEmptyString,
+	}
+	noteText, err := prompt.Run()
+	note.Text = utils.TrimString(noteText)
+	if err != nil || strings.Contains(note.Text, "^C") {
+		return note, err
+	}
+	if len(utils.TrimString(note.Text)) == 0 {
+		// this should never be encountered because of validation in earlier step
+		fmt.Printf("%v Skipping adding note with empty text\n", utils.Symbols["error"])
+		return note, errors.New("Note's text is empty")
+	}
+	return note, nil
 }
