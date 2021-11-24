@@ -2,6 +2,7 @@ package utils
 
 var Symbols = map[string]string{
 	"error":        "❌",
+	"warning":      "⚠️ ",
 	"noAction":     "❎",
 	"home":         "⛺",
 	"upVote":       "👍",

@@ -113,6 +113,18 @@ func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error
 	return err
 }
 
+// update note's status
+func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) error {
+	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
+	err := note.UpdateStatus(status, repeatTagIDs)
+	if err == nil {
+		reminderData.UpdateDataFile()
+		fmt.Println("Updated the data file")
+		return nil
+	}
+	return err
+}
+
 // register basic tags
 func (reminderData *ReminderData) RegisterBasicTags() {
 	if len(reminderData.Tags) == 0 {
@@ -193,22 +205,6 @@ func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 	return nil
 }
 
-// method to update note status
-func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) {
-	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
-	noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
-	if len(noteIDsWithRepeat) != 0 {
-		fmt.Printf("%v Update skipped as one of the associated tag is a \"repeat\" group tag \n", utils.Symbols["error"])
-	} else if note.Status != status {
-		note.Status = status
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the note")
-	} else {
-		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["error"])
-	}
-}
-
 // method (recursive) to ask tagIDs that are to be associated with a note
 // it also registers tags for you, if user asks
 func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
@@ -272,10 +268,10 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
 		return "main-menu"
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
-		reminderData.UpdateNoteStatus(note, "done")
+		_ = reminderData.UpdateNoteStatus(note, "done")
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"):
-		reminderData.UpdateNoteStatus(note, "pending")
+		_ = reminderData.UpdateNoteStatus(note, "pending")
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
 		prompt := promptui.Prompt{

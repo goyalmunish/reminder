@@ -351,6 +351,24 @@ func TestUpdateTags(t *testing.T) {
 	utils.AssertEqual(t, note1.TagIds, tagIds)
 }
 
+func TestUpdateStatus(t *testing.T) {
+	// create notes
+	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	// update TagIds
+	// case 1
+	err := note1.UpdateStatus("done", []int{1, 2, 3})
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, note1.Status, "pending")
+	// case 2
+	err = note1.UpdateStatus("done", []int{5, 6, 7})
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, note1.Status, "done")
+	// case 3
+	err = note1.UpdateStatus("pending", []int{5, 6, 7})
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, note1.Status, "pending")
+}
+
 func TestFMakeSureFileExists(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
