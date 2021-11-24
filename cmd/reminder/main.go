@@ -45,12 +45,12 @@ func flow() {
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
 		var allTagSlugsWithEmoji []string
-		for _, tagSlug := range reminderData.TagSlugs() {
+		for _, tagSlug := range reminderData.SortedTagSlugs() {
 			allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["tag"], tagSlug))
 		}
 		tagIndex, _ := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 		if tagIndex != -1 {
-			if tagIndex == len(reminderData.TagSlugs()) {
+			if tagIndex == len(reminderData.SortedTagSlugs()) {
 				// add new tag
 				reminderData.NewTagRegistration()
 			} else {

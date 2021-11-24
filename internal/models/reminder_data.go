@@ -26,9 +26,11 @@ type ReminderData struct {
 
 // methods
 
-// method to update data file
+// update data file
 func (reminderData *ReminderData) UpdateDataFile() error {
 	// update updated_at field
+	// note that updated_at of a whole remider_data object is different
+	// from corresponding field of each note
 	reminderData.UpdatedAt = utils.CurrentUnixTimestamp()
 	// marshal the data
 	byteValue, err := json.MarshalIndent(&reminderData, "", "    ")
@@ -39,46 +41,35 @@ func (reminderData *ReminderData) UpdateDataFile() error {
 	return err
 }
 
-// method to get slugs of all tags
-func (reminderData *ReminderData) TagSlugs() []string {
+// sort tags in-place and return slugs
+func (reminderData *ReminderData) SortedTagSlugs() []string {
 	// sort tags in place
 	sort.Sort(reminderData.Tags)
 	// fetch slugs and return
 	return reminderData.Tags.Slugs()
 }
 
-// method to get tag with given slug
+// get tag with given slug
 func (reminderData *ReminderData) TagFromSlug(slug string) *Tag {
 	return reminderData.Tags.FromSlug(slug)
 }
 
-// method to get tags from tagIDs
+// get tags from tagIDs
 func (reminderData *ReminderData) TagsFromIds(tagIDs []int) Tags {
 	return reminderData.Tags.FromIds(tagIDs)
 }
 
-// method to get tag ids for given group
+// get tag ids for given group
 func (reminderData *ReminderData) TagIdsForGroup(group string) []int {
 	return reminderData.Tags.IdsForGroup(group)
 }
 
-// method to get all notes with given tagID and given status
+// get all notes with given tagID and given status
 func (reminderData *ReminderData) FindNotes(tagID int, status string) Notes {
 	return reminderData.Notes.WithTagIdAndStatus(tagID, status)
 }
 
-// method to add note's comment
-func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error {
-	err := note.AddComment(text)
-	if err == nil {
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the data file")
-		return nil
-	}
-	return err
-}
-
-// method to update note's text
+// update note's text
 func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
 	err := note.UpdateText(text)
 	if err == nil {
@@ -89,7 +80,7 @@ func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
 	return err
 }
 
-// method to update note's due date (complete by)
+// update note's due date (complete by)
 func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
 	err := note.UpdateCompleteBy(text)
 	if err == nil {
@@ -100,7 +91,18 @@ func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) 
 	return err
 }
 
-// method to update note's tags
+// add note's comment
+func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error {
+	err := note.AddComment(text)
+	if err == nil {
+		reminderData.UpdateDataFile()
+		fmt.Println("Updated the data file")
+		return nil
+	}
+	return err
+}
+
+// update note's tags
 func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error {
 	err := note.UpdateTags(tagIDs)
 	if err == nil {
@@ -111,14 +113,7 @@ func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error
 	return err
 }
 
-// method to get next possible tagID
-func (reminderData *ReminderData) NextPossibleTagId() int {
-	allTags := reminderData.Tags
-	allTagsLen := len(allTags)
-	return allTagsLen
-}
-
-// method to register basic tags
+// register basic tags
 func (reminderData *ReminderData) RegisterBasicTags() {
 	if len(reminderData.Tags) == 0 {
 		fmt.Println("Adding tags:")
@@ -131,12 +126,46 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 	}
 }
 
-// method to register a new tag
+// register a new tag
 func (reminderData *ReminderData) NewTagRegistration() (error, int) {
-	// create a tag object
-	tagID := reminderData.NextPossibleTagId()
+	// collect and ask info about the tag
+	tagID := reminderData.nextPossibleTagId()
 	tag := FNewTag(tagID)
+	// validate and save data
 	return reminderData.newTagAppend(tag), tagID
+}
+
+// get next possible tagID
+func (reminderData *ReminderData) nextPossibleTagId() int {
+	allTags := reminderData.Tags
+	allTagsLen := len(allTags)
+	return allTagsLen
+}
+
+// method to append a new tag
+func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
+	// validations
+	// check if tag's slug is empty
+	if len(utils.TrimString(tag.Slug)) == 0 {
+		fmt.Printf("%v Skipping adding tag with empty slug\n", utils.Symbols["error"])
+		return errors.New("Tag's slug is empty")
+	}
+	// check if tag's slug is already present
+	isNewSlug := true
+	for _, existingTag := range reminderData.Tags {
+		if existingTag.Slug == tag.Slug {
+			isNewSlug = false
+		}
+	}
+	if !isNewSlug {
+		fmt.Printf("%v The tag already exists!\n", utils.Symbols["error"])
+		return errors.New("Tag Already Exists")
+	}
+	// go ahead and append
+	fmt.Println("Tag: ", *tag)
+	reminderData.Tags = append(reminderData.Tags, tag)
+	reminderData.UpdateDataFile()
+	return nil
 }
 
 // method to append a new note
@@ -174,15 +203,13 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) {
 func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	var err error
 	var tagID int
-	// make sure reminderData.Tags is sorted
-	sort.Sort(reminderData.Tags)
 	// ask user to select tag
-	optionIndex, _ := utils.AskOption(append(reminderData.TagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+	optionIndex, _ := utils.AskOption(append(reminderData.SortedTagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 	if optionIndex == -1 {
 		return []int{}
 	}
 	// get tagID
-	if optionIndex == len(reminderData.TagSlugs()) {
+	if optionIndex == len(reminderData.SortedTagSlugs()) {
 		// add new tag
 		err, tagID = reminderData.NewTagRegistration()
 	} else {
@@ -329,32 +356,6 @@ func (reminderData *ReminderData) Stats() string {
 		stats_str += elem
 	}
 	return stats_str
-}
-
-// method to append a new tag
-func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
-	// validations
-	// check if tag's slug is empty
-	if len(utils.TrimString(tag.Slug)) == 0 {
-		fmt.Printf("%v Skipping adding tag with empty slug\n", utils.Symbols["error"])
-		return errors.New("Tag's slug is empty")
-	}
-	// check if tag's slug is already present
-	isNewSlug := true
-	for _, existingTag := range reminderData.Tags {
-		if existingTag.Slug == tag.Slug {
-			isNewSlug = false
-		}
-	}
-	if !isNewSlug {
-		fmt.Printf("%v The tag already exists!\n", utils.Symbols["error"])
-		return errors.New("Tag Already Exists")
-	}
-	// go ahead and append
-	fmt.Println("Tag: ", *tag)
-	reminderData.Tags = append(reminderData.Tags, tag)
-	reminderData.UpdateDataFile()
-	return nil
 }
 
 // functions

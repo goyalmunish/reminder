@@ -407,7 +407,7 @@ func TestUpdateDataFile(t *testing.T) {
 	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)
 }
 
-func TestTagsSlug(t *testing.T) {
+func TestSortedTagsSlug(t *testing.T) {
 	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
 		Notes: []*models.Note{},
@@ -420,7 +420,7 @@ func TestTagsSlug(t *testing.T) {
 	tags = append(tags, &models.Tag{Id: 3, Slug: "c", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 4, Slug: "b", Group: "tag_group2"})
 	reminderData.Tags = tags
-	gotSlugs := reminderData.TagSlugs()
+	gotSlugs := reminderData.SortedTagSlugs()
 	wantSlugs := []string{"a", "b", "c", "z"}
 	utils.AssertEqual(t, gotSlugs, wantSlugs)
 }
@@ -509,6 +509,7 @@ func TestTagIdsForGroup(t *testing.T) {
 	utils.AssertEqual(t, reminderData.TagIdsForGroup("tag_group_NO"), []int{})
 }
 
+/*
 func TestNextPossibleTagId(t *testing.T) {
 	reminderData := models.ReminderData{
 		User:  &models.User{Name: "Test User", EmailId: "user@test.com"},
@@ -526,8 +527,9 @@ func TestNextPossibleTagId(t *testing.T) {
 	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
 	tags = append(tags, &tag4)
 	reminderData.Tags = tags
-	utils.AssertEqual(t, reminderData.NextPossibleTagId(), 4)
+	utils.AssertEqual(t, reminderData.nextPossibleTagId(), 4)
 }
+*/
 
 func TestFindNotes(t *testing.T) {
 	reminderData := models.ReminderData{
