@@ -250,8 +250,20 @@ func (reminderData *ReminderData) CreateBackup() string {
 }
 
 // auto backup
-func (reminderData *ReminderData) AutoBackup() string {
-	return ""
+func (reminderData *ReminderData) AutoBackup(gapSecs int64) string {
+	var dstFile string
+	currentTime := utils.CurrentUnixTimestamp()
+	lastBackup := reminderData.LastBackupAt
+	gap := currentTime - lastBackup
+	fmt.Printf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs)
+	if gap >= gapSecs {
+		dstFile = reminderData.CreateBackup()
+		reminderData.LastBackupAt = currentTime
+		reminderData.UpdateDataFile()
+	} else {
+		fmt.Printf("Skipping automatic backup\n")
+	}
+	return dstFile
 }
 
 // method (recursive) to ask tagIDs that are to be associated with a note

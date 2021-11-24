@@ -21,6 +21,8 @@ func flow() {
 	reminderData := *models.FReadDataFile(defaultDataFilePath)
 	// print data stats
 	fmt.Println(reminderData.Stats())
+	// try automatic backup
+	reminderData.AutoBackup(24 * 60 * 60)
 	// TEST CODE STARTS ---->
 	// TEST CODE ENDS ------>
 	// ask the main menu
