@@ -130,9 +130,15 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 func (reminderData *ReminderData) NewTagRegistration() (error, int) {
 	// collect and ask info about the tag
 	tagID := reminderData.nextPossibleTagId()
-	tag := FNewTag(tagID)
+	tag, err := FNewTag(tagID)
 	// validate and save data
-	return reminderData.newTagAppend(tag), tagID
+	if err == nil {
+		err, _ = reminderData.newTagAppend(tag), tagID
+	} else {
+		utils.PrintErrorIfPresent(err)
+		return err, 0
+	}
+	return err, tagID
 }
 
 // get next possible tagID
@@ -144,12 +150,6 @@ func (reminderData *ReminderData) nextPossibleTagId() int {
 
 // method to append a new tag
 func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
-	// validations
-	// check if tag's slug is empty
-	if len(utils.TrimString(tag.Slug)) == 0 {
-		fmt.Printf("%v Skipping adding tag with empty slug\n", utils.Symbols["error"])
-		return errors.New("Tag's slug is empty")
-	}
 	// check if tag's slug is already present
 	isNewSlug := true
 	for _, existingTag := range reminderData.Tags {
