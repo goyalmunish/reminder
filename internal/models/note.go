@@ -211,7 +211,6 @@ func FNewNote(tagIDs []int) (*Note, error) {
 	noteText, err := prompt.Run()
 	note.Text = utils.TrimString(noteText)
 	if err != nil || strings.Contains(note.Text, "^C") {
-		// utils.PrintErrorIfPresent(err)
 		return note, err
 	}
 	if len(utils.TrimString(note.Text)) == 0 {

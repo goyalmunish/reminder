@@ -148,7 +148,7 @@ func (reminderData *ReminderData) nextPossibleTagId() int {
 	return allTagsLen
 }
 
-// method to append a new tag
+// append a new tag
 func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 	// check if tag's slug is already present
 	isNewSlug := true
@@ -162,7 +162,7 @@ func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 		return errors.New("Tag Already Exists")
 	}
 	// go ahead and append
-	fmt.Printf("Created Tag: %v\n", *tag)
+	fmt.Printf("Added Tag: %v\n", *tag)
 	reminderData.Tags = append(reminderData.Tags, tag)
 	reminderData.UpdateDataFile()
 	return nil
@@ -185,9 +185,9 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	return note, nil
 }
 
-// method to append a new note
+// append a new note
 func (reminderData *ReminderData) newNoteAppend(note *Note) error {
-	fmt.Println("Note: ", *note)
+	fmt.Printf("Added Note: %v\n", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
 	reminderData.UpdateDataFile()
 	return nil
