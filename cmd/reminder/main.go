@@ -52,7 +52,7 @@ func flow() {
 		if tagIndex != -1 {
 			if tagIndex == len(reminderData.SortedTagSlugs()) {
 				// add new tag
-				reminderData.NewTagRegistration()
+				_, _ = reminderData.NewTagRegistration()
 			} else {
 				tag := reminderData.Tags[tagIndex]
 				notes := reminderData.FindNotes(tag.Id, "pending")
@@ -65,7 +65,7 @@ func flow() {
 		note := models.FNewNote(tagIDs)
 		reminderData.NewNoteAppend(note)
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Tag"):
-		reminderData.NewTagRegistration()
+		_, _ = reminderData.NewTagRegistration()
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Pending Notes"):

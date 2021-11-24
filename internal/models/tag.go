@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -102,26 +103,42 @@ func FBasicTags() Tags {
 }
 
 // prompt for new Tag
-func FNewTag(tagID int) *Tag {
+func FNewTag(tagID int) (*Tag, error) {
+	tag := &Tag{
+		Id:        tagID,
+		CreatedAt: utils.CurrentUnixTimestamp(),
+		UpdatedAt: utils.CurrentUnixTimestamp(),
+		// Slug:      tagSlug,
+		// Group:     tagGroup,
+	}
+	// ask for tag slug
 	prompt := promptui.Prompt{
 		Label:    "Tag Slug",
 		Validate: utils.ValidateNonEmptyString,
 	}
 	tagSlug, err := prompt.Run()
-	utils.PrintErrorIfPresent(err)
-	tagSlug = strings.ToLower(tagSlug)
+	tag.Slug = utils.TrimString(tagSlug)
+	tag.Slug = strings.ToLower(tag.Slug)
+	// in case of error or Ctrl-c as input, don't create the tag
+	if err != nil || strings.Contains(tag.Slug, "^C") {
+		return tag, err
+	}
+	if len(utils.TrimString(tag.Slug)) == 0 {
+		// this should never be encountered because of validation in earlier step
+		fmt.Printf("%v Skipping adding tag with empty slug\n", utils.Symbols["error"])
+		err := errors.New("Tag's slug is empty")
+		return tag, err
+	}
 	prompt = promptui.Prompt{
 		Label:    "Tag Group",
 		Validate: utils.ValidateString,
 	}
+	// ask for tag's group
 	tagGroup, err := prompt.Run()
-	tagGroup = strings.ToLower(tagGroup)
-	utils.PrintErrorIfPresent(err)
-	return &Tag{
-		Id:        tagID,
-		Slug:      tagSlug,
-		Group:     tagGroup,
-		CreatedAt: utils.CurrentUnixTimestamp(),
-		UpdatedAt: utils.CurrentUnixTimestamp(),
+	if err != nil {
+		return tag, err
 	}
+	tag.Group = strings.ToLower(tagGroup)
+	// return successful tag
+	return tag, nil
 }
