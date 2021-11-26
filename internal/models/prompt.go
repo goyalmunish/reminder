@@ -62,3 +62,14 @@ func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
 	}
 	return prompt
 }
+
+func GenerateNoteSearchSelect(items []string, searchFunc func(string, int) bool) *promptui.Select {
+	prompt := &promptui.Select{
+		Label:             "Notes",
+		Items:             items,
+		Size:              25,
+		StartInSearchMode: true,
+		Searcher:          searchFunc,
+	}
+	return prompt
+}
