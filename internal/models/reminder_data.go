@@ -348,7 +348,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		reminderData.AddNoteComment(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
-		promptNoteTextWithDefault := GeneratePrompt("note_text_with_default", note.Text)
+		promptNoteTextWithDefault := GeneratePrompt("note_text", note.Text)
 		promptText, err := promptNoteTextWithDefault.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpateNoteText(note, promptText)

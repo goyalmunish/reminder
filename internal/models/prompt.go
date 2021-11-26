@@ -16,47 +16,49 @@ func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
 	case "user_name":
 		prompt = &promptui.Prompt{
 			Label:    "User Name",
+			Default:  defaultText,
 			Validate: utils.ValidateNonEmptyString,
 		}
 	case "user_email":
 		prompt = &promptui.Prompt{
 			Label:    "User Email",
+			Default:  defaultText,
 			Validate: utils.ValidateNonEmptyString,
 		}
 	case "tag_slug":
 		prompt = &promptui.Prompt{
 			Label:    "Tag Slug",
+			Default:  defaultText,
 			Validate: utils.ValidateNonEmptyString,
 		}
 	case "tag_group":
 		prompt = &promptui.Prompt{
 			Label:    "Tag Group",
+			Default:  defaultText,
 			Validate: utils.ValidateString,
 		}
 	case "tag_another":
 		prompt = &promptui.Prompt{
 			Label:    "Add another tag: yes/no (default: no):",
+			Default:  defaultText,
 			Validate: utils.ValidateString,
 		}
 	case "note_text":
 		prompt = &promptui.Prompt{
 			Label:    "Note Text",
-			Validate: utils.ValidateNonEmptyString,
-		}
-	case "note_text_with_default":
-		prompt = &promptui.Prompt{
-			Label:    "New Text",
 			Default:  defaultText,
 			Validate: utils.ValidateNonEmptyString,
 		}
 	case "note_comment":
 		prompt = &promptui.Prompt{
 			Label:    "New Comment",
+			Default:  defaultText,
 			Validate: utils.ValidateNonEmptyString,
 		}
 	case "note_completed_by":
 		prompt = &promptui.Prompt{
 			Label:    "Due Date (format: YYYY-MM-DD), or enter nil to clear existing value",
+			Default:  defaultText,
 			Validate: utils.ValidateDateString,
 		}
 	}
