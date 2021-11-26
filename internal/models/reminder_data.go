@@ -13,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/manifoldco/promptui"
-
 	"reminder/pkg/utils"
 )
 
@@ -146,15 +144,8 @@ func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	// collect and ask info about the tag
 	tagID := reminderData.nextPossibleTagId()
 
-	var promptTagSlug = &promptui.Prompt{
-		Label:    "Tag Slug",
-		Validate: utils.ValidateNonEmptyString,
-	}
-
-	var promptTagGroup = &promptui.Prompt{
-		Label:    "Tag Group",
-		Validate: utils.ValidateString,
-	}
+	promptTagSlug := GeneratePrompt("tag_slug", "")
+	promptTagGroup := GeneratePrompt("tag_group", "")
 
 	tag, err := FNewTag(tagID, promptTagSlug, promptTagGroup)
 
@@ -201,10 +192,7 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	if tagIDs == nil {
 		tagIDs = []int{}
 	}
-	promptNoteText := &promptui.Prompt{
-		Label:    "Note Text",
-		Validate: utils.ValidateNonEmptyString,
-	}
+	promptNoteText := GeneratePrompt("note_text", "")
 	note, err := FNewNote(tagIDs, promptNoteText)
 	// validate and save data
 	if err == nil {
@@ -306,11 +294,8 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 		tagIDs = append(tagIDs, tagID)
 	}
 	// check with user if another tag is to be added
-	prompt := promptui.Prompt{
-		Label:    "Add another tag: yes/no (default: no):",
-		Validate: utils.ValidateString,
-	}
-	promptText, err := prompt.Run()
+	promtTagAnother := GeneratePrompt("tag_another", "")
+	promptText, err := promtTagAnother.Run()
 	utils.PrintErrorIfPresent(err)
 	promptText = strings.ToLower(promptText)
 	nextTag := false
@@ -351,30 +336,20 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		_ = reminderData.UpdateNoteStatus(note, "pending")
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
-		prompt := promptui.Prompt{
-			Label:    "Due Date (format: YYYY-MM-DD), or enter nil to clear existing value",
-			Validate: utils.ValidateDateString,
-		}
-		promptText, err := prompt.Run()
+		promptCompleteBy := GeneratePrompt("note_completed_by", "")
+		promptText, err := promptCompleteBy.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpdateNoteCompleteBy(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
-		prompt := promptui.Prompt{
-			Label:    "New Comment",
-			Validate: utils.ValidateNonEmptyString,
-		}
-		promptText, err := prompt.Run()
+		promptCommment := GeneratePrompt("note_comment", "")
+		promptText, err := promptCommment.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.AddNoteComment(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
-		prompt := promptui.Prompt{
-			Label:    "New Text",
-			Default:  note.Text,
-			Validate: utils.ValidateNonEmptyString,
-		}
-		promptText, err := prompt.Run()
+		promptNoteTextWithDefault := GeneratePrompt("note_text", note.Text)
+		promptText, err := promptNoteTextWithDefault.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpateNoteText(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
@@ -453,17 +428,11 @@ func FMakeSureFileExists(dataFilePath string) {
 // function to create blank ReminderData object
 func FBlankReminder() *ReminderData {
 	fmt.Println("Initializing the data file. Please provide following data.")
-	prompt := promptui.Prompt{
-		Label:    "User Name",
-		Validate: utils.ValidateNonEmptyString,
-	}
-	name, err := prompt.Run()
+	promptUserName := GeneratePrompt("user_name", "")
+	name, err := promptUserName.Run()
 	utils.PrintErrorIfPresent(err)
-	prompt = promptui.Prompt{
-		Label:    "User Email",
-		Validate: utils.ValidateNonEmptyString,
-	}
-	emailID, err := prompt.Run()
+	promptUserEmail := GeneratePrompt("user_email", "")
+	emailID, err := promptUserEmail.Run()
 	utils.PrintErrorIfPresent(err)
 	return &ReminderData{
 		User:     &User{Name: name, EmailId: emailID},

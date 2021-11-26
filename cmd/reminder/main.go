@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manifoldco/promptui"
-
 	"reminder/internal/models"
 	"reminder/pkg/utils"
 )
@@ -142,15 +140,9 @@ func flow() {
 			return false
 		}
 		// display prompt
-		prompt := promptui.Select{
-			Label:             "Notes",
-			Items:             utils.ChopStrings(allTexts, utils.TerminalWidth()-10),
-			Size:              25,
-			StartInSearchMode: true,
-			Searcher:          searchNotes,
-		}
+		promptNoteSelection := models.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
 		fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
-		index, _, err := prompt.Run()
+		index, _, err := promptNoteSelection.Run()
 		utils.PrintErrorIfPresent(err)
 		if index >= 0 {
 			note := allNotes[index]

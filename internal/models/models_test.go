@@ -659,9 +659,9 @@ func TestFNewNote(t *testing.T) {
 	tagIDs := []int{1, 3, 5}
 	note, _ := models.FNewNote(tagIDs, mockPromptNoteText)
 	want := &models.Note{
-		Text:   "a random note text",
-		TagIds: tagIDs,
-		Status: note.Status,
+		Text:      "a random note text",
+		TagIds:    tagIDs,
+		Status:    note.Status,
 		CreatedAt: note.CreatedAt,
 		UpdatedAt: note.UpdatedAt,
 	}
