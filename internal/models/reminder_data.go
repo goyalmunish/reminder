@@ -201,7 +201,11 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	if tagIDs == nil {
 		tagIDs = []int{}
 	}
-	note, err := FNewNote(tagIDs)
+	promptNoteText := &promptui.Prompt{
+		Label:    "Note Text",
+		Validate: utils.ValidateNonEmptyString,
+	}
+	note, err := FNewNote(tagIDs, promptNoteText)
 	// validate and save data
 	if err == nil {
 		err = reminderData.newNoteAppend(note)

@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manifoldco/promptui"
-
 	"reminder/pkg/utils"
 )
 
@@ -209,7 +207,7 @@ func fPrintNoteField(fieldName string, fieldValue interface{}) string {
 }
 
 // prompt for new Note
-func FNewNote(tagIDs []int) (*Note, error) {
+func FNewNote(tagIDs []int, promptNoteText PromptInf) (*Note, error) {
 	note := &Note{
 		Comments:   *new([]string),
 		Status:     "pending",
@@ -219,11 +217,7 @@ func FNewNote(tagIDs []int) (*Note, error) {
 		UpdatedAt:  utils.CurrentUnixTimestamp(),
 		// Text:       noteText,
 	}
-	prompt := promptui.Prompt{
-		Label:    "Note Text",
-		Validate: utils.ValidateNonEmptyString,
-	}
-	noteText, err := prompt.Run()
+	noteText, err := promptNoteText.Run()
 	note.Text = utils.TrimString(noteText)
 	if err != nil || strings.Contains(note.Text, "^C") {
 		return note, err

@@ -24,6 +24,8 @@ type MockPromptTagSlug struct {
 }
 type MockPromptTagGroup struct {
 }
+type MockPromptNoteText struct {
+}
 
 func (prompt *MockPromptTagSlug) Run() (string, error) {
 	return "test_tag_slug", nil
@@ -31,6 +33,10 @@ func (prompt *MockPromptTagSlug) Run() (string, error) {
 
 func (prompt *MockPromptTagGroup) Run() (string, error) {
 	return "test_tag_group", nil
+}
+
+func (prompt *MockPromptNoteText) Run() (string, error) {
+	return "a random note text", nil
 }
 
 // test examples
@@ -641,10 +647,23 @@ func TestFNewTag(t *testing.T) {
 	mockPromptTagSlug := &MockPromptTagSlug{}
 	mockPromptTagGroup := &MockPromptTagGroup{}
 	tag, _ := models.FNewTag(10, mockPromptTagSlug, mockPromptTagGroup)
-	want := models.Tag{
+	want := &models.Tag{
 		Id:    10,
 		Slug:  "test_tag_slug",
 		Group: "test_tag_group",
 	}
 	utils.AssertEqual(t, tag, want)
+}
+func TestFNewNote(t *testing.T) {
+	mockPromptNoteText := &MockPromptNoteText{}
+	tagIDs := []int{1, 3, 5}
+	note, _ := models.FNewNote(tagIDs, mockPromptNoteText)
+	want := &models.Note{
+		Text:   "a random note text",
+		TagIds: tagIDs,
+		Status: note.Status,
+		CreatedAt: note.CreatedAt,
+		UpdatedAt: note.UpdatedAt,
+	}
+	utils.AssertEqual(t, note, want)
 }
