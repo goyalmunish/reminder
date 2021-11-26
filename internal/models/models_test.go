@@ -643,6 +643,9 @@ Stats of "temp_test_dir/mydata.json"
 	utils.AssertEqual(t, got, want)
 }
 
+func TestNewTagRegistration(t *testing.T) {
+}
+
 func TestFNewTag(t *testing.T) {
 	mockPromptTagSlug := &MockPromptTagSlug{}
 	mockPromptTagGroup := &MockPromptTagGroup{}

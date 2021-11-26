@@ -140,12 +140,9 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 }
 
 // register a new tag
-func (reminderData *ReminderData) NewTagRegistration() (int, error) {
+func (reminderData *ReminderData) NewTagRegistration(promptTagSlug PromptInf, promptTagGroup PromptInf) (int, error) {
 	// collect and ask info about the tag
 	tagID := reminderData.nextPossibleTagId()
-
-	promptTagSlug := GeneratePrompt("tag_slug", "")
-	promptTagGroup := GeneratePrompt("tag_group", "")
 
 	tag, err := FNewTag(tagID, promptTagSlug, promptTagGroup)
 
@@ -272,7 +269,7 @@ func (reminderData *ReminderData) AutoBackup(gapSecs int64) string {
 
 // method (recursive) to ask tagIDs that are to be associated with a note
 // it also registers tags for you, if user asks
-func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
+func (reminderData *ReminderData) AskTagIds(tagIDs []int, promptTagSlug PromptInf, promptTagGroup PromptInf) []int {
 	var err error
 	var tagID int
 	// ask user to select tag
@@ -283,7 +280,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	// get tagID
 	if optionIndex == len(reminderData.SortedTagSlugs()) {
 		// add new tag
-		tagID, err = reminderData.NewTagRegistration()
+		tagID, err = reminderData.NewTagRegistration(promptTagSlug, promptTagGroup)
 	} else {
 		// existing tag selected
 		tagID = reminderData.Tags[optionIndex].Id
@@ -305,13 +302,13 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 		}
 	}
 	if nextTag {
-		return reminderData.AskTagIds(tagIDs)
+		return reminderData.AskTagIds(tagIDs, promptTagSlug, promptTagGroup)
 	}
 	return tagIDs
 }
 
 // method to print note and display options
-func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
+func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note, promptTagSlug PromptInf, promptTagGroup PromptInf) string {
 	fmt.Print(note.ExternalText(reminderData))
 	_, noteOption := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
@@ -354,7 +351,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		reminderData.UpateNoteText(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"):
-		tagIDs := reminderData.AskTagIds([]int{})
+		tagIDs := reminderData.AskTagIds([]int{}, promptTagSlug, promptTagGroup)
 		if len(tagIDs) > 0 {
 			reminderData.UpdateNoteTags(note, tagIDs)
 			fmt.Print(note.ExternalText(reminderData))
@@ -366,7 +363,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 }
 
 // method (recursively) to print notes interactively
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int) error {
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, promptTagSlug PromptInf, promptTagGroup PromptInf) error {
 	// sort notes
 	sort.Sort(Notes(notes))
 	texts := notes.ExternalTexts(utils.TerminalWidth() - 50)
@@ -385,7 +382,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 				var updatedNotes Notes
 				updatedNotes = append(updatedNotes, note)
 				updatedNotes = append(updatedNotes, notes...)
-				reminderData.PrintNotesAndAskOptions(updatedNotes, tagID)
+				reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, promptTagSlug, promptTagGroup)
 			}
 			utils.PrintErrorIfPresent(err)
 		} else {
@@ -394,9 +391,9 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	} else {
 		// ask options about select note
 		note := notes[noteIndex]
-		action := reminderData.PrintNoteAndAskOptions(note)
+		action := reminderData.PrintNoteAndAskOptions(note, promptTagSlug, promptTagGroup)
 		if action == "stay" {
-			reminderData.PrintNotesAndAskOptions(notes, tagID)
+			reminderData.PrintNotesAndAskOptions(notes, tagID, promptTagSlug, promptTagGroup)
 		}
 	}
 	return nil

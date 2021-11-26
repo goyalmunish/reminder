@@ -37,6 +37,8 @@ func flow() {
 		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"),
 		fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"),
 		fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File")}, "Select Option")
+	promptTagSlug := models.GeneratePrompt("tag_slug", "")
+	promptTagGroup := models.GeneratePrompt("tag_group", "")
 	// operate on main options
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
@@ -48,19 +50,19 @@ func flow() {
 		if tagIndex != -1 {
 			if tagIndex == len(reminderData.SortedTagSlugs()) {
 				// add new tag
-				_, _ = reminderData.NewTagRegistration()
+				_, _ = reminderData.NewTagRegistration(promptTagSlug, promptTagGroup)
 			} else {
 				tag := reminderData.Tags[tagIndex]
 				notes := reminderData.FindNotes(tag.Id, "pending")
-				err := reminderData.PrintNotesAndAskOptions(notes, tag.Id)
+				err := reminderData.PrintNotesAndAskOptions(notes, tag.Id, promptTagSlug, promptTagGroup)
 				utils.PrintErrorIfPresent(err)
 			}
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Note"):
-		tagIDs := reminderData.AskTagIds([]int{})
+		tagIDs := reminderData.AskTagIds([]int{}, promptTagSlug, promptTagGroup)
 		_, _ = reminderData.NewNoteRegistration(tagIDs)
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Tag"):
-		_, _ = reminderData.NewTagRegistration()
+		_, _ = reminderData.NewTagRegistration(promptTagSlug, promptTagGroup)
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Pending Notes"):
@@ -115,13 +117,13 @@ func flow() {
 		fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 		fmt.Println("  - within a week for repeat-annually and 2 days post due date (ignoring its year)")
 		fmt.Println("  - within 3 days for repeat-monthly and 2 days post due date (ignoring its year and month)")
-		err := reminderData.PrintNotesAndAskOptions(currentNotes, -1)
+		err := reminderData.PrintNotesAndAskOptions(currentNotes, -1, promptTagSlug, promptTagGroup)
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
 		allNotes := reminderData.Notes
 		doneNotes := allNotes.WithStatus("done")
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(doneNotes))
-		err := reminderData.PrintNotesAndAskOptions(doneNotes, -1)
+		err := reminderData.PrintNotesAndAskOptions(doneNotes, -1, promptTagSlug, promptTagGroup)
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
 		// get texts of all notes
@@ -146,7 +148,7 @@ func flow() {
 		utils.PrintErrorIfPresent(err)
 		if index >= 0 {
 			note := allNotes[index]
-			reminderData.PrintNoteAndAskOptions(note)
+			reminderData.PrintNoteAndAskOptions(note, promptTagSlug, promptTagGroup)
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
 		reminderData.CreateBackup()
