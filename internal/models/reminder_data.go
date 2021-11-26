@@ -145,7 +145,19 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	// collect and ask info about the tag
 	tagID := reminderData.nextPossibleTagId()
-	tag, err := FNewTag(tagID)
+
+	var promptTagSlug = &promptui.Prompt{
+		Label:    "Tag Slug",
+		Validate: utils.ValidateNonEmptyString,
+	}
+
+	var promptTagGroup = &promptui.Prompt{
+		Label:    "Tag Group",
+		Validate: utils.ValidateString,
+	}
+
+	tag, err := FNewTag(tagID, promptTagSlug, promptTagGroup)
+
 	// validate and save data
 	if err == nil {
 		err, _ = reminderData.newTagAppend(tag), tagID

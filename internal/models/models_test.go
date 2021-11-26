@@ -18,6 +18,23 @@ import (
 	utils "reminder/pkg/utils"
 )
 
+// mocks
+
+type MockPromptTagSlug struct {
+}
+type MockPromptTagGroup struct {
+}
+
+func (prompt *MockPromptTagSlug) Run() (string, error) {
+	return "test_tag_slug", nil
+}
+
+func (prompt *MockPromptTagGroup) Run() (string, error) {
+	return "test_tag_group", nil
+}
+
+// test examples
+
 func TestDataFile(t *testing.T) {
 	defaultDataFilePath := models.FDefaultDataFile()
 	utils.AssertEqual(t, strings.HasPrefix(defaultDataFilePath, "/"), true)
@@ -618,4 +635,16 @@ Stats of "temp_test_dir/mydata.json"
   - Pending Notes: 0/0
 `
 	utils.AssertEqual(t, got, want)
+}
+
+func TestFNewTag(t *testing.T) {
+	mockPromptTagSlug := &MockPromptTagSlug{}
+	mockPromptTagGroup := &MockPromptTagGroup{}
+	tag, _ := models.FNewTag(10, mockPromptTagSlug, mockPromptTagGroup)
+	want := models.Tag{
+		Id:    10,
+		Slug:  "test_tag_slug",
+		Group: "test_tag_group",
+	}
+	utils.AssertEqual(t, tag, want)
 }
