@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/manifoldco/promptui"
-
 	"reminder/pkg/utils"
 )
 
@@ -103,7 +101,7 @@ func FBasicTags() Tags {
 }
 
 // prompt for new Tag
-func FNewTag(tagID int) (*Tag, error) {
+func FNewTag(tagID int, promptTagSlug PromptInf, promptTagGroup PromptInf) (*Tag, error) {
 	tag := &Tag{
 		Id:        tagID,
 		CreatedAt: utils.CurrentUnixTimestamp(),
@@ -112,11 +110,7 @@ func FNewTag(tagID int) (*Tag, error) {
 		// Group:     tagGroup,
 	}
 	// ask for tag slug
-	prompt := promptui.Prompt{
-		Label:    "Tag Slug",
-		Validate: utils.ValidateNonEmptyString,
-	}
-	tagSlug, err := prompt.Run()
+	tagSlug, err := promptTagSlug.Run()
 	tag.Slug = utils.TrimString(tagSlug)
 	tag.Slug = strings.ToLower(tag.Slug)
 	// in case of error or Ctrl-c as input, don't create the tag
@@ -129,12 +123,8 @@ func FNewTag(tagID int) (*Tag, error) {
 		err := errors.New("Tag's slug is empty")
 		return tag, err
 	}
-	prompt = promptui.Prompt{
-		Label:    "Tag Group",
-		Validate: utils.ValidateString,
-	}
 	// ask for tag's group
-	tagGroup, err := prompt.Run()
+	tagGroup, err := promptTagGroup.Run()
 	if err != nil {
 		return tag, err
 	}
