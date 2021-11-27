@@ -140,7 +140,7 @@ func flow() {
 			return false
 		}
 		// display prompt
-		promptNoteSelection := models.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
+		promptNoteSelection := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
 		fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
 		index, _, err := promptNoteSelection.Run()
 		utils.PrintErrorIfPresent(err)

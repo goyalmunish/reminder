@@ -144,8 +144,8 @@ func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	// collect and ask info about the tag
 	tagID := reminderData.nextPossibleTagId()
 
-	promptTagSlug := GeneratePrompt("tag_slug", "")
-	promptTagGroup := GeneratePrompt("tag_group", "")
+	promptTagSlug := utils.GeneratePrompt("tag_slug", "")
+	promptTagGroup := utils.GeneratePrompt("tag_group", "")
 
 	tag, err := FNewTag(tagID, promptTagSlug, promptTagGroup)
 
@@ -192,7 +192,7 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	if tagIDs == nil {
 		tagIDs = []int{}
 	}
-	promptNoteText := GeneratePrompt("note_text", "")
+	promptNoteText := utils.GeneratePrompt("note_text", "")
 	note, err := FNewNote(tagIDs, promptNoteText)
 	// validate and save data
 	if err == nil {
@@ -294,7 +294,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 		tagIDs = append(tagIDs, tagID)
 	}
 	// check with user if another tag is to be added
-	promtTagAnother := GeneratePrompt("tag_another", "")
+	promtTagAnother := utils.GeneratePrompt("tag_another", "")
 	promptText, err := promtTagAnother.Run()
 	utils.PrintErrorIfPresent(err)
 	promptText = strings.ToLower(promptText)
@@ -336,19 +336,19 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		_ = reminderData.UpdateNoteStatus(note, "pending")
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
-		promptCompleteBy := GeneratePrompt("note_completed_by", "")
+		promptCompleteBy := utils.GeneratePrompt("note_completed_by", "")
 		promptText, err := promptCompleteBy.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpdateNoteCompleteBy(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
-		promptCommment := GeneratePrompt("note_comment", "")
+		promptCommment := utils.GeneratePrompt("note_comment", "")
 		promptText, err := promptCommment.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.AddNoteComment(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
-		promptNoteTextWithDefault := GeneratePrompt("note_text", note.Text)
+		promptNoteTextWithDefault := utils.GeneratePrompt("note_text", note.Text)
 		promptText, err := promptNoteTextWithDefault.Run()
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpateNoteText(note, promptText)
@@ -428,10 +428,10 @@ func FMakeSureFileExists(dataFilePath string) {
 // function to create blank ReminderData object
 func FBlankReminder() *ReminderData {
 	fmt.Println("Initializing the data file. Please provide following data.")
-	promptUserName := GeneratePrompt("user_name", "")
+	promptUserName := utils.GeneratePrompt("user_name", "")
 	name, err := promptUserName.Run()
 	utils.PrintErrorIfPresent(err)
-	promptUserEmail := GeneratePrompt("user_email", "")
+	promptUserEmail := utils.GeneratePrompt("user_email", "")
 	emailID, err := promptUserEmail.Run()
 	utils.PrintErrorIfPresent(err)
 	return &ReminderData{

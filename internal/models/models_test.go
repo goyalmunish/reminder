@@ -643,6 +643,13 @@ Stats of "temp_test_dir/mydata.json"
 	utils.AssertEqual(t, got, want)
 }
 
+func TestNewTagRegistration(t *testing.T) {
+	var dataFilePath = "test_data_file.json"
+	reminderData := models.FReadDataFile(dataFilePath)
+	utils.AssertEqual(t, len(reminderData.Tags), 5)
+	// TODO: yet to finish
+}
+
 func TestFNewTag(t *testing.T) {
 	mockPromptTagSlug := &MockPromptTagSlug{}
 	mockPromptTagGroup := &MockPromptTagGroup{}
