@@ -39,6 +39,7 @@ func flow() {
 		fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File")}, "Select Option")
 	promptTagSlug := models.GeneratePrompt("tag_slug", "")
 	promptTagGroup := models.GeneratePrompt("tag_group", "")
+	promptNoteText := models.GeneratePrompt("note_text", "")
 	// operate on main options
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
@@ -54,13 +55,13 @@ func flow() {
 			} else {
 				tag := reminderData.Tags[tagIndex]
 				notes := reminderData.FindNotes(tag.Id, "pending")
-				err := reminderData.PrintNotesAndAskOptions(notes, tag.Id, promptTagSlug, promptTagGroup)
+				err := reminderData.PrintNotesAndAskOptions(notes, tag.Id, promptTagSlug, promptTagGroup, promptNoteText)
 				utils.PrintErrorIfPresent(err)
 			}
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Note"):
 		tagIDs := reminderData.AskTagIds([]int{}, promptTagSlug, promptTagGroup)
-		_, _ = reminderData.NewNoteRegistration(tagIDs)
+		_, _ = reminderData.NewNoteRegistration(tagIDs, promptNoteText)
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Tag"):
 		_, _ = reminderData.NewTagRegistration(promptTagSlug, promptTagGroup)
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
@@ -117,13 +118,13 @@ func flow() {
 		fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 		fmt.Println("  - within a week for repeat-annually and 2 days post due date (ignoring its year)")
 		fmt.Println("  - within 3 days for repeat-monthly and 2 days post due date (ignoring its year and month)")
-		err := reminderData.PrintNotesAndAskOptions(currentNotes, -1, promptTagSlug, promptTagGroup)
+		err := reminderData.PrintNotesAndAskOptions(currentNotes, -1, promptTagSlug, promptTagGroup, promptNoteText)
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
 		allNotes := reminderData.Notes
 		doneNotes := allNotes.WithStatus("done")
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(doneNotes))
-		err := reminderData.PrintNotesAndAskOptions(doneNotes, -1, promptTagSlug, promptTagGroup)
+		err := reminderData.PrintNotesAndAskOptions(doneNotes, -1, promptTagSlug, promptTagGroup, promptNoteText)
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
 		// get texts of all notes

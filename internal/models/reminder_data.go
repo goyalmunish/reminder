@@ -184,12 +184,11 @@ func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 }
 
 // register new note
-func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
+func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int, promptNoteText PromptInf) (*Note, error) {
 	// collect info about the note
 	if tagIDs == nil {
 		tagIDs = []int{}
 	}
-	promptNoteText := GeneratePrompt("note_text", "")
 	note, err := FNewNote(tagIDs, promptNoteText)
 	// validate and save data
 	if err == nil {
@@ -363,7 +362,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note, promptTagSl
 }
 
 // method (recursively) to print notes interactively
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, promptTagSlug PromptInf, promptTagGroup PromptInf) error {
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, promptTagSlug PromptInf, promptTagGroup PromptInf, promptNoteText PromptInf) error {
 	// sort notes
 	sort.Sort(Notes(notes))
 	texts := notes.ExternalTexts(utils.TerminalWidth() - 50)
@@ -377,12 +376,12 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	if noteIndex == len(texts) {
 		// add new note
 		if tagID >= 0 {
-			note, err := reminderData.NewNoteRegistration([]int{tagID})
+			note, err := reminderData.NewNoteRegistration([]int{tagID}, promptNoteText)
 			if err == nil {
 				var updatedNotes Notes
 				updatedNotes = append(updatedNotes, note)
 				updatedNotes = append(updatedNotes, notes...)
-				reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, promptTagSlug, promptTagGroup)
+				reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, promptTagSlug, promptTagGroup, promptNoteText)
 			}
 			utils.PrintErrorIfPresent(err)
 		} else {
@@ -393,7 +392,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		note := notes[noteIndex]
 		action := reminderData.PrintNoteAndAskOptions(note, promptTagSlug, promptTagGroup)
 		if action == "stay" {
-			reminderData.PrintNotesAndAskOptions(notes, tagID, promptTagSlug, promptTagGroup)
+			reminderData.PrintNotesAndAskOptions(notes, tagID, promptTagSlug, promptTagGroup, promptNoteText)
 		}
 	}
 	return nil
