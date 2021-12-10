@@ -314,8 +314,8 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	fmt.Print(note.ExternalText(reminderData))
 	_, noteOption := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"),
-		fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
+		fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"),
 		fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"),
 		fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"),
@@ -330,11 +330,11 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		utils.PrintErrorIfPresent(err)
 		reminderData.AddNoteComment(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
+	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
+		return "main-menu"
 	case fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"):
 		fmt.Println("No changes made")
 		fmt.Print(note.ExternalText(reminderData))
-	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
-		return "main-menu"
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
 		_ = reminderData.UpdateNoteStatus(note, "done")
 		fmt.Print(note.ExternalText(reminderData))
