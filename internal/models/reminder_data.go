@@ -372,7 +372,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	texts := notes.ExternalTexts(utils.TerminalWidth() - 50)
 	// ask user to select a note
 	fmt.Println("Note: An added note appears immidiately, but if a note is moved, refresh the list by going to main menu and come back.")
-	noteIndex, _ := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), "Select Note")
+	noteIndex, _ := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), fmt.Sprintf("Select Note for the tag %v %v", utils.Symbols["tag"], reminderData.Tags[tagID].Slug))
 	if noteIndex == -1 {
 		return errors.New("The noteIndex is invalid!")
 	}
