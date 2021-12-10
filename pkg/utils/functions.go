@@ -300,13 +300,13 @@ func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
 		prompt = &promptui.Prompt{
 			Label:    "User Name",
 			Default:  defaultText,
-			Validate: ValidateNonEmptyString,
+			Validate: ValidateString,
 		}
 	case "user_email":
 		prompt = &promptui.Prompt{
 			Label:    "User Email",
 			Default:  defaultText,
-			Validate: ValidateNonEmptyString,
+			Validate: ValidateString,
 		}
 	case "tag_slug":
 		prompt = &promptui.Prompt{
