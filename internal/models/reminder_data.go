@@ -314,8 +314,8 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	fmt.Print(note.ExternalText(reminderData))
 	_, noteOption := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"),
-		fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
+		fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"),
 		fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"),
 		fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"),
@@ -330,11 +330,11 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		utils.PrintErrorIfPresent(err)
 		reminderData.AddNoteComment(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
+	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
+		return "main-menu"
 	case fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"):
 		fmt.Println("No changes made")
 		fmt.Print(note.ExternalText(reminderData))
-	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
-		return "main-menu"
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
 		_ = reminderData.UpdateNoteStatus(note, "done")
 		fmt.Print(note.ExternalText(reminderData))
@@ -372,7 +372,13 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	texts := notes.ExternalTexts(utils.TerminalWidth() - 50)
 	// ask user to select a note
 	fmt.Println("Note: An added note appears immidiately, but if a note is moved, refresh the list by going to main menu and come back.")
-	noteIndex, _ := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), fmt.Sprintf("Select Note for the tag %v %v", utils.Symbols["tag"], reminderData.Tags[tagID].Slug))
+	promptText := ""
+	if tagID >= 0 {
+		promptText = fmt.Sprintf("Select Note (for the tag %v %v)", utils.Symbols["tag"], reminderData.Tags[tagID].Slug)
+	} else {
+		promptText = fmt.Sprintf("Select Note")
+	}
+	noteIndex, _ := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
 	if noteIndex == -1 {
 		return errors.New("The noteIndex is invalid!")
 	}
