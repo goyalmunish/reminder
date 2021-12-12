@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 
 type Note struct {
 	Text       string   `json:"text"`
-	Comments   []string `json:"comments"`
+	Comments   Comments `json:"comments"`
 	Status     string   `json:"status"`
 	TagIds     []int    `json:"tag_ids"`
 	CompleteBy int64    `json:"complete_by"`
@@ -31,7 +30,7 @@ func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 func (note *Note) String() []string {
 	var strs []string
 	strs = append(strs, fPrintNoteField("Text", note.Text))
-	strs = append(strs, fPrintNoteField("Comments", note.Comments))
+	strs = append(strs, fPrintNoteField("Comments", note.Comments.String()))
 	strs = append(strs, fPrintNoteField("Status", note.Status))
 	strs = append(strs, fPrintNoteField("Tags", note.TagIds))
 	strs = append(strs, fPrintNoteField("CompleteBy", utils.UnixTimestampToLongTimeStr(note.CompleteBy)))
@@ -63,7 +62,7 @@ func (note *Note) SearchableText() string {
 	if len(note.Comments) == 0 {
 		commentsText = append(commentsText, "no-comments")
 	} else {
-		commentsText = append(commentsText, strings.Join(note.Comments, ", "))
+		commentsText = append(commentsText, strings.Join(note.Comments.String(), ", "))
 	}
 	commentsText = append(commentsText, "]")
 	// get a complete searchable text array for note
@@ -80,8 +79,9 @@ func (note *Note) AddComment(text string) error {
 		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's comment text is empty")
 	} else {
-		text := "(" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + "): " + text
-		note.Comments = append(note.Comments, text)
+		// text := "(" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + "): " + text
+		comment := &Comment{Text: text, CreatedAt: utils.CurrentUnixTimestamp()}
+		note.Comments = append(note.Comments, comment)
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
 		fmt.Println("Updated the note")
 		return nil
@@ -209,7 +209,7 @@ func fPrintNoteField(fieldName string, fieldValue interface{}) string {
 // prompt for new Note
 func FNewNote(tagIDs []int, promptNoteText PromptInf) (*Note, error) {
 	note := &Note{
-		Comments:   *new([]string),
+		Comments:   Comments{},
 		Status:     "pending",
 		CompleteBy: 0,
 		TagIds:     tagIDs,
