@@ -20,7 +20,7 @@ func (c Comments) Less(i, j int) bool { return c[i].CreatedAt > c[j].CreatedAt }
 // provide basic string representation of a commment
 func (comment *Comment) String() string {
 	var strs []string
-	strs = append(strs, fmt.Sprintf("[%v]", utils.UnixTimestampToLongTimeStr(comment.CreatedAt)))
+	strs = append(strs, fmt.Sprintf("[%v]", utils.UnixTimestampToMediumTimeStr(comment.CreatedAt)))
 	strs = append(strs, comment.Text)
 	return strings.Join(strs, " ")
 }

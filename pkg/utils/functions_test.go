@@ -49,6 +49,11 @@ func TestUnixTimestampToShortTimeStr(t *testing.T) {
 	utils.AssertEqual(t, output, "21-Dec-20")
 }
 
+func TestUnixTimestampToMediumTimeStr(t *testing.T) {
+	output := utils.UnixTimestampToMediumTimeStr(int64(1608575176))
+	utils.AssertEqual(t, output, "21-Dec-20 18:26:16")
+}
+
 func TestUnixTimestampToLongTimeStr(t *testing.T) {
 	output := utils.UnixTimestampToLongTimeStr(int64(1608575176))
 	utils.AssertEqual(t, output, "Monday, 21-Dec-20 18:26:16 UTC")
