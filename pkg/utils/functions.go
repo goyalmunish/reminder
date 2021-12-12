@@ -82,6 +82,11 @@ func UnixTimestampToShortTimeStr(unixTimestamp int64) string {
 	return UnixTimestampToTimeStr(unixTimestamp, "02-Jan-06")
 }
 
+// convert unix timestamp to medium time string
+func UnixTimestampToMediumTimeStr(unixTimestamp int64) string {
+	return UnixTimestampToTimeStr(unixTimestamp, "02-Jan-06 15:04:05")
+}
+
 // get unix timestamp for date corresponding to current year
 func UnixTimestampForCorrespondingCurrentYear(month int, day int) int64 {
 	currentYear, _, _ := CurrentTime().Date()
