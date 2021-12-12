@@ -183,11 +183,12 @@ func TestNotes(t *testing.T) {
 }
 
 func TestNoteString(t *testing.T) {
-	note := &models.Note{Text: "dummy text", Comments: []string{"c1", "c2", "c3"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
+	comments := models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "c2"}, &models.Comment{Text: "c3"}}
+	note := &models.Note{Text: "dummy text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	want := `[  |          Text:  dummy text
-   |              :  c1
-  |              :  c2
-  |              :  c3
+   |              :  [nil] c1
+  |              :  [nil] c2
+  |              :  [nil] c3
    |        Status:  pending
    |          Tags:  [1 2]
    |    CompleteBy:  Sunday, 03-Jan-21 10:20:35 UTC
@@ -198,7 +199,8 @@ func TestNoteString(t *testing.T) {
 }
 
 func TestExternalText(t *testing.T) {
-	note := &models.Note{Text: "dummy text", Comments: []string{"c1", "c2", "c3"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
+	comments := models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "c2"}, &models.Comment{Text: "c3"}}
+	note := &models.Note{Text: "dummy text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	var tags models.Tags
 	tags = append(tags, &models.Tag{Id: 0, Slug: "tag_0", Group: "tag_group1"})
 	tags = append(tags, &models.Tag{Id: 1, Slug: "tag_1", Group: "tag_group1"})
@@ -206,9 +208,9 @@ func TestExternalText(t *testing.T) {
 	reminderData := &models.ReminderData{Tags: tags}
 	want := `Note Details: -------------------------------------------------
   |          Text:  dummy text
-  |              :  c1
-  |              :  c2
-  |              :  c3
+  |              :  [nil] c1
+  |              :  [nil] c2
+  |              :  [nil] c3
   |        Status:  pending
   |              :  tag_1
   |              :  tag_2
@@ -221,23 +223,28 @@ func TestExternalText(t *testing.T) {
 
 func TestSearchableText(t *testing.T) {
 	// case 1
-	note := models.Note{Text: "a beautiful cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	comments := models.Comments{&models.Comment{Text: "c1"}}
+	note := models.Note{Text: "a beautiful cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	got := note.SearchableText()
-	utils.AssertEqual(t, got, "a beautiful cat [c1]")
+	utils.AssertEqual(t, got, "a beautiful cat [[nil] c1]")
 	// case 2
-	note = models.Note{Text: "a cute dog", Comments: []string{"c1", "foo bar", "c3"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
+	comments = models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "foo bar"}, &models.Comment{Text: "c3"}}
+	note = models.Note{Text: "a cute dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "a cute dog [c1, foo bar, c3]")
+	utils.AssertEqual(t, got, "a cute dog [[nil] c1, [nil] foo bar, [nil] c3]")
 	// case 3
-	note = models.Note{Text: "a cute dog", Comments: []string{}}
+	comments = models.Comments{}
+	note = models.Note{Text: "a cute dog", Comments: comments}
 	got = note.SearchableText()
 	utils.AssertEqual(t, got, "a cute dog [no-comments]")
 }
 
 func TestExternalTexts(t *testing.T) {
 	var notes models.Notes
-	notes = append(notes, &models.Note{Text: "beautiful little cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231})
-	notes = append(notes, &models.Note{Text: "cute brown dog", Comments: []string{"c1", "foo bar", "c3", "baz"}, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
+	comments := models.Comments{&models.Comment{Text: "c1"}}
+	notes = append(notes, &models.Note{Text: "beautiful little cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231})
+	comments = models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "foo bar"}, &models.Comment{Text: "c3"}, &models.Comment{Text: "baz"}}
+	notes = append(notes, &models.Note{Text: "cute brown dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
 	// case 1
 	got := notes.ExternalTexts(0)
 	want := "[beautiful little cat {C:01, S:P, D:03-Jan-21} cute brown dog {C:04, S:D, D:03-Jan-21}]"
@@ -258,11 +265,14 @@ func TestExternalTexts(t *testing.T) {
 
 func TestWithStatus(t *testing.T) {
 	var notes models.Notes
-	note1 := models.Note{Text: "big fat cat", Comments: []string{"c1"}, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	comments := models.Comments{&models.Comment{Text: "c1"}}
+	note1 := models.Note{Text: "big fat cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	notes = append(notes, &note1)
-	note2 := models.Note{Text: "cute brown dog", Comments: []string{"c1", "foo bar"}, Status: "done", TagIds: []int{1, 3}, CompleteBy: 1609669232}
+	comments = models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "foo bar"}}
+	note2 := models.Note{Text: "cute brown dog", Comments: comments, Status: "done", TagIds: []int{1, 3}, CompleteBy: 1609669232}
 	notes = append(notes, &note2)
-	note3 := models.Note{Text: "little hamster", Comments: []string{"foo bar", "c3"}, Status: "pending", TagIds: []int{1}, CompleteBy: 1609669233}
+	comments = models.Comments{&models.Comment{Text: "foo bar"}, &models.Comment{Text: "c3"}}
+	note3 := models.Note{Text: "little hamster", Comments: comments, Status: "pending", TagIds: []int{1}, CompleteBy: 1609669233}
 	notes = append(notes, &note3)
 	// case 1
 	got := notes.WithStatus("pending")
@@ -316,17 +326,17 @@ func TestAddComment(t *testing.T) {
 	err := note1.AddComment("test comment 1")
 	utils.AssertEqual(t, err, nil)
 	utils.AssertEqual(t, len(note1.Comments), 1)
-	utils.AssertEqual(t, strings.Contains(note1.Comments[0], "test comment 1"), true)
+	utils.AssertEqual(t, strings.Contains(note1.Comments[0].Text, "test comment 1"), true)
 	// case 2
 	err = note1.AddComment("test comment 2")
 	utils.AssertEqual(t, err, nil)
 	utils.AssertEqual(t, len(note1.Comments), 2)
-	utils.AssertEqual(t, strings.Contains(note1.Comments[1], "test comment 2"), true)
+	utils.AssertEqual(t, strings.Contains(note1.Comments[1].Text, "test comment 2"), true)
 	// case 3
 	err = note1.AddComment("")
 	utils.AssertEqual(t, strings.Contains(err.Error(), "Note's comment text is empty"), true)
 	utils.AssertEqual(t, len(note1.Comments), 2)
-	utils.AssertEqual(t, strings.Contains(note1.Comments[1], "test comment 2"), true)
+	utils.AssertEqual(t, strings.Contains(note1.Comments[1].Text, "test comment 2"), true)
 }
 
 func TestUpdateText(t *testing.T) {
