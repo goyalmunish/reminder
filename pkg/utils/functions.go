@@ -224,9 +224,10 @@ func AskOption(options []string, label string) (int, string) {
 	// otherwise such item is observed to not getting appear
 	// in the rendered list
 	prompt := promptui.Select{
-		Label: label,
-		Items: options,
-		Size:  25,
+		Label:  label,
+		Items:  options,
+		Size:   25,
+		Stdout: &bellSkipper{},
 	}
 	index, result, err := prompt.Run()
 	if err != nil {

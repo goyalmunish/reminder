@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
@@ -125,6 +126,7 @@ func flow() {
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
 		// get texts of all notes
+		sort.Sort(reminderData.Notes)
 		allNotes := reminderData.Notes
 		var allTexts []string
 		for _, note := range allNotes {
