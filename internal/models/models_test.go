@@ -359,7 +359,7 @@ func TestUpdateCompleteBy(t *testing.T) {
 	utils.AssertEqual(t, note1.CompleteBy, 0)
 	// update complete_by
 	// case 1
-	err := note1.UpdateCompleteBy("2021-12-15")
+	err := note1.UpdateCompleteBy("15-12-2021")
 	utils.AssertEqual(t, err, nil)
 	utils.AssertEqual(t, note1.CompleteBy, 1639526400)
 	// case 2
