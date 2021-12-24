@@ -113,8 +113,7 @@ func (note *Note) UpdateCompleteBy(text string) error {
 		fmt.Println("Cleared the due date from the note")
 		return nil
 	} else {
-		// fmt.Println(text)
-		format := "2006-1-2"
+		format := "2-1-2006"
 		timeValue, _ := time.Parse(format, text)
 		note.CompleteBy = int64(timeValue.Unix())
 		note.UpdatedAt = utils.CurrentUnixTimestamp()

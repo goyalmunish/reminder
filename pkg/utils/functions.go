@@ -346,7 +346,7 @@ func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
 		}
 	case "note_completed_by":
 		prompt = &promptui.Prompt{
-			Label:    "Due Date (format: YYYY-MM-DD), or enter nil to clear existing value",
+			Label:    "Due Date (format: DD-MM-YYYY), or enter nil to clear existing value",
 			Default:  defaultText,
 			Validate: ValidateDateString,
 		}
