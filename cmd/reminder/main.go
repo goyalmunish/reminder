@@ -26,7 +26,7 @@ func flow() {
 	// TEST CODE ENDS ------>
 	// ask the main menu
 	fmt.Println("| =========================== MAIN MENU =========================== |")
-	fmt.Println("|    Use 'Ctrl-c' to jump one level up (towards the Main Menu)    |")
+	fmt.Println("|     Use 'Ctrl-c' to jump one level up (towards the Main Menu)     |")
 	fmt.Println("| ----------------------------------------------------------------- |")
 	_, result := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
