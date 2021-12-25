@@ -66,8 +66,14 @@ func (reminderData *ReminderData) TagIdsForGroup(group string) []int {
 }
 
 // get all notes with given tagID and given status
-func (reminderData *ReminderData) FindNotes(tagID int, status string) Notes {
+func (reminderData *ReminderData) FindNotesByTagId(tagID int, status string) Notes {
 	return reminderData.Notes.WithTagIdAndStatus(tagID, status)
+}
+
+// get all notes with given tagSlug and given status
+func (reminderData *ReminderData) FindNotesByTagSlug(tagSlug string, status string) Notes {
+	tag := reminderData.TagFromSlug(tagSlug)
+	return reminderData.FindNotesByTagId(tag.Id, status)
 }
 
 // update note's text

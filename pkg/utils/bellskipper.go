@@ -5,7 +5,8 @@ import (
 )
 
 /*
- * BellSkipper for PromptUI
+ * bellSkipper for PromptUI
+
  * Refer: https://github.com/manifoldco/promptui/issues/49
  * bellSkipper implements an io.WriteCloser that skips the terminal bell
  * character (ASCII code 7), and writes the rest to os.Stderr. It is used to
