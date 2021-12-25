@@ -47,8 +47,7 @@ func flow() {
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
 		tagSymbol := func(tagSlug string) string {
-			tag := reminderData.TagFromSlug(tagSlug)
-			hasPendingNote := len(reminderData.Notes.WithTagIdAndStatus(tag.Id, "pending")) > 0
+			hasPendingNote := len(reminderData.FindNotesByTagSlug(tagSlug, "pending")) > 0
 			if hasPendingNote {
 				return utils.Symbols["tag"]
 			} else {
@@ -66,7 +65,7 @@ func flow() {
 				_, _ = reminderData.NewTagRegistration()
 			} else {
 				tag := reminderData.Tags[tagIndex]
-				notes := reminderData.FindNotes(tag.Id, "pending")
+				notes := reminderData.FindNotesByTagId(tag.Id, "pending")
 				err := reminderData.PrintNotesAndAskOptions(notes, tag.Id)
 				utils.PrintErrorIfPresent(err)
 			}
