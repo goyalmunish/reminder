@@ -182,7 +182,7 @@ func TestNotes(t *testing.T) {
 	utils.AssertEqual(t, gotTexts, wantTexts)
 }
 
-func TestNoteToStrings(t *testing.T) {
+func TestNoteStrings(t *testing.T) {
 	comments := models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "c2"}, &models.Comment{Text: "c3"}}
 	note := &models.Note{Text: "dummy text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	want := `[  |          Text:  dummy text
@@ -195,7 +195,7 @@ func TestNoteToStrings(t *testing.T) {
    |     CreatedAt:  nil
    |     UpdatedAt:  nil
 ]`
-	utils.AssertEqual(t, note.ToStrings(), want)
+	utils.AssertEqual(t, note.Strings(), want)
 }
 
 func TestExternalText(t *testing.T) {

@@ -30,10 +30,10 @@ func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
 // provide basic string representation (actually a slice of strings) of a note
 // with each element of slice representing certain field of the note
-func (note *Note) ToStrings() []string {
+func (note *Note) Strings() []string {
 	var strs []string
 	strs = append(strs, fPrintNoteField("Text", note.Text))
-	strs = append(strs, fPrintNoteField("Comments", note.Comments.ToStrings()))
+	strs = append(strs, fPrintNoteField("Comments", note.Comments.Strings()))
 	strs = append(strs, fPrintNoteField("Status", note.Status))
 	strs = append(strs, fPrintNoteField("Tags", note.TagIds))
 	strs = append(strs, fPrintNoteField("CompleteBy", utils.UnixTimestampToLongTimeStr(note.CompleteBy)))
@@ -47,7 +47,7 @@ func (note *Note) ToStrings() []string {
 func (note *Note) ExternalText(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
-	basicStrs := note.ToStrings()
+	basicStrs := note.Strings()
 	// replace tag ids with tag slugs
 	tagsStr := fPrintNoteField("Tags", reminderData.TagsFromIds(note.TagIds).Slugs())
 	basicStrs[3] = tagsStr
@@ -65,7 +65,7 @@ func (note *Note) SearchableText() string {
 	if len(note.Comments) == 0 {
 		commentsText = append(commentsText, "no-comments")
 	} else {
-		commentsText = append(commentsText, strings.Join(note.Comments.ToStrings(), ", "))
+		commentsText = append(commentsText, strings.Join(note.Comments.Strings(), ", "))
 	}
 	commentsText = append(commentsText, "]")
 	// get a complete searchable text array for note

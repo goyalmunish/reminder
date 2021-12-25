@@ -32,7 +32,7 @@ func (comment *Comment) String() string {
 }
 
 // provide basic string representation of commments
-func (comments Comments) ToStrings() []string {
+func (comments Comments) Strings() []string {
 	var strs []string
 	for _, comment := range comments {
 		strs = append(strs, comment.String())
