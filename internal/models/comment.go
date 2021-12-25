@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+/*
+Comment is an update to a note
+
+A comment belongs to a particular note
+A note can have multiple comments
+*/
 type Comment struct {
 	Text      string `json:"text"`
 	CreatedAt int64  `json:"created_at"`

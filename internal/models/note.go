@@ -9,6 +9,9 @@ import (
 	"reminder/pkg/utils"
 )
 
+/*
+Note represents a task (a TO-DO item)
+*/
 type Note struct {
 	Text       string   `json:"text"`
 	Comments   Comments `json:"comments"`

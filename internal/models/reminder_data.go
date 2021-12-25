@@ -16,6 +16,9 @@ import (
 	"reminder/pkg/utils"
 )
 
+/*
+ReminderData represents whole reminder data-structure
+*/
 type ReminderData struct {
 	User         *User  `json:"user"`
 	Notes        Notes  `json:"notes"`

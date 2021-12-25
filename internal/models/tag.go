@@ -8,6 +8,12 @@ import (
 	"reminder/pkg/utils"
 )
 
+/*
+Tag represents classification of a note
+
+A note can have multiple tags
+A tag can be associated with multiple notes
+*/
 type Tag struct {
 	Id        int    `json:"id"`    // internal int-based id of the tag
 	Slug      string `json:"slug"`  // client-facing string-based id for tag
