@@ -1,3 +1,8 @@
+/*
+Tool `reminder` is a command-line (terminal) based interactive app for organizing tasks with minimal efforts.
+
+Just run it as `go run cmd/reminder/main.go`
+*/
 package main
 
 import (
@@ -41,9 +46,18 @@ func flow() {
 	// operate on main options
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
+		tagSymbol := func(tagSlug string) string {
+			tag := reminderData.TagFromSlug(tagSlug)
+			hasPendingNote := len(reminderData.Notes.WithTagIdAndStatus(tag.Id, "pending")) > 0
+			if hasPendingNote {
+				return utils.Symbols["tag"]
+			} else {
+				return utils.Symbols["zzz"]
+			}
+		}
 		var allTagSlugsWithEmoji []string
 		for _, tagSlug := range reminderData.SortedTagSlugs() {
-			allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["tag"], tagSlug))
+			allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", tagSymbol(tagSlug), tagSlug))
 		}
 		tagIndex, _ := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 		if tagIndex != -1 {
