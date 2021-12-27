@@ -209,7 +209,7 @@ func fPrintNoteField(fieldName string, fieldValue interface{}) string {
 }
 
 // prompt for new Note
-func FNewNote(tagIDs []int, promptNoteText PromptInf) (*Note, error) {
+func FNewNote(tagIDs []int, promptNoteText Prompter) (*Note, error) {
 	note := &Note{
 		Comments:   Comments{},
 		Status:     "pending",

@@ -107,7 +107,7 @@ func FBasicTags() Tags {
 }
 
 // prompt for new Tag
-func FNewTag(tagID int, promptTagSlug PromptInf, promptTagGroup PromptInf) (*Tag, error) {
+func FNewTag(tagID int, promptTagSlug Prompter, promptTagGroup Prompter) (*Tag, error) {
 	tag := &Tag{
 		Id:        tagID,
 		CreatedAt: utils.CurrentUnixTimestamp(),
