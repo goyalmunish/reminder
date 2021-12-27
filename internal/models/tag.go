@@ -8,6 +8,12 @@ import (
 	"reminder/pkg/utils"
 )
 
+/*
+Tag represents classification of a note
+
+A note can have multiple tags
+A tag can be associated with multiple notes
+*/
 type Tag struct {
 	Id        int    `json:"id"`    // internal int-based id of the tag
 	Slug      string `json:"slug"`  // client-facing string-based id for tag
@@ -30,7 +36,8 @@ func (c Tags) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
 
 // get slugs of given tags
 func (tags Tags) Slugs() []string {
-	var allSlugs []string
+	// assuming there are at least 20 tags (on average)
+	allSlugs := make([]string, 0, 20)
 	for _, tag := range tags {
 		allSlugs = append(allSlugs, tag.Slug)
 	}
@@ -101,7 +108,7 @@ func FBasicTags() Tags {
 }
 
 // prompt for new Tag
-func FNewTag(tagID int, promptTagSlug PromptInf, promptTagGroup PromptInf) (*Tag, error) {
+func FNewTag(tagID int, promptTagSlug Prompter, promptTagGroup Prompter) (*Tag, error) {
 	tag := &Tag{
 		Id:        tagID,
 		CreatedAt: utils.CurrentUnixTimestamp(),

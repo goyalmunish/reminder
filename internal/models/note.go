@@ -9,6 +9,9 @@ import (
 	"reminder/pkg/utils"
 )
 
+/*
+Note represents a task (a TO-DO item)
+*/
 type Note struct {
 	Text       string   `json:"text"`
 	Comments   Comments `json:"comments"`
@@ -27,10 +30,11 @@ func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 
 // provide basic string representation (actually a slice of strings) of a note
 // with each element of slice representing certain field of the note
-func (note *Note) String() []string {
-	var strs []string
+func (note *Note) Strings() []string {
+	// allocating 10 members before hand, considering there will be around 10 status fields
+	strs := make([]string, 0, 10)
 	strs = append(strs, fPrintNoteField("Text", note.Text))
-	strs = append(strs, fPrintNoteField("Comments", note.Comments.String()))
+	strs = append(strs, fPrintNoteField("Comments", note.Comments.Strings()))
 	strs = append(strs, fPrintNoteField("Status", note.Status))
 	strs = append(strs, fPrintNoteField("Tags", note.TagIds))
 	strs = append(strs, fPrintNoteField("CompleteBy", utils.UnixTimestampToLongTimeStr(note.CompleteBy)))
@@ -44,7 +48,7 @@ func (note *Note) String() []string {
 func (note *Note) ExternalText(reminderData *ReminderData) string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
-	basicStrs := note.String()
+	basicStrs := note.Strings()
 	// replace tag ids with tag slugs
 	tagsStr := fPrintNoteField("Tags", reminderData.TagsFromIds(note.TagIds).Slugs())
 	basicStrs[3] = tagsStr
@@ -62,7 +66,7 @@ func (note *Note) SearchableText() string {
 	if len(note.Comments) == 0 {
 		commentsText = append(commentsText, "no-comments")
 	} else {
-		commentsText = append(commentsText, strings.Join(note.Comments.String(), ", "))
+		commentsText = append(commentsText, strings.Join(note.Comments.Strings(), ", "))
 	}
 	commentsText = append(commentsText, "]")
 	// get a complete searchable text array for note
@@ -79,7 +83,6 @@ func (note *Note) AddComment(text string) error {
 		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's comment text is empty")
 	} else {
-		// text := "(" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + "): " + text
 		comment := &Comment{Text: text, CreatedAt: utils.CurrentUnixTimestamp()}
 		note.Comments = append(note.Comments, comment)
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
@@ -149,7 +152,8 @@ func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
 // get display text of list of notes
 // width of each note is truncated to maxStrLen
 func (notes Notes) ExternalTexts(maxStrLen int) []string {
-	var allTexts []string
+	// assuming there are at least (on average) 100s of notes
+	allTexts := make([]string, 0, 100)
 	for _, note := range notes {
 		noteText := note.Text
 		if maxStrLen > 0 {
@@ -206,7 +210,7 @@ func fPrintNoteField(fieldName string, fieldValue interface{}) string {
 }
 
 // prompt for new Note
-func FNewNote(tagIDs []int, promptNoteText PromptInf) (*Note, error) {
+func FNewNote(tagIDs []int, promptNoteText Prompter) (*Note, error) {
 	note := &Note{
 		Comments:   Comments{},
 		Status:     "pending",

@@ -16,6 +16,9 @@ import (
 	"reminder/pkg/utils"
 )
 
+/*
+ReminderData represents whole reminder data-structure
+*/
 type ReminderData struct {
 	User         *User  `json:"user"`
 	Notes        Notes  `json:"notes"`
@@ -196,7 +199,8 @@ func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
 	// collect info about the note
 	if tagIDs == nil {
-		tagIDs = []int{}
+		// assuming each note with have on average 2 tags
+		tagIDs = make([]int, 0, 2)
 	}
 	promptNoteText := utils.GeneratePrompt("note_text", "")
 	note, err := FNewNote(tagIDs, promptNoteText)
@@ -220,7 +224,8 @@ func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 
 // return current status
 func (reminderData *ReminderData) Stats() string {
-	var stats []string
+	// assuming the `stats` will have around 5 members
+	stats := make([]string, 0, 5)
 	if len(reminderData.Tags) > 0 {
 		stats = append(stats, fmt.Sprintf("\nStats of %q\n", reminderData.DataFile))
 		stats = append(stats, fmt.Sprintf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags)))
@@ -237,7 +242,7 @@ func (reminderData *ReminderData) Stats() string {
 func (reminderData *ReminderData) CreateBackup() string {
 	// get backup file name
 	ext := path.Ext(reminderData.DataFile)
-	dstFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + ext
+	dstFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_" + strconv.FormatInt(int64(utils.CurrentUnixTimestamp()), 10) + ext
 	lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
 	fmt.Printf("Creating backup at %q\n", dstFile)
 	// create backup

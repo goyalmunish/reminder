@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+/*
+Comment is an update to a note
+
+A comment belongs to a particular note
+A note can have multiple comments
+*/
 type Comment struct {
 	Text      string `json:"text"`
 	CreatedAt int64  `json:"created_at"`
@@ -26,8 +32,9 @@ func (comment *Comment) String() string {
 }
 
 // provide basic string representation of commments
-func (comments Comments) String() []string {
-	var strs []string
+func (comments Comments) Strings() []string {
+	// assuming each note will have 10 comments on average
+	strs := make([]string, 0, 10)
 	for _, comment := range comments {
 		strs = append(strs, comment.String())
 	}
