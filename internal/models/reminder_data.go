@@ -240,7 +240,7 @@ func (reminderData *ReminderData) Stats() string {
 func (reminderData *ReminderData) CreateBackup() string {
 	// get backup file name
 	ext := path.Ext(reminderData.DataFile)
-	dstFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + ext
+	dstFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_" + strconv.FormatInt(int64(utils.CurrentUnixTimestamp()), 10) + ext
 	lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
 	fmt.Printf("Creating backup at %q\n", dstFile)
 	// create backup

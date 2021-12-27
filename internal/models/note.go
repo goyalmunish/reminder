@@ -82,7 +82,6 @@ func (note *Note) AddComment(text string) error {
 		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's comment text is empty")
 	} else {
-		// text := "(" + strconv.Itoa(int(utils.CurrentUnixTimestamp())) + "): " + text
 		comment := &Comment{Text: text, CreatedAt: utils.CurrentUnixTimestamp()}
 		note.Comments = append(note.Comments, comment)
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
