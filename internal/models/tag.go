@@ -36,7 +36,8 @@ func (c Tags) Less(i, j int) bool { return c[i].Slug < c[j].Slug }
 
 // get slugs of given tags
 func (tags Tags) Slugs() []string {
-	var allSlugs []string
+	// assuming there are at least 20 tags (on average)
+	allSlugs := make([]string, 0, 20)
 	for _, tag := range tags {
 		allSlugs = append(allSlugs, tag.Slug)
 	}

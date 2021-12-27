@@ -31,7 +31,8 @@ func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 // provide basic string representation (actually a slice of strings) of a note
 // with each element of slice representing certain field of the note
 func (note *Note) Strings() []string {
-	var strs []string
+	// allocating 10 members before hand, considering there will be around 10 status fields
+	strs := make([]string, 0, 10)
 	strs = append(strs, fPrintNoteField("Text", note.Text))
 	strs = append(strs, fPrintNoteField("Comments", note.Comments.Strings()))
 	strs = append(strs, fPrintNoteField("Status", note.Status))
@@ -151,7 +152,8 @@ func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
 // get display text of list of notes
 // width of each note is truncated to maxStrLen
 func (notes Notes) ExternalTexts(maxStrLen int) []string {
-	var allTexts []string
+	// assuming there are at least (on average) 100s of notes
+	allTexts := make([]string, 0, 100)
 	for _, note := range notes {
 		noteText := note.Text
 		if maxStrLen > 0 {

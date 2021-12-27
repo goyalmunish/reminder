@@ -199,7 +199,8 @@ func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
 	// collect info about the note
 	if tagIDs == nil {
-		tagIDs = []int{}
+		// assuming each note with have on average 2 tags
+		tagIDs = make([]int, 0, 2)
 	}
 	promptNoteText := utils.GeneratePrompt("note_text", "")
 	note, err := FNewNote(tagIDs, promptNoteText)
@@ -223,7 +224,8 @@ func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 
 // return current status
 func (reminderData *ReminderData) Stats() string {
-	var stats []string
+	// assuming the `stats` will have around 5 members
+	stats := make([]string, 0, 5)
 	if len(reminderData.Tags) > 0 {
 		stats = append(stats, fmt.Sprintf("\nStats of %q\n", reminderData.DataFile))
 		stats = append(stats, fmt.Sprintf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags)))

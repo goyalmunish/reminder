@@ -54,7 +54,8 @@ func flow() {
 				return utils.Symbols["zzz"]
 			}
 		}
-		var allTagSlugsWithEmoji []string
+		// assuming there are at least 20 tags (on average)
+		allTagSlugsWithEmoji := make([]string, 0, 20)
 		for _, tagSlug := range reminderData.SortedTagSlugs() {
 			allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", tagSymbol(tagSlug), tagSlug))
 		}
@@ -80,7 +81,8 @@ func flow() {
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Pending Notes"):
 		allNotes := reminderData.Notes
 		pendingNotes := allNotes.WithStatus("pending")
-		var currentNotes []*models.Note
+		// assuming there are at least 100 notes (on average)
+		currentNotes := make([]*models.Note, 0, 100)
 		repeatTagIDs := reminderData.TagIdsForGroup("repeat")
 		// populating currentNotes
 		for _, note := range pendingNotes {
@@ -141,7 +143,8 @@ func flow() {
 		// get texts of all notes
 		sort.Sort(reminderData.Notes)
 		allNotes := reminderData.Notes
-		var allTexts []string
+		// assuming the search shows 25 items in general
+		allTexts := make([]string, 0, 25)
 		for _, note := range allNotes {
 			allTexts = append(allTexts, note.SearchableText())
 		}

@@ -33,7 +33,8 @@ func (comment *Comment) String() string {
 
 // provide basic string representation of commments
 func (comments Comments) Strings() []string {
-	var strs []string
+	// assuming each note will have 10 comments on average
+	strs := make([]string, 0, 10)
 	for _, comment := range comments {
 		strs = append(strs, comment.String())
 	}
