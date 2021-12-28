@@ -18,7 +18,6 @@ type Note struct {
 	Status     string   `json:"status"`
 	TagIds     []int    `json:"tag_ids"`
 	CompleteBy int64    `json:"complete_by"`
-	CreatedAt  int64    `json:"created_at"`
 	BaseStruct
 }
 
@@ -83,7 +82,7 @@ func (note *Note) AddComment(text string) error {
 		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's comment text is empty")
 	} else {
-		comment := &Comment{Text: text, CreatedAt: utils.CurrentUnixTimestamp()}
+		comment := &Comment{Text: text, BaseStruct: BaseStruct{CreatedAt: utils.CurrentUnixTimestamp()}}
 		note.Comments = append(note.Comments, comment)
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
 		fmt.Println("Updated the note")
@@ -216,8 +215,9 @@ func FNewNote(tagIDs []int, promptNoteText Prompter) (*Note, error) {
 		Status:     "pending",
 		CompleteBy: 0,
 		TagIds:     tagIDs,
-		CreatedAt:  utils.CurrentUnixTimestamp(),
-		BaseStruct: BaseStruct{UpdatedAt: utils.CurrentUnixTimestamp()},
+		BaseStruct: BaseStruct{
+			CreatedAt: utils.CurrentUnixTimestamp(),
+			UpdatedAt: utils.CurrentUnixTimestamp()},
 		// Text:       noteText,
 	}
 	noteText, err := promptNoteText.Run()

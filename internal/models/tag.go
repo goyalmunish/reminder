@@ -15,10 +15,9 @@ A note can have multiple tags
 A tag can be associated with multiple notes
 */
 type Tag struct {
-	Id        int    `json:"id"`    // internal int-based id of the tag
-	Slug      string `json:"slug"`  // client-facing string-based id for tag
-	Group     string `json:"group"` // a note can be part of only one tag within a group
-	CreatedAt int64  `json:"created_at"`
+	Id    int    `json:"id"`    // internal int-based id of the tag
+	Slug  string `json:"slug"`  // client-facing string-based id for tag
+	Group string `json:"group"` // a note can be part of only one tag within a group
 	BaseStruct
 }
 
@@ -96,11 +95,12 @@ func FBasicTags() Tags {
 	var basicTags Tags
 	for index, tagMap := range basicTagsMap {
 		tag := Tag{
-			Id:         index,
-			Slug:       tagMap["slug"],
-			Group:      tagMap["group"],
-			CreatedAt:  utils.CurrentUnixTimestamp(),
-			BaseStruct: BaseStruct{UpdatedAt: utils.CurrentUnixTimestamp()},
+			Id:    index,
+			Slug:  tagMap["slug"],
+			Group: tagMap["group"],
+			BaseStruct: BaseStruct{
+				CreatedAt: utils.CurrentUnixTimestamp(),
+				UpdatedAt: utils.CurrentUnixTimestamp()},
 		}
 		basicTags = append(basicTags, &tag)
 	}
@@ -110,9 +110,10 @@ func FBasicTags() Tags {
 // prompt for new Tag
 func FNewTag(tagID int, promptTagSlug Prompter, promptTagGroup Prompter) (*Tag, error) {
 	tag := &Tag{
-		Id:         tagID,
-		CreatedAt:  utils.CurrentUnixTimestamp(),
-		BaseStruct: BaseStruct{UpdatedAt: utils.CurrentUnixTimestamp()},
+		Id: tagID,
+		BaseStruct: BaseStruct{
+			CreatedAt: utils.CurrentUnixTimestamp(),
+			UpdatedAt: utils.CurrentUnixTimestamp()},
 		// Slug:      tagSlug,
 		// Group:     tagGroup,
 	}

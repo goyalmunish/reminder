@@ -720,8 +720,7 @@ func TestFNewNote(t *testing.T) {
 		Text:       "a random note text",
 		TagIds:     tagIDs,
 		Status:     note.Status,
-		CreatedAt:  note.CreatedAt,
-		BaseStruct: models.BaseStruct{UpdatedAt: note.UpdatedAt},
+		BaseStruct: models.BaseStruct{UpdatedAt: note.UpdatedAt, CreatedAt: note.CreatedAt},
 	}
 	utils.AssertEqual(t, note, want)
 }
