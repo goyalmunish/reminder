@@ -1,9 +1,11 @@
 package models
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -224,18 +226,27 @@ func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 
 // return current status
 func (reminderData *ReminderData) Stats() string {
-	// assuming the `stats` will have around 5 members
-	stats := make([]string, 0, 5)
-	if len(reminderData.Tags) > 0 {
-		stats = append(stats, fmt.Sprintf("\nStats of %q\n", reminderData.DataFile))
-		stats = append(stats, fmt.Sprintf("%4vNumber of Tags: %v\n", "- ", len(reminderData.Tags)))
-		stats = append(stats, fmt.Sprintf("%4vPending Notes: %v/%v\n", "- ", len(reminderData.Notes.WithStatus("pending")), len(reminderData.Notes)))
+	// define report template
+	reportTemplate := `
+Stats of "{{.DataFile}}"
+  - Number of Tags: {{.Tags | len}}
+  - Pending Notes: {{.Notes | numPending}}/{{.Notes | numAll}}
+`
+	// define report result (as bytes)
+	var reportResult bytes.Buffer
+	// define report
+	report := template.Must(template.New("report").Funcs(template.FuncMap{
+		"numPending": func(notes Notes) int { return len(notes.WithStatus("pending")) },
+		"numAll":     func(notes Notes) int { return len(notes) },
+	}).Parse(reportTemplate))
+	// execute report to populate `reportResult`
+	err := report.Execute(&reportResult, *reminderData)
+	if err != nil {
+		return err.Error()
+	} else {
+		// return report data as string
+		return reportResult.String()
 	}
-	stats_str := ""
-	for _, elem := range stats {
-		stats_str += elem
-	}
-	return stats_str
 }
 
 // create timestamped backup
