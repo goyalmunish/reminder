@@ -15,10 +15,9 @@ A note can have multiple tags
 A tag can be associated with multiple notes
 */
 type Tag struct {
-	Id        int    `json:"id"`    // internal int-based id of the tag
-	Slug      string `json:"slug"`  // client-facing string-based id for tag
-	Group     string `json:"group"` // a note can be part of only one tag within a group
-	CreatedAt int64  `json:"created_at"`
+	Id    int    `json:"id"`    // internal int-based id of the tag
+	Slug  string `json:"slug"`  // client-facing string-based id for tag
+	Group string `json:"group"` // a note can be part of only one tag within a group
 	BaseStruct
 }
 

@@ -18,7 +18,6 @@ type Note struct {
 	Status     string   `json:"status"`
 	TagIds     []int    `json:"tag_ids"`
 	CompleteBy int64    `json:"complete_by"`
-	CreatedAt  int64    `json:"created_at"`
 	BaseStruct
 }
 
