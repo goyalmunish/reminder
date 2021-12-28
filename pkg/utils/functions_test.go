@@ -14,6 +14,8 @@ package utils_test
 import (
 	// "fmt"
 	"errors"
+	"fmt"
+	"html/template"
 	"testing"
 	"time"
 
@@ -145,6 +147,39 @@ func TestValidateDateString(t *testing.T) {
 	utils.AssertEqual(t, utils.ValidateDateString("2020-31"), errors.New("Invalid input"))
 	utils.AssertEqual(t, utils.ValidateDateString("2020-"), errors.New("Invalid input"))
 	utils.AssertEqual(t, utils.ValidateDateString("2020"), errors.New("Invalid input"))
+}
+
+func TestTemplateResult(t *testing.T) {
+	type TestData struct {
+		DataFile string
+		Tags     []string
+		Notes    []string
+	}
+	testData := TestData{"random/file/path", []string{"a", "b", "c"}, []string{"foo", "bar"}}
+	reportTemplate := `
+Stats of "{{.DataFile}}"
+  - Number of valid Tags: {{.Tags | numValidTags}}
+  - Number of Notes: {{.Notes | len}}
+`
+	funcMap := template.FuncMap{
+		"numValidTags": func(tags []string) int {
+			var validTags []string
+			for _, elem := range tags {
+				if elem > "a" {
+					validTags = append(validTags, elem)
+				}
+			}
+			fmt.Println(validTags)
+			return len(validTags)
+		},
+	}
+	result := utils.TemplateResult(reportTemplate, funcMap, testData)
+	want := `
+Stats of "random/file/path"
+  - Number of valid Tags: 2
+  - Number of Notes: 2
+`
+	utils.AssertEqual(t, result, want)
 }
 
 func TestTerminalSize(t *testing.T) {

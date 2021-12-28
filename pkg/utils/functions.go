@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"os"
 	"os/exec"
@@ -180,6 +182,21 @@ func ValidateDateString(input string) error {
 		return nil
 	} else {
 		return errors.New("Invalid input")
+	}
+}
+
+func TemplateResult(reportTemplate string, funcMap template.FuncMap, data interface{}) string {
+	// define report result (as bytes)
+	var reportResult bytes.Buffer
+	// define report
+	report := template.Must(template.New("report").Funcs(template.FuncMap(funcMap)).Parse(reportTemplate))
+	// execute report to populate `reportResult`
+	err := report.Execute(&reportResult, data)
+	if err != nil {
+		return err.Error()
+	} else {
+		// return report data as string
+		return reportResult.String()
 	}
 }
 
