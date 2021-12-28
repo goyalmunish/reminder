@@ -83,57 +83,57 @@ func (reminderData *ReminderData) FindNotesByTagSlug(tagSlug string, status stri
 // update note's text
 func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
 	err := note.UpdateText(text)
-	if err == nil {
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the data file")
-		return nil
+	if err != nil {
+		return err
 	}
-	return err
+	reminderData.UpdateDataFile()
+	fmt.Println("Updated the data file")
+	return nil
 }
 
 // update note's due date (complete by)
 func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
 	err := note.UpdateCompleteBy(text)
-	if err == nil {
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the data file")
-		return nil
+	if err != nil {
+		return err
 	}
-	return err
+	reminderData.UpdateDataFile()
+	fmt.Println("Updated the data file")
+	return nil
 }
 
 // add note's comment
 func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error {
 	err := note.AddComment(text)
-	if err == nil {
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the data file")
-		return nil
+	if err != nil {
+		return err
 	}
-	return err
+	reminderData.UpdateDataFile()
+	fmt.Println("Updated the data file")
+	return nil
 }
 
 // update note's tags
 func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error {
 	err := note.UpdateTags(tagIDs)
-	if err == nil {
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the data file")
-		return nil
+	if err != nil {
+		return err
 	}
-	return err
+	reminderData.UpdateDataFile()
+	fmt.Println("Updated the data file")
+	return nil
 }
 
 // update note's status
 func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) error {
 	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
 	err := note.UpdateStatus(status, repeatTagIDs)
-	if err == nil {
-		reminderData.UpdateDataFile()
-		fmt.Println("Updated the data file")
-		return nil
+	if err != nil {
+		return err
 	}
-	return err
+	reminderData.UpdateDataFile()
+	fmt.Println("Updated the data file")
+	return nil
 }
 
 // register basic tags
@@ -160,11 +160,11 @@ func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	tag, err := FNewTag(tagID, promptTagSlug, promptTagGroup)
 
 	// validate and save data
-	if err == nil {
-		err, _ = reminderData.newTagAppend(tag), tagID
-	} else {
+	if err != nil {
 		utils.PrintErrorIfPresent(err)
 		return 0, err
+	} else {
+		err, _ = reminderData.newTagAppend(tag), tagID
 	}
 	return tagID, err
 }
@@ -206,11 +206,11 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	promptNoteText := utils.GeneratePrompt("note_text", "")
 	note, err := FNewNote(tagIDs, promptNoteText)
 	// validate and save data
-	if err == nil {
-		err = reminderData.newNoteAppend(note)
-	} else {
+	if err != nil {
 		utils.PrintErrorIfPresent(err)
 		return note, err
+	} else {
+		err = reminderData.newNoteAppend(note)
 	}
 	return note, nil
 }
@@ -395,18 +395,18 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	// create new note or show note options
 	if noteIndex == len(texts) {
 		// add new note
-		if tagID >= 0 {
-			note, err := reminderData.NewNoteRegistration([]int{tagID})
-			if err == nil {
-				var updatedNotes Notes
-				updatedNotes = append(updatedNotes, note)
-				updatedNotes = append(updatedNotes, notes...)
-				reminderData.PrintNotesAndAskOptions(updatedNotes, tagID)
-			}
-			utils.PrintErrorIfPresent(err)
-		} else {
+		if tagID < 0 {
 			return errors.New("The passed tagID is invalid!")
 		}
+		note, err := reminderData.NewNoteRegistration([]int{tagID})
+		if err != nil {
+			utils.PrintErrorIfPresent(err)
+			return err
+		}
+		var updatedNotes Notes
+		updatedNotes = append(updatedNotes, note)
+		updatedNotes = append(updatedNotes, notes...)
+		reminderData.PrintNotesAndAskOptions(updatedNotes, tagID)
 	} else {
 		// ask options about select note
 		note := notes[noteIndex]

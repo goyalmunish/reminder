@@ -173,17 +173,17 @@ func flow() {
 		ext := path.Ext(reminderData.DataFile)
 		lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
 		err := utils.PerformWhich("wdiff")
-		if err == nil {
-			err = utils.PerformFilePresence(lnFile)
-			if err == nil {
-				err = utils.FPerformCwdiff(lnFile, reminderData.DataFile)
-			} else {
-				fmt.Printf("Warning: `%v` file is not available yet\n", lnFile)
-				err = utils.PerformCat(reminderData.DataFile)
-			}
-		} else {
+		if err != nil {
 			fmt.Printf("%v Warning: `wdiff` command is not available\n", utils.Symbols["error"])
 			err = utils.PerformCat(reminderData.DataFile)
+		} else {
+			err = utils.PerformFilePresence(lnFile)
+			if err != nil {
+				fmt.Printf("Warning: `%v` file is not available yet\n", lnFile)
+				err = utils.PerformCat(reminderData.DataFile)
+			} else {
+				err = utils.FPerformCwdiff(lnFile, reminderData.DataFile)
+			}
 		}
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):
