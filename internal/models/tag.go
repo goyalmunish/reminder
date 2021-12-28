@@ -95,11 +95,12 @@ func FBasicTags() Tags {
 	var basicTags Tags
 	for index, tagMap := range basicTagsMap {
 		tag := Tag{
-			Id:         index,
-			Slug:       tagMap["slug"],
-			Group:      tagMap["group"],
-			CreatedAt:  utils.CurrentUnixTimestamp(),
-			BaseStruct: BaseStruct{UpdatedAt: utils.CurrentUnixTimestamp()},
+			Id:    index,
+			Slug:  tagMap["slug"],
+			Group: tagMap["group"],
+			BaseStruct: BaseStruct{
+				CreatedAt: utils.CurrentUnixTimestamp(),
+				UpdatedAt: utils.CurrentUnixTimestamp()},
 		}
 		basicTags = append(basicTags, &tag)
 	}
@@ -109,9 +110,10 @@ func FBasicTags() Tags {
 // prompt for new Tag
 func FNewTag(tagID int, promptTagSlug Prompter, promptTagGroup Prompter) (*Tag, error) {
 	tag := &Tag{
-		Id:         tagID,
-		CreatedAt:  utils.CurrentUnixTimestamp(),
-		BaseStruct: BaseStruct{UpdatedAt: utils.CurrentUnixTimestamp()},
+		Id: tagID,
+		BaseStruct: BaseStruct{
+			CreatedAt: utils.CurrentUnixTimestamp(),
+			UpdatedAt: utils.CurrentUnixTimestamp()},
 		// Slug:      tagSlug,
 		// Group:     tagGroup,
 	}

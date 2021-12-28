@@ -13,6 +13,7 @@ A note can have multiple comments
 */
 type Comment struct {
 	Text string `json:"text"`
+	BaseStruct
 }
 
 type Comments []*Comment
