@@ -19,7 +19,7 @@ type Note struct {
 	TagIds     []int    `json:"tag_ids"`
 	CompleteBy int64    `json:"complete_by"`
 	CreatedAt  int64    `json:"created_at"`
-	UpdatedAt  int64    `json:"updated_at"`
+	BaseStruct
 }
 
 type Notes []*Note
@@ -217,7 +217,7 @@ func FNewNote(tagIDs []int, promptNoteText Prompter) (*Note, error) {
 		CompleteBy: 0,
 		TagIds:     tagIDs,
 		CreatedAt:  utils.CurrentUnixTimestamp(),
-		UpdatedAt:  utils.CurrentUnixTimestamp(),
+		BaseStruct: BaseStruct{UpdatedAt: utils.CurrentUnixTimestamp()},
 		// Text:       noteText,
 	}
 	noteText, err := promptNoteText.Run()

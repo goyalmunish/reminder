@@ -19,7 +19,7 @@ type Tag struct {
 	Slug      string `json:"slug"`  // client-facing string-based id for tag
 	Group     string `json:"group"` // a note can be part of only one tag within a group
 	CreatedAt int64  `json:"created_at"`
-	UpdatedAt int64  `json:"updated_at"`
+	BaseStruct
 }
 
 // provide basic string representation of a tag
@@ -96,11 +96,11 @@ func FBasicTags() Tags {
 	var basicTags Tags
 	for index, tagMap := range basicTagsMap {
 		tag := Tag{
-			Id:        index,
-			Slug:      tagMap["slug"],
-			Group:     tagMap["group"],
-			CreatedAt: utils.CurrentUnixTimestamp(),
-			UpdatedAt: utils.CurrentUnixTimestamp(),
+			Id:         index,
+			Slug:       tagMap["slug"],
+			Group:      tagMap["group"],
+			CreatedAt:  utils.CurrentUnixTimestamp(),
+			BaseStruct: BaseStruct{UpdatedAt: utils.CurrentUnixTimestamp()},
 		}
 		basicTags = append(basicTags, &tag)
 	}
@@ -110,9 +110,9 @@ func FBasicTags() Tags {
 // prompt for new Tag
 func FNewTag(tagID int, promptTagSlug Prompter, promptTagGroup Prompter) (*Tag, error) {
 	tag := &Tag{
-		Id:        tagID,
-		CreatedAt: utils.CurrentUnixTimestamp(),
-		UpdatedAt: utils.CurrentUnixTimestamp(),
+		Id:         tagID,
+		CreatedAt:  utils.CurrentUnixTimestamp(),
+		BaseStruct: BaseStruct{UpdatedAt: utils.CurrentUnixTimestamp()},
 		// Slug:      tagSlug,
 		// Group:     tagGroup,
 	}

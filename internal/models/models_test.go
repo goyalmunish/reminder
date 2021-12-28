@@ -169,10 +169,10 @@ func TestFBasicTags(t *testing.T) {
 
 func TestNotes(t *testing.T) {
 	var notes []*models.Note
-	notes = append(notes, &models.Note{Text: "1", Status: "pending", UpdatedAt: 1600000001})
-	notes = append(notes, &models.Note{Text: "2", Status: "pending", UpdatedAt: 1600000004})
-	notes = append(notes, &models.Note{Text: "3", Status: "done", UpdatedAt: 1600000003})
-	notes = append(notes, &models.Note{Text: "4", Status: "done", UpdatedAt: 1600000002})
+	notes = append(notes, &models.Note{Text: "1", Status: "pending", BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}})
+	notes = append(notes, &models.Note{Text: "2", Status: "pending", BaseStruct: models.BaseStruct{UpdatedAt: 1600000004}})
+	notes = append(notes, &models.Note{Text: "3", Status: "done", BaseStruct: models.BaseStruct{UpdatedAt: 1600000003}})
+	notes = append(notes, &models.Note{Text: "4", Status: "done", BaseStruct: models.BaseStruct{UpdatedAt: 1600000002}})
 	sort.Sort(models.Notes(notes))
 	var gotTexts []string
 	for _, value := range notes {
@@ -297,15 +297,15 @@ func TestWithTagIdAndStatus(t *testing.T) {
 	tags = append(tags, &tag4)
 	// create notes
 	var notes models.Notes
-	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	notes = append(notes, &note1)
-	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, UpdatedAt: 1600000004}
+	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000004}}
 	notes = append(notes, &note2)
-	note3 := models.Note{Text: "3", Status: "done", TagIds: []int{2}, UpdatedAt: 1600000003}
+	note3 := models.Note{Text: "3", Status: "done", TagIds: []int{2}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000003}}
 	notes = append(notes, &note3)
-	note4 := models.Note{Text: "4", Status: "done", TagIds: []int{}, UpdatedAt: 1600000002}
+	note4 := models.Note{Text: "4", Status: "done", TagIds: []int{}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000002}}
 	notes = append(notes, &note4)
-	note5 := models.Note{Text: "5", Status: "pending", UpdatedAt: 1600000005}
+	note5 := models.Note{Text: "5", Status: "pending", BaseStruct: models.BaseStruct{UpdatedAt: 1600000005}}
 	notes = append(notes, &note5)
 	// searching notes
 	// case 1
@@ -320,7 +320,7 @@ func TestWithTagIdAndStatus(t *testing.T) {
 
 func TestAddComment(t *testing.T) {
 	// create notes
-	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	// add comments
 	// case 1
 	err := note1.AddComment("test comment 1")
@@ -341,7 +341,7 @@ func TestAddComment(t *testing.T) {
 
 func TestUpdateText(t *testing.T) {
 	// create notes
-	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	// update text
 	// case 1
 	err := note1.UpdateText("updated text 1")
@@ -355,7 +355,7 @@ func TestUpdateText(t *testing.T) {
 
 func TestUpdateCompleteBy(t *testing.T) {
 	// create notes
-	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	utils.AssertEqual(t, note1.CompleteBy, 0)
 	// update complete_by
 	// case 1
@@ -370,7 +370,7 @@ func TestUpdateCompleteBy(t *testing.T) {
 
 func TestUpdateTags(t *testing.T) {
 	// create notes
-	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	// update TagIds
 	// case 1
 	tagIds := []int{2, 5}
@@ -386,7 +386,7 @@ func TestUpdateTags(t *testing.T) {
 
 func TestUpdateStatus(t *testing.T) {
 	// create notes
-	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	// update TagIds
 	// case 1
 	err := note1.UpdateStatus("done", []int{1, 2, 3})
@@ -601,15 +601,15 @@ func TestFindNotesByTagId(t *testing.T) {
 	reminderData.Tags = tags
 	// create notes
 	var notes models.Notes
-	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	notes = append(notes, &note1)
-	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, UpdatedAt: 1600000004}
+	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000004}}
 	notes = append(notes, &note2)
-	note3 := models.Note{Text: "3", Status: "done", TagIds: []int{2}, UpdatedAt: 1600000003}
+	note3 := models.Note{Text: "3", Status: "done", TagIds: []int{2}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000003}}
 	notes = append(notes, &note3)
-	note4 := models.Note{Text: "4", Status: "done", TagIds: []int{}, UpdatedAt: 1600000002}
+	note4 := models.Note{Text: "4", Status: "done", TagIds: []int{}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000002}}
 	notes = append(notes, &note4)
-	note5 := models.Note{Text: "5", Status: "pending", UpdatedAt: 1600000005}
+	note5 := models.Note{Text: "5", Status: "pending", BaseStruct: models.BaseStruct{UpdatedAt: 1600000005}}
 	notes = append(notes, &note5)
 	reminderData.Notes = notes
 	// searching notes
@@ -642,15 +642,15 @@ func TestFindNotesByTagSlug(t *testing.T) {
 	reminderData.Tags = tags
 	// create notes
 	var notes models.Notes
-	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, UpdatedAt: 1600000001}
+	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	notes = append(notes, &note1)
-	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, UpdatedAt: 1600000004}
+	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000004}}
 	notes = append(notes, &note2)
-	note3 := models.Note{Text: "3", Status: "done", TagIds: []int{2}, UpdatedAt: 1600000003}
+	note3 := models.Note{Text: "3", Status: "done", TagIds: []int{2}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000003}}
 	notes = append(notes, &note3)
-	note4 := models.Note{Text: "4", Status: "done", TagIds: []int{}, UpdatedAt: 1600000002}
+	note4 := models.Note{Text: "4", Status: "done", TagIds: []int{}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000002}}
 	notes = append(notes, &note4)
-	note5 := models.Note{Text: "5", Status: "pending", UpdatedAt: 1600000005}
+	note5 := models.Note{Text: "5", Status: "pending", BaseStruct: models.BaseStruct{UpdatedAt: 1600000005}}
 	notes = append(notes, &note5)
 	reminderData.Notes = notes
 	// searching notes
@@ -717,11 +717,11 @@ func TestFNewNote(t *testing.T) {
 	tagIDs := []int{1, 3, 5}
 	note, _ := models.FNewNote(tagIDs, mockPromptNoteText)
 	want := &models.Note{
-		Text:      "a random note text",
-		TagIds:    tagIDs,
-		Status:    note.Status,
-		CreatedAt: note.CreatedAt,
-		UpdatedAt: note.UpdatedAt,
+		Text:       "a random note text",
+		TagIds:     tagIDs,
+		Status:     note.Status,
+		CreatedAt:  note.CreatedAt,
+		BaseStruct: models.BaseStruct{UpdatedAt: note.UpdatedAt},
 	}
 	utils.AssertEqual(t, note, want)
 }
