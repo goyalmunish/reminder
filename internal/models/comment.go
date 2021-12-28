@@ -1,9 +1,8 @@
 package models
 
 import (
-	"fmt"
+	"html/template"
 	"reminder/pkg/utils"
-	"strings"
 )
 
 /*
@@ -25,10 +24,11 @@ func (c Comments) Less(i, j int) bool { return c[i].CreatedAt > c[j].CreatedAt }
 
 // provide basic string representation of a commment
 func (comment *Comment) String() string {
-	var strs []string
-	strs = append(strs, fmt.Sprintf("[%v]", utils.UnixTimestampToMediumTimeStr(comment.CreatedAt)))
-	strs = append(strs, comment.Text)
-	return strings.Join(strs, " ")
+	reportTemplate := `[{{.CreatedAt | mediumTimeStr}}] {{.Text}}`
+	funcMap := template.FuncMap{
+		"mediumTimeStr": utils.UnixTimestampToMediumTimeStr,
+	}
+	return utils.TemplateResult(reportTemplate, funcMap, comment)
 }
 
 // provide basic string representation of commments
