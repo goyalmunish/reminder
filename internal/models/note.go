@@ -196,9 +196,10 @@ func fPrintNoteField(fieldName string, fieldValue interface{}) string {
 	var strs []string
 	fieldDynamicType := fmt.Sprintf("%T", fieldValue)
 	if fieldDynamicType == "[]string" {
-		comments := fieldValue.([]string)
-		if comments != nil {
-			for _, v := range comments {
+		items := fieldValue.([]string)
+		strs = append(strs, fmt.Sprintf("  |  %12v:\n", fieldName))
+		if items != nil {
+			for _, v := range items {
 				strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
 			}
 		}
