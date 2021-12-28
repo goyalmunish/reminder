@@ -186,7 +186,8 @@ func TestNoteStrings(t *testing.T) {
 	comments := models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "c2"}, &models.Comment{Text: "c3"}}
 	note := &models.Note{Text: "dummy text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	want := `[  |          Text:  dummy text
-   |              :  [nil] c1
+   |      Comments:
+  |              :  [nil] c1
   |              :  [nil] c2
   |              :  [nil] c3
    |        Status:  pending
@@ -208,10 +209,12 @@ func TestExternalText(t *testing.T) {
 	reminderData := &models.ReminderData{Tags: tags}
 	want := `Note Details: -------------------------------------------------
   |          Text:  dummy text
+  |      Comments:
   |              :  [nil] c1
   |              :  [nil] c2
   |              :  [nil] c3
   |        Status:  pending
+  |          Tags:
   |              :  tag_1
   |              :  tag_2
   |    CompleteBy:  Sunday, 03-Jan-21 10:20:35 UTC
