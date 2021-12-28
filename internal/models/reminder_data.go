@@ -1,7 +1,6 @@
 package models
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -232,21 +231,11 @@ Stats of "{{.DataFile}}"
   - Number of Tags: {{.Tags | len}}
   - Pending Notes: {{.Notes | numPending}}/{{.Notes | numAll}}
 `
-	// define report result (as bytes)
-	var reportResult bytes.Buffer
-	// define report
-	report := template.Must(template.New("report").Funcs(template.FuncMap{
+	funcMap := template.FuncMap{
 		"numPending": func(notes Notes) int { return len(notes.WithStatus("pending")) },
 		"numAll":     func(notes Notes) int { return len(notes) },
-	}).Parse(reportTemplate))
-	// execute report to populate `reportResult`
-	err := report.Execute(&reportResult, *reminderData)
-	if err != nil {
-		return err.Error()
-	} else {
-		// return report data as string
-		return reportResult.String()
 	}
+	return utils.TemplateResult(reportTemplate, funcMap, *reminderData)
 }
 
 // create timestamped backup
