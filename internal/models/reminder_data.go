@@ -225,7 +225,6 @@ func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 
 // return current status
 func (reminderData *ReminderData) Stats() string {
-	// define report template
 	reportTemplate := `
 Stats of "{{.DataFile}}"
   - Number of Tags: {{.Tags | len}}
