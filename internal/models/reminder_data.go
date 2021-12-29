@@ -376,12 +376,21 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 }
 
 // method (recursively) to print notes interactively
-// if tagID >= 0, the passed notes is ignored, otherwise tagID and status
-// is used to get notes
+// in some cases, notes will be fetched, so blank notes can be passed
+// unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake"
 func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string) error {
-	// fetch latest notes if `tagID` is valid
-	if tagID >= 0 {
-		notes = reminderData.FindNotesByTagId(tagID, status)
+	// check if passed notes is to be used or to fetch latest notes
+	if status == "done" {
+		// fetch latest notes
+		notes = reminderData.Notes.WithStatus("done")
+		fmt.Printf("A total of %v notes marked as 'done':\n", len(notes))
+	} else if status == "pending" {
+		if tagID >= 0 {
+			// fetch latest notes
+			notes = reminderData.FindNotesByTagId(tagID, status)
+		}
+	} else {
+		fmt.Printf("Using passed notes, so the list will not be refreshed immediately.\n")
 	}
 	// sort notes
 	sort.Sort(Notes(notes))

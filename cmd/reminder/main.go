@@ -133,10 +133,7 @@ func flow() {
 		err := reminderData.PrintNotesAndAskOptions(currentNotes, -1, "fake")
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
-		allNotes := reminderData.Notes
-		doneNotes := allNotes.WithStatus("done")
-		fmt.Printf("A total of %v notes marked as 'done':\n", len(doneNotes))
-		err := reminderData.PrintNotesAndAskOptions(doneNotes, -1, "fake")
+		err := reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "done")
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
 		// get texts of all notes
