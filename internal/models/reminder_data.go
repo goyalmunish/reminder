@@ -149,6 +149,62 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 	}
 }
 
+// fetch all pending notes which are urgent
+func (reminderData *ReminderData) UrgentNotes() Notes {
+	allNotes := reminderData.Notes
+	pendingNotes := allNotes.WithStatus("pending")
+	// assuming there are at least 100 notes (on average)
+	currentNotes := make([]*Note, 0, 100)
+	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
+	// populating currentNotes
+	for _, note := range pendingNotes {
+		noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
+		// first process notes without tag with group "repeat"
+		// start showing such notes 7 days in advance from their due date, and until they are marked done
+		minDay := note.CompleteBy - 7*24*60*60
+		currentTimestamp := utils.CurrentUnixTimestamp()
+		if (len(noteIDsWithRepeat) == 0) && (note.CompleteBy != 0) && (currentTimestamp >= minDay) {
+			currentNotes = append(currentNotes, note)
+		}
+		// check notes with tag with group "repeat"
+		// start showing notes with "repeat-annually" 7 days in advance
+		// start showing notes with "repeat-monthly" 3 days in advance
+		// don't show such notes after their due date is past by 2 day
+		if (len(noteIDsWithRepeat) > 0) && (note.CompleteBy != 0) {
+			// check for repeat-annually tag
+			// note: for the CompletedBy date of the note, we accept only date
+			// so, even if there is a time element recorded the the timestamp,
+			// we ignore it
+			repeatAnnuallyTag := reminderData.TagFromSlug("repeat-annually")
+			repeatMonthlyTag := reminderData.TagFromSlug("repeat-monthly")
+			if (repeatAnnuallyTag != nil) && utils.IntPresentInSlice(repeatAnnuallyTag.Id, note.TagIds) {
+				_, noteMonth, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
+				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYear(int(noteMonth), noteDay)
+				noteTimestampPrevious := noteTimestampCurrent - 365*24*60*60
+				noteTimestampNext := noteTimestampCurrent + 365*24*60*60
+				daysBefore := int64(7) // days before to start showing the note
+				daysAfter := int64(2)  // days after until to show the note
+				if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
+					currentNotes = append(currentNotes, note)
+				}
+			}
+			// check for repeat-monthly tag
+			if (repeatMonthlyTag != nil) && utils.IntPresentInSlice(repeatMonthlyTag.Id, note.TagIds) {
+				_, _, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
+				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYearMonth(noteDay)
+				noteTimestampPrevious := noteTimestampCurrent - 30*24*60*60
+				noteTimestampNext := noteTimestampCurrent + 30*24*60*60
+				daysBefore := int64(3) // days beofre to start showing the note
+				daysAfter := int64(2)  // days after until to show the note
+				if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
+					currentNotes = append(currentNotes, note)
+				}
+			}
+		}
+	}
+	return currentNotes
+}
+
 // register a new tag
 func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	// collect and ask info about the tag
@@ -373,59 +429,6 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		}
 	}
 	return "stay"
-}
-
-// fetch all pending notes which are urgent
-func (reminderData *ReminderData) UrgentNotes() Notes {
-	allNotes := reminderData.Notes
-	pendingNotes := allNotes.WithStatus("pending")
-	// assuming there are at least 100 notes (on average)
-	currentNotes := make([]*Note, 0, 100)
-	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
-	// populating currentNotes
-	for _, note := range pendingNotes {
-		noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
-		// first process notes without tag with group "repeat"
-		// start showing such notes 7 days in advance from their due date, and until they are marked done
-		minDay := note.CompleteBy - 7*24*60*60
-		currentTimestamp := utils.CurrentUnixTimestamp()
-		if (len(noteIDsWithRepeat) == 0) && (note.CompleteBy != 0) && (currentTimestamp >= minDay) {
-			currentNotes = append(currentNotes, note)
-		}
-		// check notes with tag with group "repeat"
-		// start showing notes with "repeat-annually" 7 days in advance
-		// start showing notes with "repeat-monthly" 3 days in advance
-		// don't show such notes after their due date is past by 2 day
-		if (len(noteIDsWithRepeat) > 0) && (note.CompleteBy != 0) {
-			// check for repeat-annually tag
-			repeatAnnuallyTag := reminderData.TagFromSlug("repeat-annually")
-			repeatMonthlyTag := reminderData.TagFromSlug("repeat-monthly")
-			if (repeatAnnuallyTag != nil) && utils.IntPresentInSlice(repeatAnnuallyTag.Id, note.TagIds) {
-				_, noteMonth, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
-				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYear(int(noteMonth), noteDay)
-				noteTimestampPrevious := noteTimestampCurrent - 365*24*60*60
-				noteTimestampNext := noteTimestampCurrent + 365*24*60*60
-				daysBefore := int64(7)
-				daysAfter := int64(2)
-				if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
-					currentNotes = append(currentNotes, note)
-				}
-			}
-			// check for repeat-monthly tag
-			if (repeatMonthlyTag != nil) && utils.IntPresentInSlice(repeatMonthlyTag.Id, note.TagIds) {
-				_, _, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
-				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYearMonth(noteDay)
-				noteTimestampPrevious := noteTimestampCurrent - 30*24*60*60
-				noteTimestampNext := noteTimestampCurrent + 30*24*60*60
-				daysBefore := int64(3)
-				daysAfter := int64(2)
-				if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
-					currentNotes = append(currentNotes, note)
-				}
-			}
-		}
-	}
-	return currentNotes
 }
 
 // method (recursively) to print notes interactively
