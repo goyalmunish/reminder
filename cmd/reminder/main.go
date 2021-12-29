@@ -35,7 +35,7 @@ func flow() {
 	fmt.Println("| ----------------------------------------------------------------- |")
 	_, result := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
-		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Pending Notes"),
+		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Urgent Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Note"),
@@ -77,7 +77,7 @@ func flow() {
 		_, _ = reminderData.NewTagRegistration()
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		reminderData.RegisterBasicTags()
-	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Pending Notes"):
+	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Urgent Notes"):
 		fmt.Println("Note: Following are the pending notes with due date:")
 		fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 		fmt.Println("  - within a week for repeat-annually and 2 days post due date (ignoring its year)")
