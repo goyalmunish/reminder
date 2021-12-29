@@ -185,6 +185,10 @@ func ValidateDateString(input string) error {
 	}
 }
 
+// run given go template with given data and function map, and return the result as string
+// it is interesting to note that even though data is recieved as `interface{}`, the template
+// is able to access those attributes without even having to perform type assertion to get
+// the underneath concrete value; this is contrary to masking behavior of interfaces
 func TemplateResult(reportTemplate string, funcMap template.FuncMap, data interface{}) string {
 	// define report result (as bytes)
 	var reportResult bytes.Buffer
