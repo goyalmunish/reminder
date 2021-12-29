@@ -30,7 +30,7 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 - A given task:
     - can be **updated** (📝) with its text, and also can be enhanced with time-stamped **comments** (💬); so that you can track how and when the progress happened
     - can be marked **done** (✅) or **pending** (⏰); marking it as "done" makes it invisible
-    - can be associated with **due-date** (📅); tasks with upcoming deadlines automatically show up under the **"Pending Notes"** option under **Main Menu**
+    - can be associated with **due-date** (📅); tasks with upcoming deadlines automatically show up under the **"~Pending~ Urgent Notes"** option under **Main Menu**
 - **Full-text search** (🔎) among all tasks.
 - **Tag-groups** for grouping tags, for managing priority-levels (⬆️ ⬇️) or workflow-stages.
 - Provides you with **"Register Basic Tags"** functionality to seed basic tags which have special meaning to the workflow.
@@ -71,7 +71,7 @@ Now, from within the **"List Stuff"** option, you can add a new tag using **"Add
 
 On selecting a tag (navigating to the tag and hitting **Enter** key), all of its tasks show up as a list of selectable items. You can then **navigate to a given task** and hit **Enter** key to bring up a **menu to update the task** (it lets you change its text, add comments, mark it as pending, mark it as done, add due-date, change its existing tag(s)). The following figures shows you how this menu looks like:
 
-Note: The **"Pending Notes"** shows you tasks that require your immediate attention. In general, tasks with a **due-date** in upcoming `7` days start showing up under this option (and remain there until they are marked done). The tags **"repeat-monthly"** and **"repeat-annually"** are special; tasks tagged with them also show up under the **"Pending Notes"** option close to their due-dates in their respective monthly and annual frequencies. These rules are also listed under **"Pending Notes"** option as a reference.
+Note: The **"~Pending~ Urgent Notes"** shows you tasks that require your immediate attention. In general, tasks with a **due-date** in upcoming `7` days start showing up under this option (and remain there until they are marked done). The tags **"repeat-monthly"** and **"repeat-annually"** are special; tasks tagged with them also show up under the **"~Pending~ Urgent Notes"** option close to their due-dates in their respective monthly and annual frequencies. These rules are also listed under **"~Pending~ Urgent Notes"** option as a reference.
 
 <p align="center">
   <img src="./assets/images/screen_search_04.png" width="100%">
