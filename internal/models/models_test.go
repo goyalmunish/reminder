@@ -679,6 +679,95 @@ func TestRegisterBasicTags(t *testing.T) {
 	utils.AssertEqual(t, len(reminderData.Tags), 7)
 }
 
+func TestUrgentNotes(t *testing.T) {
+	var dataFilePath = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(dataFilePath))
+	// create the file and required dirs
+	models.FMakeSureFileExists(dataFilePath)
+	reminderData := models.FReadDataFile(dataFilePath)
+	// register basic tags
+	reminderData.RegisterBasicTags()
+	// get current time
+	currentTime := utils.CurrentUnixTimestamp()
+	// register notes
+	// for reference: here is the list of basic tags
+	// {"slug": "current", "group": ""},
+	// {"slug": "priority-urgent", "group": "priority"},
+	// {"slug": "priority-medium", "group": "priority"},
+	// {"slug": "priority-low", "group": "priority"},
+	// {"slug": "repeat-annually", "group": "repeat"},
+	// {"slug": "repeat-monthly", "group": "repeat"},
+	// {"slug": "tips", "group": "tips"}}
+	currentTagId := reminderData.TagFromSlug("current").Id
+	repeatAnnuallyTagId := reminderData.TagFromSlug("repeat-annually").Id
+	repeatMonthlyTagId := reminderData.TagFromSlug("repeat-monthly").Id
+	var notes models.Notes
+	// non-repeat done notes
+	notes = append(notes, &models.Note{Text: "NRD01a", Status: "done", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 8*24*3600})
+	notes = append(notes, &models.Note{Text: "NRD02a", Status: "done", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})
+	notes = append(notes, &models.Note{Text: "NRD03a", Status: "done", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600})
+	// repeat-annually done notes
+	notes = append(notes, &models.Note{Text: "RAD01a", Status: "done", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 8*24*3600})
+	notes = append(notes, &models.Note{Text: "RAD02a", Status: "done", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})
+	notes = append(notes, &models.Note{Text: "RAD03a", Status: "done", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600})
+	// repeat-monthally done notes
+	notes = append(notes, &models.Note{Text: "RMD01a", Status: "done", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 8*24*3600})
+	notes = append(notes, &models.Note{Text: "RMD02a", Status: "done", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})
+	notes = append(notes, &models.Note{Text: "RMD03a", Status: "done", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600})
+	// non-repeat pending notes
+	notes = append(notes, &models.Note{Text: "NRP01a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})        // expected
+	notes = append(notes, &models.Note{Text: "NRP02a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*24*3600 - 3600}) // expected
+	notes = append(notes, &models.Note{Text: "NRP02b", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*24*3600 + 3600}) // expected
+	notes = append(notes, &models.Note{Text: "NRP03a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})        // expected
+	notes = append(notes, &models.Note{Text: "NRP04a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 - 3600}) // expected
+	notes = append(notes, &models.Note{Text: "NRP04b", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 + 3600}) // expected
+	notes = append(notes, &models.Note{Text: "NRP05a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 3*24*3600 - 3600}) // expected
+	notes = append(notes, &models.Note{Text: "NRP05b", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 3*24*3600 + 3600}) // expected
+	notes = append(notes, &models.Note{Text: "NRP06a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600 - 3600}) // expected
+	notes = append(notes, &models.Note{Text: "NRP06b", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600 + 3600})
+	notes = append(notes, &models.Note{Text: "NRP07a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
+	// repeat-annually pending notes
+	notes = append(notes, &models.Note{Text: "RAP01", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})
+	notes = append(notes, &models.Note{Text: "RAP02", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600}) // expected
+	notes = append(notes, &models.Note{Text: "RAP03", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime})             // expected
+	notes = append(notes, &models.Note{Text: "RAP04", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600}) // expected
+	notes = append(notes, &models.Note{Text: "RAP05", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 6*24*3600}) // expected
+	notes = append(notes, &models.Note{Text: "RAP06", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
+	notes = append(notes, &models.Note{Text: "RAP07", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600 - 2*365})
+	notes = append(notes, &models.Note{Text: "RAP08", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600 - 2*365}) // expected
+	notes = append(notes, &models.Note{Text: "RAP09", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*365})             // expected
+	notes = append(notes, &models.Note{Text: "RAP10", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600 - 2*365}) // expected
+	notes = append(notes, &models.Note{Text: "RAP11", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 6*24*3600 - 2*365}) // expected
+	notes = append(notes, &models.Note{Text: "RAP12", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600 - 2*365})
+	notes = append(notes, &models.Note{Text: "RAP13", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600 + 2*365})
+	notes = append(notes, &models.Note{Text: "RAP14", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600 + 2*365}) // expected
+	notes = append(notes, &models.Note{Text: "RAP15", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*365})             // expected
+	notes = append(notes, &models.Note{Text: "RAP16", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600 + 2*365}) // expected
+	notes = append(notes, &models.Note{Text: "RAP17", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 6*24*3600 + 2*365}) // expected
+	notes = append(notes, &models.Note{Text: "RAP18", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600 + 2*365})
+	// repeat-monthly pending notes
+	notes = append(notes, &models.Note{Text: "RMP01", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})
+	notes = append(notes, &models.Note{Text: "RMP02", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600}) // expected
+	notes = append(notes, &models.Note{Text: "RMP03", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime})             // expected
+	notes = append(notes, &models.Note{Text: "RMP04", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600}) // expected
+	notes = append(notes, &models.Note{Text: "RMP05", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600}) // expected
+	notes = append(notes, &models.Note{Text: "RMP06", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600})
+	notes = append(notes, &models.Note{Text: "RMP07", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
+	reminderData.Notes = notes
+	// get urgent notes
+	urgentNotes := reminderData.UrgentNotes()
+	var urgentNotesText []string
+	for _, note := range urgentNotes {
+		urgentNotesText = append(urgentNotesText, note.Text)
+	}
+	utils.AssertEqual(t, urgentNotesText, []string{
+		"NRP01a", "NRP02a", "NRP02b", "NRP03a", "NRP04a", "NRP04b", "NRP05a", "NRP05b", "NRP06a",
+		"RAP02", "RAP03", "RAP04", "RAP05", "RAP08", "RAP09", "RAP10", "RAP11", "RAP14", "RAP15", "RAP16", "RAP17",
+		"RMP02", "RMP03", "RMP04", "RMP05",
+	})
+}
+
 func TestPrintStats(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test

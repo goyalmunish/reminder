@@ -200,6 +200,11 @@ func AssertEqual(t *testing.T, got interface{}, want interface{}) {
 // function to determine if it is time to show a repeat-based note/task
 // dependency: `CurrentUnixTimestamp`
 func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter int64) bool {
+	// fmt.Printf("Timestamp Curr: %v %v\n", noteTimestampCurrent, UnixTimestampToTime(noteTimestampCurrent))
+	// fmt.Printf("Timestamp Prev: %v %v\n", noteTimestampPrevious, UnixTimestampToTime(noteTimestampPrevious))
+	// fmt.Printf("Timestamp Next: %v %v\n", noteTimestampNext, UnixTimestampToTime(noteTimestampNext))
+	// fmt.Printf("Days before: %v\n", daysBefore)
+	// fmt.Printf("Days after: %v\n", daysAfter)
 	currentTimestamp := CurrentUnixTimestamp()
 	daysSecs := int64(24 * 60 * 60)
 	return ((currentTimestamp >= noteTimestampCurrent-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampCurrent+daysAfter*daysSecs)) ||
