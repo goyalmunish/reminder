@@ -78,10 +78,6 @@ func flow() {
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Urgent Notes"):
-		fmt.Println("Note: Following are the pending notes with due date:")
-		fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
-		fmt.Println("  - within a week for repeat-annually and 2 days post due date (ignoring its year)")
-		fmt.Println("  - within 3 days for repeat-monthly and 2 days post due date (ignoring its year and month)")
 		err := reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending")
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
