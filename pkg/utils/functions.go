@@ -18,34 +18,6 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-// fmt.Sprintf("%v %v", Symbols["tag"], "Update tags"):
-
-// type StandaloneFunctions interface {
-// 	CurrentUnixTimestamp() int64
-// 	UnixTimestampToTime(unixTimestamp int64) time.Time
-// 	UnixTimestampToTimeStr(unixTimestamp int64, timeFormat string) string
-// 	UnixTimestampToLongTimeStr(unixTimestamp int64) string
-// 	UnixTimestampToShortTimeStr(unixTimestamp int64) string
-// 	UnixTimestampForCorrespondingCurrentYear(month int, day int) int64
-// 	UnixTimestampForCorrespondingCurrentYearMonth(day int) int64
-// 	IntPresentInSlice(a int, list []int) bool
-// 	GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int
-// 	PrintErrorIfPresent(err error)
-// 	TrimString(str string) string
-// 	ValidateString(input string) error
-// 	ValidateNonEmptyString(input string) error
-// 	ValidateDateString(input string) error
-// 	PerformShellOperation(exe string, args ...string) error
-// 	PerformFilePresence(filePath string) error
-// 	PerformWhich(shellCmd string) error
-// 	PerformCat(filePath string) error
-// 	FPerformCwdiff(oldFilePath string, newFilePath string) error
-// 	AskOption(options []string, label string) (int, string)
-// 	IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter int64) bool
-// 	Spinner(delay time.Duration)
-// 	AssertEqual(t *testing.T, got interface{}, want interface{})
-// }
-
 // get current time
 // serve as a central place to switch between
 // local time and UTC
