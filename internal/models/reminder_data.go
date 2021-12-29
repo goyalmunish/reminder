@@ -375,21 +375,82 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	return "stay"
 }
 
+// fetch all pending notes which are urgent
+func (reminderData *ReminderData) UrgentNotes() Notes {
+	allNotes := reminderData.Notes
+	pendingNotes := allNotes.WithStatus("pending")
+	// assuming there are at least 100 notes (on average)
+	currentNotes := make([]*Note, 0, 100)
+	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
+	// populating currentNotes
+	for _, note := range pendingNotes {
+		noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
+		// first process notes without tag with group "repeat"
+		// start showing such notes 7 days in advance from their due date, and until they are marked done
+		minDay := note.CompleteBy - 7*24*60*60
+		currentTimestamp := utils.CurrentUnixTimestamp()
+		if (len(noteIDsWithRepeat) == 0) && (note.CompleteBy != 0) && (currentTimestamp >= minDay) {
+			currentNotes = append(currentNotes, note)
+		}
+		// check notes with tag with group "repeat"
+		// start showing notes with "repeat-annually" 7 days in advance
+		// start showing notes with "repeat-monthly" 3 days in advance
+		// don't show such notes after their due date is past by 2 day
+		if (len(noteIDsWithRepeat) > 0) && (note.CompleteBy != 0) {
+			// check for repeat-annually tag
+			repeatAnnuallyTag := reminderData.TagFromSlug("repeat-annually")
+			repeatMonthlyTag := reminderData.TagFromSlug("repeat-monthly")
+			if (repeatAnnuallyTag != nil) && utils.IntPresentInSlice(repeatAnnuallyTag.Id, note.TagIds) {
+				_, noteMonth, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
+				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYear(int(noteMonth), noteDay)
+				noteTimestampPrevious := noteTimestampCurrent - 365*24*60*60
+				noteTimestampNext := noteTimestampCurrent + 365*24*60*60
+				daysBefore := int64(7)
+				daysAfter := int64(2)
+				if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
+					currentNotes = append(currentNotes, note)
+				}
+			}
+			// check for repeat-monthly tag
+			if (repeatMonthlyTag != nil) && utils.IntPresentInSlice(repeatMonthlyTag.Id, note.TagIds) {
+				_, _, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
+				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYearMonth(noteDay)
+				noteTimestampPrevious := noteTimestampCurrent - 30*24*60*60
+				noteTimestampNext := noteTimestampCurrent + 30*24*60*60
+				daysBefore := int64(3)
+				daysAfter := int64(2)
+				if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
+					currentNotes = append(currentNotes, note)
+				}
+			}
+		}
+	}
+	return currentNotes
+}
+
 // method (recursively) to print notes interactively
 // in some cases, notes will be fetched, so blank notes can be passed
 // unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake"
 func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string) error {
 	// check if passed notes is to be used or to fetch latest notes
 	if status == "done" {
-		// fetch latest notes
+		// fetch all the done notes
 		notes = reminderData.Notes.WithStatus("done")
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(notes))
 	} else if status == "pending" {
 		if tagID >= 0 {
-			// fetch latest notes
+			// fetch pending notes with given tagID
 			notes = reminderData.FindNotesByTagId(tagID, status)
+		} else {
+			// fetch urgent notes
+			fmt.Println("Note: Following are the pending notes with due date:")
+			fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
+			fmt.Println("  - within a week for repeat-annually and 2 days post due date (ignoring its year)")
+			fmt.Println("  - within 3 days for repeat-monthly and 2 days post due date (ignoring its year and month)")
+			notes = reminderData.UrgentNotes()
 		}
 	} else {
+		// use passed notes
 		fmt.Printf("Using passed notes, so the list will not be refreshed immediately.\n")
 	}
 	// sort notes
