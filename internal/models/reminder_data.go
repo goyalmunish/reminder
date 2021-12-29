@@ -376,12 +376,17 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 }
 
 // method (recursively) to print notes interactively
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int) error {
+// if tagID >= 0, the passed notes is ignored, otherwise tagID and status
+// is used to get notes
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string) error {
+	// fetch latest notes if `tagID` is valid
+	if tagID >= 0 {
+		notes = reminderData.FindNotesByTagId(tagID, status)
+	}
 	// sort notes
 	sort.Sort(Notes(notes))
 	texts := notes.ExternalTexts(utils.TerminalWidth() - 50)
 	// ask user to select a note
-	fmt.Println("Note: An added note appears immidiately, but if a note is moved, refresh the list by going to main menu and come back.")
 	promptText := ""
 	if tagID >= 0 {
 		promptText = fmt.Sprintf("Select Note (for the tag %v %v)", utils.Symbols["tag"], reminderData.Tags[tagID].Slug)
@@ -406,13 +411,13 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		var updatedNotes Notes
 		updatedNotes = append(updatedNotes, note)
 		updatedNotes = append(updatedNotes, notes...)
-		reminderData.PrintNotesAndAskOptions(updatedNotes, tagID)
+		reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status)
 	} else {
 		// ask options about select note
 		note := notes[noteIndex]
 		action := reminderData.PrintNoteAndAskOptions(note)
 		if action == "stay" {
-			reminderData.PrintNotesAndAskOptions(notes, tagID)
+			reminderData.PrintNotesAndAskOptions(notes, tagID, status)
 		}
 	}
 	return nil

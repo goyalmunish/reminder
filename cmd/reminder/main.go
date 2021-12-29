@@ -66,8 +66,7 @@ func flow() {
 				_, _ = reminderData.NewTagRegistration()
 			} else {
 				tag := reminderData.Tags[tagIndex]
-				notes := reminderData.FindNotesByTagId(tag.Id, "pending")
-				err := reminderData.PrintNotesAndAskOptions(notes, tag.Id)
+				err := reminderData.PrintNotesAndAskOptions(models.Notes{}, tag.Id, "pending")
 				utils.PrintErrorIfPresent(err)
 			}
 		}
@@ -131,13 +130,13 @@ func flow() {
 		fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 		fmt.Println("  - within a week for repeat-annually and 2 days post due date (ignoring its year)")
 		fmt.Println("  - within 3 days for repeat-monthly and 2 days post due date (ignoring its year and month)")
-		err := reminderData.PrintNotesAndAskOptions(currentNotes, -1)
+		err := reminderData.PrintNotesAndAskOptions(currentNotes, -1, "fake")
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
 		allNotes := reminderData.Notes
 		doneNotes := allNotes.WithStatus("done")
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(doneNotes))
-		err := reminderData.PrintNotesAndAskOptions(doneNotes, -1)
+		err := reminderData.PrintNotesAndAskOptions(doneNotes, -1, "fake")
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
 		// get texts of all notes
