@@ -535,7 +535,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	// ask user to select a note
 	promptText := ""
 	if tagID >= 0 {
-		promptText = fmt.Sprintf("Select Note (for the tag %v %v)", utils.Symbols["tag"], reminderData.Tags[tagID].Slug)
+		promptText = fmt.Sprintf("Select Note (for the tag %v %v)", utils.Symbols["tag"], reminderData.TagsFromIds([]int{tagID})[0].Slug)
 	} else {
 		promptText = fmt.Sprintf("Select Note")
 	}
