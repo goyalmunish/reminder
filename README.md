@@ -53,7 +53,7 @@ Once you invoke the tool (for example, by using the [alias **`reminder`**)](#eas
 
 You may like to take a good look at the options of the **Main Menu** (as shown above), as we'll be talking about it through out this guide.
 
-Also note that you can choose an option by pressing **Enter** key, and use **Ctrl-c** to jump from any nested level to come back to the **Main Menu**.
+Also note that you can choose an option by pressing **Enter** key, and use **Ctrl-c** to jump from any nested level to **one level up** (towards the the **Main Menu**).
 
 In [`reminder`](https://github.com/goyalmunish/reminder), the **tags** are the main method of categorizing tasks. When you first time start the app, the tag list is empty, but you can use the **"Register Basic Tags"** option (the option pointed out by the selection-cursor in the above figure) to register basic tags (as listed in the figure below). Then, you can use the **"List Stuff"** option to list them out (as shown below figure).
 
