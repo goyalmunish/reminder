@@ -52,30 +52,8 @@ func flow() {
 	// operate on main options
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
-		tagSymbol := func(tagSlug string) string {
-			hasPendingNote := len(reminderData.FindNotesByTagSlug(tagSlug, "pending")) > 0
-			if hasPendingNote {
-				return utils.Symbols["tag"]
-			} else {
-				return utils.Symbols["zzz"]
-			}
-		}
-		// assuming there are at least 20 tags (on average)
-		allTagSlugsWithEmoji := make([]string, 0, 20)
-		for _, tagSlug := range reminderData.SortedTagSlugs() {
-			allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", tagSymbol(tagSlug), tagSlug))
-		}
-		tagIndex, _ := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
-		if tagIndex != -1 {
-			if tagIndex == len(reminderData.SortedTagSlugs()) {
-				// add new tag
-				_, _ = reminderData.NewTagRegistration()
-			} else {
-				tag := reminderData.Tags[tagIndex]
-				err := reminderData.PrintNotesAndAskOptions(models.Notes{}, tag.Id, "pending")
-				utils.PrintErrorIfPresent(err)
-			}
-		}
+		err := reminderData.ListTags()
+		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Note"):
 		tagIDs := reminderData.AskTagIds([]int{})
 		_, _ = reminderData.NewNoteRegistration(tagIDs)

@@ -149,6 +149,41 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 	}
 }
 
+// list all tags (and their notes underneath)
+func (reminderData *ReminderData) ListTags() error {
+	tagSymbol := func(tagSlug string) string {
+		hasPendingNote := len(reminderData.FindNotesByTagSlug(tagSlug, "pending")) > 0
+		if hasPendingNote {
+			return utils.Symbols["tag"]
+		} else {
+			return utils.Symbols["zzz"]
+		}
+	}
+	// assuming there are at least 20 tags (on average)
+	allTagSlugsWithEmoji := make([]string, 0, 20)
+	for _, tagSlug := range reminderData.SortedTagSlugs() {
+		allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", tagSymbol(tagSlug), tagSlug))
+	}
+	tagIndex, _ := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+	if tagIndex == -1 {
+		// do nothing, just exit
+		return nil
+	}
+	if tagIndex == len(reminderData.SortedTagSlugs()) {
+		// add new tag
+		_, _ = reminderData.NewTagRegistration()
+	} else {
+		tag := reminderData.Tags[tagIndex]
+		err := reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, "pending")
+		if err != nil {
+			utils.PrintErrorIfPresent(err)
+			// go back to ListTags
+			reminderData.ListTags()
+		}
+	}
+	return nil
+}
+
 // search throught all notes
 func (reminderData *ReminderData) SearchNotes() error {
 	// get texts of all notes
