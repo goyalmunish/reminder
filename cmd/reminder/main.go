@@ -8,8 +8,6 @@ package main
 import (
 	"fmt"
 	"path"
-	"sort"
-	"strings"
 	"time"
 
 	"reminder/internal/models"
@@ -33,6 +31,14 @@ func flow() {
 	fmt.Println("| =========================== MAIN MENU =========================== |")
 	fmt.Println("|     Use 'Ctrl-c' to jump one level up (towards the Main Menu)     |")
 	fmt.Println("| ----------------------------------------------------------------- |")
+	/*
+		How 'Ctrl-c' works?
+		Hitting 'Ctrl-c' in golang raises as SIGINT signal.
+		By default SIGINT signal (https://pkg.go.dev/os/signal) is converted to run-time panic,
+		and eventually causes the program to exit.
+		But, if you are inside PromptUI's `Run()`, then it cancels the input and moves to next
+		statement in the code.
+	*/
 	_, result := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
 		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Urgent Notes"),
@@ -84,32 +90,8 @@ func flow() {
 		err := reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "done")
 		utils.PrintErrorIfPresent(err)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
-		// get texts of all notes
-		sort.Sort(reminderData.Notes)
-		allNotes := reminderData.Notes
-		// assuming the search shows 25 items in general
-		allTexts := make([]string, 0, 25)
-		for _, note := range allNotes {
-			allTexts = append(allTexts, note.SearchableText())
-		}
-		// function to search across notes
-		searchNotes := func(input string, idx int) bool {
-			input = strings.ToLower(input)
-			noteText := allTexts[idx]
-			if strings.Contains(strings.ToLower(noteText), input) {
-				return true
-			}
-			return false
-		}
-		// display prompt
-		promptNoteSelection := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
-		fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
-		index, _, err := promptNoteSelection.Run()
+		err := reminderData.SearchNotes()
 		utils.PrintErrorIfPresent(err)
-		if index >= 0 {
-			note := allNotes[index]
-			reminderData.PrintNoteAndAskOptions(note)
-		}
 	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
 		reminderData.CreateBackup()
 	case fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File"):

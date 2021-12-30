@@ -149,6 +149,44 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 	}
 }
 
+// search throught all notes
+func (reminderData *ReminderData) SearchNotes() error {
+	// get texts of all notes
+	sort.Sort(reminderData.Notes)
+	allNotes := reminderData.Notes
+	// assuming the search shows 25 items in general
+	allTexts := make([]string, 0, 25)
+	for _, note := range allNotes {
+		allTexts = append(allTexts, note.SearchableText())
+	}
+	// function to search across notes
+	searchNotes := func(input string, idx int) bool {
+		input = strings.ToLower(input)
+		noteText := allTexts[idx]
+		if strings.Contains(strings.ToLower(noteText), input) {
+			return true
+		}
+		return false
+	}
+	// display prompt
+	promptNoteSelection := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
+	fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
+	index, _, err := promptNoteSelection.Run()
+	if err != nil {
+		utils.PrintErrorIfPresent(err)
+		return err
+	}
+	if index >= 0 {
+		note := allNotes[index]
+		action := reminderData.PrintNoteAndAskOptions(note)
+		if action == "stay" {
+			// no action was selected for the note, go one step back
+			reminderData.SearchNotes()
+		}
+	}
+	return err
+}
+
 // fetch all pending notes which are urgent
 func (reminderData *ReminderData) UrgentNotes() Notes {
 	allNotes := reminderData.Notes
@@ -490,6 +528,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		note := notes[noteIndex]
 		action := reminderData.PrintNoteAndAskOptions(note)
 		if action == "stay" {
+			// no action was selected for the note, go one step back
 			reminderData.PrintNotesAndAskOptions(notes, tagID, status)
 		}
 	}
