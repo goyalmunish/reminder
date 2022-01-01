@@ -7,7 +7,6 @@ package main
 
 import (
 	"fmt"
-	"path"
 	"time"
 
 	"reminder/internal/models"
@@ -55,34 +54,15 @@ func flow() {
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Urgent Notes"):
-		err := reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending")
-		utils.PrintErrorIfPresent(err)
+		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending")
 	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
-		err := reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "done")
-		utils.PrintErrorIfPresent(err)
+		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "done")
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
-		err := reminderData.SearchNotes()
-		utils.PrintErrorIfPresent(err)
+		_ = reminderData.SearchNotes()
 	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
-		reminderData.CreateBackup()
+		_ = reminderData.CreateBackup()
 	case fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File"):
-		fmt.Printf("Printing contents (and if possible, its difference since last backup) of %q:\n", reminderData.DataFile)
-		ext := path.Ext(reminderData.DataFile)
-		lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
-		err := utils.PerformWhich("wdiff")
-		if err != nil {
-			fmt.Printf("%v Warning: `wdiff` command is not available\n", utils.Symbols["error"])
-			err = utils.PerformCat(reminderData.DataFile)
-		} else {
-			err = utils.PerformFilePresence(lnFile)
-			if err != nil {
-				fmt.Printf("Warning: `%v` file is not available yet\n", lnFile)
-				err = utils.PerformCat(reminderData.DataFile)
-			} else {
-				err = utils.FPerformCwdiff(lnFile, reminderData.DataFile)
-			}
-		}
-		utils.PrintErrorIfPresent(err)
+		_ = reminderData.DisplayDataFile()
 	case fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):
 		fmt.Println("Exiting...")
 		return
