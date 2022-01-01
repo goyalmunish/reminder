@@ -38,6 +38,7 @@ func TestUnixTimestampToTime(t *testing.T) {
 }
 
 func TestUnixTimestampToTimeStr(t *testing.T) {
+	utils.Location = utils.UTCLocation()
 	output := utils.UnixTimestampToTimeStr(int64(1608575176), "02-Jan-06")
 	utils.AssertEqual(t, output, "21-Dec-20")
 	output = utils.UnixTimestampToTimeStr(int64(1608575176), time.RFC850)
@@ -46,22 +47,26 @@ func TestUnixTimestampToTimeStr(t *testing.T) {
 	utils.AssertEqual(t, output, "nil")
 }
 
-func TestUnixTimestampToShortTimeStr(t *testing.T) {
-	output := utils.UnixTimestampToShortTimeStr(int64(1608575176))
-	utils.AssertEqual(t, output, "21-Dec-20")
-}
-
-func TestUnixTimestampToMediumTimeStr(t *testing.T) {
-	output := utils.UnixTimestampToMediumTimeStr(int64(1608575176))
-	utils.AssertEqual(t, output, "21-Dec-20 18:26:16")
-}
-
 func TestUnixTimestampToLongTimeStr(t *testing.T) {
+	utils.Location = utils.UTCLocation()
 	output := utils.UnixTimestampToLongTimeStr(int64(1608575176))
 	utils.AssertEqual(t, output, "Monday, 21-Dec-20 18:26:16 UTC")
 }
 
+func TestUnixTimestampToMediumTimeStr(t *testing.T) {
+	utils.Location = utils.UTCLocation()
+	output := utils.UnixTimestampToMediumTimeStr(int64(1608575176))
+	utils.AssertEqual(t, output, "21-Dec-20 18:26:16")
+}
+
+func TestUnixTimestampToShortTimeStr(t *testing.T) {
+	utils.Location = utils.UTCLocation()
+	output := utils.UnixTimestampToShortTimeStr(int64(1608575176))
+	utils.AssertEqual(t, output, "21-Dec-20")
+}
+
 func TestUnixTimestampForCorrespondingCurrentYear(t *testing.T) {
+	utils.Location = utils.UTCLocation()
 	got := utils.UnixTimestampForCorrespondingCurrentYear(9, 30) - utils.UnixTimestampForCorrespondingCurrentYear(6, 30)
 	utils.AssertEqual(t, got, 7948800)
 	got = utils.UnixTimestampForCorrespondingCurrentYear(10, 1) - utils.UnixTimestampForCorrespondingCurrentYear(7, 1)
@@ -69,6 +74,7 @@ func TestUnixTimestampForCorrespondingCurrentYear(t *testing.T) {
 }
 
 func TestUnixTimestampForCorrespondingCurrentYearMonth(t *testing.T) {
+	utils.Location = utils.UTCLocation()
 	got := utils.UnixTimestampForCorrespondingCurrentYearMonth(9) - utils.UnixTimestampForCorrespondingCurrentYearMonth(1)
 	utils.AssertEqual(t, got, 691200)
 	got = utils.UnixTimestampForCorrespondingCurrentYearMonth(28) - utils.UnixTimestampForCorrespondingCurrentYearMonth(1)
