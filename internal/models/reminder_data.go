@@ -394,11 +394,11 @@ func (reminderData *ReminderData) CreateBackup() string {
 	err = ioutil.WriteFile(dstFile, byteValue, 0644)
 	utils.PrintErrorIfPresent(err)
 	// create alias of latest backup
-	fmt.Printf("Creating synlink at %q\n", lnFile)
+	fmt.Printf("Creating symlink at %q\n", lnFile)
 	executable, _ := exec.LookPath("ln")
 	cmd := &exec.Cmd{
 		Path:   executable,
-		Args:   []string{executable, "-f", dstFile, lnFile},
+		Args:   []string{executable, "-sf", dstFile, lnFile},
 		Stdout: os.Stdout,
 		Stdin:  os.Stdin,
 	}
