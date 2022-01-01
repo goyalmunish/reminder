@@ -148,8 +148,9 @@ func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
 	return nil
 }
 
-// get display text of list of notes
-// width of each note is truncated to maxStrLen
+// get display text (that is, external representation) of list of notes
+// with width of each note is truncated to maxStrLen
+// return empty []string if there are no notes
 func (notes Notes) ExternalTexts(maxStrLen int) []string {
 	// assuming there are at least (on average) 100s of notes
 	allTexts := make([]string, 0, 100)
@@ -167,6 +168,7 @@ func (notes Notes) ExternalTexts(maxStrLen int) []string {
 }
 
 // filter notes with given status (such as "pending" status)
+// return empty Notes if no matching Note is found (even when given status doesn't exist)
 func (notes Notes) WithStatus(status string) Notes {
 	var result Notes
 	for _, note := range notes {
@@ -178,6 +180,7 @@ func (notes Notes) WithStatus(status string) Notes {
 }
 
 // get all notes with given tagID and given status
+// return empty Notes if no matching Note is found (even when given tagID or status doesn't exist)
 func (notes Notes) WithTagIdAndStatus(tagID int, status string) Notes {
 	notesWithStatus := notes.WithStatus(status)
 	var result Notes

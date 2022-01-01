@@ -39,26 +39,19 @@ func flow() {
 		But, if you are inside PromptUI's `Run()`, then it cancels the input and moves to next
 		statement in the code.
 	*/
-	_, result := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
+	_, result, _ := utils.AskOption([]string{
+		fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
 		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Urgent Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"),
-		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Note"),
-		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Tag"),
 		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"),
 		fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"),
 		fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File")}, "Select Option")
 	// operate on main options
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
-		err := reminderData.ListTags()
-		utils.PrintErrorIfPresent(err)
-	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Note"):
-		tagIDs := reminderData.AskTagIds([]int{})
-		_, _ = reminderData.NewNoteRegistration(tagIDs)
-	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Add Tag"):
-		_, _ = reminderData.NewTagRegistration()
+		_ = reminderData.ListTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Urgent Notes"):

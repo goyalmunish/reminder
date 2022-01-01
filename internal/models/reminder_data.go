@@ -47,6 +47,7 @@ func (reminderData *ReminderData) UpdateDataFile() error {
 }
 
 // sort tags in-place and return slugs
+// empty Tags is returned if there are no tags
 func (reminderData *ReminderData) SortedTagSlugs() []string {
 	// sort tags in place
 	sort.Sort(reminderData.Tags)
@@ -77,6 +78,10 @@ func (reminderData *ReminderData) FindNotesByTagId(tagID int, status string) Not
 // get all notes with given tagSlug and given status
 func (reminderData *ReminderData) FindNotesByTagSlug(tagSlug string, status string) Notes {
 	tag := reminderData.TagFromSlug(tagSlug)
+	// return empty Notes object for nil `tag`
+	if tag == nil {
+		return Notes{}
+	}
 	return reminderData.FindNotesByTagId(tag.Id, status)
 }
 
@@ -149,37 +154,43 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 	}
 }
 
-// list all tags (and their notes underneath)
+// prompt a list all tags (and their notes underneath)
 func (reminderData *ReminderData) ListTags() error {
+	// function to return a tag sumbol
+	// keep different tag symbol for empty tags
 	tagSymbol := func(tagSlug string) string {
-		hasPendingNote := len(reminderData.FindNotesByTagSlug(tagSlug, "pending")) > 0
-		if hasPendingNote {
+		PendingNote := reminderData.FindNotesByTagSlug(tagSlug, "pending")
+		if len(PendingNote) > 0 {
 			return utils.Symbols["tag"]
 		} else {
 			return utils.Symbols["zzz"]
 		}
 	}
+	// get list of tags with their emojis
 	// assuming there are at least 20 tags (on average)
 	allTagSlugsWithEmoji := make([]string, 0, 20)
 	for _, tagSlug := range reminderData.SortedTagSlugs() {
 		allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", tagSymbol(tagSlug), tagSlug))
 	}
-	tagIndex, _ := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
-	if tagIndex == -1 {
+	// ask user to select a tag
+	tagIndex, _, err := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+	if (err != nil) || (tagIndex == -1) {
 		// do nothing, just exit
-		return nil
+		return err
 	}
+	// check if user wants to add a new tag
 	if tagIndex == len(reminderData.SortedTagSlugs()) {
 		// add new tag
 		_, _ = reminderData.NewTagRegistration()
-	} else {
-		tag := reminderData.Tags[tagIndex]
-		err := reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, "pending")
-		if err != nil {
-			utils.PrintErrorIfPresent(err)
-			// go back to ListTags
-			reminderData.ListTags()
-		}
+		return nil
+	}
+	// operate on the selected a tag
+	tag := reminderData.Tags[tagIndex]
+	err = reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, "pending")
+	if err != nil {
+		utils.PrintErrorIfPresent(err)
+		// go back to ListTags
+		reminderData.ListTags()
 	}
 	return nil
 }
@@ -415,7 +426,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	var err error
 	var tagID int
 	// ask user to select tag
-	optionIndex, _ := utils.AskOption(append(reminderData.SortedTagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+	optionIndex, _, _ := utils.AskOption(append(reminderData.SortedTagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 	if optionIndex == -1 {
 		return []int{}
 	}
@@ -450,9 +461,12 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 }
 
 // method to print note and display options
+// like utils.AskOptions, it prints any encountered error, but doesn't returns that error just for information
+// it return string representing workflow direction
 func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	fmt.Print(note.ExternalText(reminderData))
-	_, noteOption := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"),
+	_, noteOption, _ := utils.AskOption([]string{
+		fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"),
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
 		fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"),
@@ -461,7 +475,6 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"),
 		fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text")},
 		"Select Action")
-	fmt.Println("Do you want to update the note?")
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
 		promptCommment := utils.GeneratePrompt("note_comment", "")
@@ -505,8 +518,9 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 }
 
 // method (recursively) to print notes interactively
-// in some cases, notes will be fetched, so blank notes can be passed
+// in some cases, updated list notes will be fetched, so blank notes can be passed in those cases
 // unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake"
+// like utils.AskOptions, it prints any encountered error, and returns that error just for information
 func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string) error {
 	// check if passed notes is to be used or to fetch latest notes
 	if status == "done" {
@@ -539,11 +553,12 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	} else {
 		promptText = fmt.Sprintf("Select Note")
 	}
-	noteIndex, _ := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
-	if noteIndex == -1 {
-		return errors.New("The noteIndex is invalid!")
+	// ask user to select a note
+	noteIndex, _, err := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
+	if (err != nil) || (noteIndex == -1) {
+		return err
 	}
-	// create new note or show note options
+	// create new note
 	if noteIndex == len(texts) {
 		// add new note
 		if tagID < 0 {
@@ -558,14 +573,14 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		updatedNotes = append(updatedNotes, note)
 		updatedNotes = append(updatedNotes, notes...)
 		reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status)
-	} else {
-		// ask options about select note
-		note := notes[noteIndex]
-		action := reminderData.PrintNoteAndAskOptions(note)
-		if action == "stay" {
-			// no action was selected for the note, go one step back
-			reminderData.PrintNotesAndAskOptions(notes, tagID, status)
-		}
+		return nil
+	}
+	// ask options about the selected note
+	note := notes[noteIndex]
+	action := reminderData.PrintNoteAndAskOptions(note)
+	if action == "stay" {
+		// no action was selected for the note, go one step back
+		reminderData.PrintNotesAndAskOptions(notes, tagID, status)
 	}
 	return nil
 }

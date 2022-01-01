@@ -55,6 +55,7 @@ func (tags Tags) FromSlug(slug string) *Tag {
 }
 
 // get tags from tagIDs
+// return empty Tags if non of tagIDs match
 func (tags Tags) FromIds(tagIDs []int) Tags {
 	var filteredTags Tags
 	for _, tagID := range tagIDs {
@@ -68,6 +69,7 @@ func (tags Tags) FromIds(tagIDs []int) Tags {
 }
 
 // get tag ids of given group
+// return empty []int if group with given group name doesn't exist
 func (tags Tags) IdsForGroup(group string) []int {
 	var tagIDs []int
 	for _, tag := range tags {
