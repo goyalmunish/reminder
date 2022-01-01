@@ -252,23 +252,26 @@ func TestSearchableText(t *testing.T) {
 
 func TestExternalTexts(t *testing.T) {
 	var notes models.Notes
+	// case 1 (no notes)
+	utils.AssertEqual(t, "[]", "[]")
+	// add notes
 	comments := models.Comments{&models.Comment{Text: "c1"}}
 	notes = append(notes, &models.Note{Text: "beautiful little cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231})
 	comments = models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "foo bar"}, &models.Comment{Text: "c3"}, &models.Comment{Text: "baz"}}
 	notes = append(notes, &models.Note{Text: "cute brown dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
-	// case 1
+	// case 2
 	got := notes.ExternalTexts(0)
 	want := "[beautiful little cat {C:01, S:P, D:03-Jan-21} cute brown dog {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
-	// case 2
+	// case 3
 	got = notes.ExternalTexts(5)
 	want = "[be... {C:01, S:P, D:03-Jan-21} cu... {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
-	// case 3
+	// case 4
 	got = notes.ExternalTexts(15)
 	want = "[beautiful li... {C:01, S:P, D:03-Jan-21} cute brown dog  {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
-	// case 4
+	// case 5
 	got = notes.ExternalTexts(25)
 	want = "[beautiful little cat      {C:01, S:P, D:03-Jan-21} cute brown dog            {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
@@ -276,6 +279,9 @@ func TestExternalTexts(t *testing.T) {
 
 func TestWithStatus(t *testing.T) {
 	var notes models.Notes
+	// case 1 (no notes)
+	utils.AssertEqual(t, notes.WithStatus("pending"), models.Notes{})
+	// add some notes
 	comments := models.Comments{&models.Comment{Text: "c1"}}
 	note1 := models.Note{Text: "big fat cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	notes = append(notes, &note1)
@@ -285,19 +291,24 @@ func TestWithStatus(t *testing.T) {
 	comments = models.Comments{&models.Comment{Text: "foo bar"}, &models.Comment{Text: "c3"}}
 	note3 := models.Note{Text: "little hamster", Comments: comments, Status: "pending", TagIds: []int{1}, CompleteBy: 1609669233}
 	notes = append(notes, &note3)
-	// case 1
+	// case 2 (with an invalid status)
+	utils.AssertEqual(t, notes.WithStatus("no-such-status"), models.Notes{})
+	// case 3 (with valid status "pending")
 	got := notes.WithStatus("pending")
-	want := []*models.Note{&note1, &note3}
+	want := models.Notes{&note1, &note3}
 	utils.AssertEqual(t, got, want)
-	// case 2
+	// case 4 (with valid status "done")
 	got = notes.WithStatus("done")
-	want = []*models.Note{&note2}
+	want = models.Notes{&note2}
 	utils.AssertEqual(t, got, want)
 }
 
 func TestWithTagIdAndStatus(t *testing.T) {
-	// creating tags
 	var tags models.Tags
+	var notes models.Notes
+	// case 1 (no notes)
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "pending"), models.Notes{})
+	// creating tags
 	tag1 := models.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
 	tags = append(tags, &tag1)
 	tag2 := models.Tag{Id: 2, Slug: "a1", Group: "tag_group1"}
@@ -307,7 +318,6 @@ func TestWithTagIdAndStatus(t *testing.T) {
 	tag4 := models.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
 	tags = append(tags, &tag4)
 	// create notes
-	var notes models.Notes
 	note1 := models.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	notes = append(notes, &note1)
 	note2 := models.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000004}}
@@ -318,14 +328,13 @@ func TestWithTagIdAndStatus(t *testing.T) {
 	notes = append(notes, &note4)
 	note5 := models.Note{Text: "5", Status: "pending", BaseStruct: models.BaseStruct{UpdatedAt: 1600000005}}
 	notes = append(notes, &note5)
-	// searching notes
-	// case 1
-	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "pending"), []*models.Note{&note2})
 	// case 2
-	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "done"), []*models.Note{&note3})
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "pending"), []*models.Note{&note2})
 	// case 3
-	utils.AssertEqual(t, notes.WithTagIdAndStatus(4, "pending"), []*models.Note{&note1, &note2})
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "done"), []*models.Note{&note3})
 	// case 4
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(4, "pending"), []*models.Note{&note1, &note2})
+	// case 5
 	utils.AssertEqual(t, notes.WithTagIdAndStatus(1, "done"), []*models.Note{})
 }
 
