@@ -154,7 +154,8 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 	}
 }
 
-// prompt a list all tags (and their notes underneath)
+// prompt a list of all tags (and their notes underneath)
+// like utils.AskOptions, it prints any encountered error, and returns that error just for information
 func (reminderData *ReminderData) ListTags() error {
 	// function to return a tag sumbol
 	// keep different tag symbol for empty tags
@@ -196,6 +197,7 @@ func (reminderData *ReminderData) ListTags() error {
 }
 
 // search throught all notes
+// like utils.AskOptions, it prints any encountered error, and returns that error just for information
 func (reminderData *ReminderData) SearchNotes() error {
 	// get texts of all notes
 	sort.Sort(reminderData.Notes)
@@ -378,6 +380,8 @@ Stats of "{{.DataFile}}"
 }
 
 // create timestamped backup
+// returns path of the data file
+// like utils.AskOptions, it prints any encountered error, but doesn't return the error
 func (reminderData *ReminderData) CreateBackup() string {
 	// get backup file name
 	ext := path.Ext(reminderData.DataFile)
@@ -401,6 +405,29 @@ func (reminderData *ReminderData) CreateBackup() string {
 	err = cmd.Run()
 	utils.PrintErrorIfPresent(err)
 	return dstFile
+}
+
+// display data file
+// like utils.AskOptions, it prints any encountered error, and returns that error just for information
+func (reminderData *ReminderData) DisplayDataFile() error {
+	fmt.Printf("Printing contents (and if possible, its difference since last backup) of %q:\n", reminderData.DataFile)
+	ext := path.Ext(reminderData.DataFile)
+	lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
+	err := utils.PerformWhich("wdiff")
+	if err != nil {
+		fmt.Printf("%v Warning: `wdiff` command is not available\n", utils.Symbols["error"])
+		err = utils.PerformCat(reminderData.DataFile)
+	} else {
+		err = utils.PerformFilePresence(lnFile)
+		if err != nil {
+			fmt.Printf("Warning: `%v` file is not available yet\n", lnFile)
+			err = utils.PerformCat(reminderData.DataFile)
+		} else {
+			err = utils.FPerformCwdiff(lnFile, reminderData.DataFile)
+		}
+	}
+	utils.PrintErrorIfPresent(err)
+	return err
 }
 
 // auto backup
