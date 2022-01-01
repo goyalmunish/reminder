@@ -47,6 +47,7 @@ func (reminderData *ReminderData) UpdateDataFile() error {
 }
 
 // sort tags in-place and return slugs
+// empty Tags is returned if there are no tags
 func (reminderData *ReminderData) SortedTagSlugs() []string {
 	// sort tags in place
 	sort.Sort(reminderData.Tags)
@@ -77,6 +78,10 @@ func (reminderData *ReminderData) FindNotesByTagId(tagID int, status string) Not
 // get all notes with given tagSlug and given status
 func (reminderData *ReminderData) FindNotesByTagSlug(tagSlug string, status string) Notes {
 	tag := reminderData.TagFromSlug(tagSlug)
+	// return empty Notes object for nil `tag`
+	if tag == nil {
+		return Notes{}
+	}
 	return reminderData.FindNotesByTagId(tag.Id, status)
 }
 
@@ -151,20 +156,24 @@ func (reminderData *ReminderData) RegisterBasicTags() {
 
 // list all tags (and their notes underneath)
 func (reminderData *ReminderData) ListTags() error {
+	// function to return a tag sumbol
+	// keep different tag symbol for empty tags
 	tagSymbol := func(tagSlug string) string {
-		hasPendingNote := len(reminderData.FindNotesByTagSlug(tagSlug, "pending")) > 0
-		if hasPendingNote {
+		PendingNote := reminderData.FindNotesByTagSlug(tagSlug, "pending")
+		if len(PendingNote) > 0 {
 			return utils.Symbols["tag"]
 		} else {
 			return utils.Symbols["zzz"]
 		}
 	}
+	// get list of tags with their emojis
 	// assuming there are at least 20 tags (on average)
 	allTagSlugsWithEmoji := make([]string, 0, 20)
 	for _, tagSlug := range reminderData.SortedTagSlugs() {
 		allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", tagSymbol(tagSlug), tagSlug))
 	}
-	tagIndex, _ := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+	// ask user to select a tag
+	tagIndex, _, _ := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 	if tagIndex == -1 {
 		// do nothing, just exit
 		return nil
@@ -415,7 +424,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	var err error
 	var tagID int
 	// ask user to select tag
-	optionIndex, _ := utils.AskOption(append(reminderData.SortedTagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+	optionIndex, _, _ := utils.AskOption(append(reminderData.SortedTagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
 	if optionIndex == -1 {
 		return []int{}
 	}
@@ -452,7 +461,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 // method to print note and display options
 func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	fmt.Print(note.ExternalText(reminderData))
-	_, noteOption := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"),
+	_, noteOption, _ := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"),
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
 		fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"),
@@ -539,7 +548,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	} else {
 		promptText = fmt.Sprintf("Select Note")
 	}
-	noteIndex, _ := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
+	noteIndex, _, _ := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
 	if noteIndex == -1 {
 		return errors.New("The noteIndex is invalid!")
 	}

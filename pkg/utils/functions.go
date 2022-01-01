@@ -213,10 +213,13 @@ func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimest
 }
 
 // ask option to the user
-func AskOption(options []string, label string) (int, string) {
+// print error, if encountered any (so that they don't have to printed by calling function)
+// return a tuple (chosen_index, chosen_string, error_if_any)
+func AskOption(options []string, label string) (int, string, error) {
 	if len(options) == 0 {
-		fmt.Println("No results")
-		return -1, "error"
+		err := errors.New("Empty List")
+		fmt.Printf("%v Prompt failed %v\n", Symbols["warning"], err)
+		return -1, "", err
 	}
 	// note: any item in options should not have \n character
 	// otherwise such item is observed to not getting appear
@@ -229,11 +232,12 @@ func AskOption(options []string, label string) (int, string) {
 	}
 	index, result, err := prompt.Run()
 	if err != nil {
+		// error can happen if user raises an interrupt (such as Ctrl-c, SIGINT)
 		fmt.Printf("%v Prompt failed %v\n", Symbols["warning"], err)
-		return -1, "error"
+		return -1, "", err
 	}
 	fmt.Printf("You chose %d:%q\n", index, result)
-	return index, result
+	return index, result, nil
 }
 
 // perform shell operation and return its output

@@ -39,7 +39,7 @@ func flow() {
 		But, if you are inside PromptUI's `Run()`, then it cancels the input and moves to next
 		statement in the code.
 	*/
-	_, result := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
+	_, result, _ := utils.AskOption([]string{fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
 		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Urgent Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"),
