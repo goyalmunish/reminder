@@ -176,6 +176,10 @@ func ValidateDateString(input string) error {
 // is able to access those attributes without even having to perform type assertion to get
 // the underneath concrete value; this is contrary to masking behavior of interfaces
 func TemplateResult(reportTemplate string, funcMap template.FuncMap, data interface{}) string {
+	/*
+		Issue with this function: It uses bytes.Buffer and converts it to string, but at the moment
+		bytes (that is, uint8) are not converted back to rune/string properly.
+	*/
 	// define report result (as bytes)
 	var reportResult bytes.Buffer
 	// define report

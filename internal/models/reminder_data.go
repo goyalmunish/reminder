@@ -398,7 +398,7 @@ func (reminderData *ReminderData) CreateBackup() string {
 	executable, _ := exec.LookPath("ln")
 	cmd := &exec.Cmd{
 		Path:   executable,
-		Args:   []string{executable, "-f", dstFile, lnFile},
+		Args:   []string{executable, "-sf", dstFile, lnFile},
 		Stdout: os.Stdout,
 		Stdin:  os.Stdin,
 	}
