@@ -191,6 +191,7 @@ func TestNotes(t *testing.T) {
 }
 
 func TestNoteStrings(t *testing.T) {
+	utils.Location = utils.UTCLocation()
 	comments := models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "c2"}, &models.Comment{Text: "c3"}}
 	note := &models.Note{Text: "dummy text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	want := `[  |          Text:  dummy text
@@ -208,6 +209,7 @@ func TestNoteStrings(t *testing.T) {
 }
 
 func TestExternalText(t *testing.T) {
+	utils.Location = utils.UTCLocation()
 	comments := models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "c2"}, &models.Comment{Text: "c3"}}
 	note := &models.Note{Text: "dummy text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	var tags models.Tags

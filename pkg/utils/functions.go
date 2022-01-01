@@ -18,11 +18,13 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
+// location info for `time`
+// it can be set to update behavior of UnixTimestampToTime
+var Location *time.Location
+
 // get current time
-// serve as a central place to switch between
-// local time and UTC
 func CurrentTime() time.Time {
-	return time.Now().UTC()
+	return time.Now()
 }
 
 // get current unix timestamp
@@ -30,9 +32,21 @@ func CurrentUnixTimestamp() int64 {
 	return int64(CurrentTime().Unix())
 }
 
+// return UTC location
+func UTCLocation() *time.Location {
+	location, _ := time.LoadLocation("UTC")
+	return location
+}
+
 // convert unix timestamp to time
+// serve as central place to switch between UTC and local time
+// by default use local time, but behavior can be changed via `Location`
 func UnixTimestampToTime(unixTimestamp int64) time.Time {
-	return time.Unix(unixTimestamp, 0).UTC()
+	t := time.Unix(unixTimestamp, 0)
+	if Location == nil {
+		return t
+	}
+	return t.In(Location)
 }
 
 // convert unix timestamp to time string
@@ -51,14 +65,14 @@ func UnixTimestampToLongTimeStr(unixTimestamp int64) string {
 	return UnixTimestampToTimeStr(unixTimestamp, time.RFC850)
 }
 
-// convert unix timestamp to short time string
-func UnixTimestampToShortTimeStr(unixTimestamp int64) string {
-	return UnixTimestampToTimeStr(unixTimestamp, "02-Jan-06")
-}
-
 // convert unix timestamp to medium time string
 func UnixTimestampToMediumTimeStr(unixTimestamp int64) string {
 	return UnixTimestampToTimeStr(unixTimestamp, "02-Jan-06 15:04:05")
+}
+
+// convert unix timestamp to short time string
+func UnixTimestampToShortTimeStr(unixTimestamp int64) string {
+	return UnixTimestampToTimeStr(unixTimestamp, "02-Jan-06")
 }
 
 // get unix timestamp for date corresponding to current year
