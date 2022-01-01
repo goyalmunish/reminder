@@ -57,7 +57,7 @@ Also note that you can choose an option by pressing **Enter** key, and use **Ctr
 
 In [`reminder`](https://github.com/goyalmunish/reminder), the **tags** are the main method of categorizing tasks. When you first time start the app, the tag list is empty, but you can use the **"Register Basic Tags"** option (the option pointed out by the selection-cursor in the above figure) to register basic tags (as listed in the figure below). Then, you can use the **"List Stuff"** option to list them out (as shown below figure).
 
-As we'll see, the **"List Stuff"** option is the most frequently used option in this list. It lets you add tags, add tasks (also referred to as "notes") under those tags, update those tasks; so almost 90% of use-cases. The **Main Menu** also lists options such as **"Add Note"** and **"Add Tag"** at the root level of this menu, but you'll rarely have to use them directly, as these functionalities can be handled from within the **"List Stuff"** option in a convenient two-level tree-based hierarchy of tags and tasks.
+As we'll see, the **"List Stuff"** option is the most frequently used option in this list. It lets you add tags, add tasks (also referred to as "notes") under those tags, update those tasks; so almost 90% of use-cases.
 
 <p align="center">
   <img src="./assets/images/screen_basic_tags_02.png" width="100%">
