@@ -85,7 +85,7 @@ With time, you will add more tags and hundreds of tasks under them. These **stat
 
 The above status states that there are currently 22 tags, a total of 330 tasks, and out of them 204 tasks are in the **"pending"** state. The tasks marked as **"done"** become **invisible** (but not deleted, and will still show up under **"Done Notes"** and in Search results).
 
-The **"Search Notes"** option lets you perform a **full-text search** (with each task's text and its comments) through all tasks with the **"pending"** state.
+The **"Search Notes"** option lets you perform a **full-text search** (with each task's status, text and its comments) through all tasks. You can use `[done]` as search text to filter only tasks which are done, similarly use `[pending]` for tasks which are pending.
 
 <p align="center">
   <img src="./assets/images/screen_search_01.png" width="100%">
