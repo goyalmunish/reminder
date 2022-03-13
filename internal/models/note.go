@@ -70,6 +70,8 @@ func (note *Note) SearchableText() string {
 	commentsText = append(commentsText, "]")
 	// get a complete searchable text array for note
 	var searchableText []string
+	noteStatus := "[" + note.Status + "]"
+	searchableText = append(searchableText, noteStatus)
 	searchableText = append(searchableText, note.Text)
 	searchableText = append(searchableText, strings.Join(commentsText, ""))
 	// return searchable text for note a string
