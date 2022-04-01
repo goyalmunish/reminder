@@ -191,6 +191,18 @@ func (notes Notes) WithStatus(status string) Notes {
 	}
 	return result
 }
+// filter notes with priority
+// return empty Notes if no priority Note is found
+func (notes Notes) WithPriority() Notes {
+	var result Notes
+	for _, note := range notes {
+		if note.IsPriority {
+			result = append(result, note)
+		}
+	}
+	return result
+}
+
 
 // get all notes with given tagID and given status
 // return empty Notes if no matching Note is found (even when given tagID or status doesn't exist)

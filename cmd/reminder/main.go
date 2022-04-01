@@ -42,6 +42,7 @@ func flow() {
 		fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
 		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Notes approaching Due Date"),
+		fmt.Sprintf("%v %v", utils.Symbols["clock"], "High Priority Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"),
 		fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"),
@@ -53,9 +54,11 @@ func flow() {
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Notes approaching Due Date"):
-		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending")
+		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending", false)
+	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "High Priority Notes"):
+		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending", true)
 	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
-		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "done")
+		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "done", false)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
 		_ = reminderData.SearchNotes()
 	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
