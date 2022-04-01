@@ -11,12 +11,15 @@ import (
 
 /*
 Note represents a task (a TO-DO item)
+
+A note can be main or main-note (incidental)
 */
 type Note struct {
 	Text       string   `json:"text"`
 	Comments   Comments `json:"comments"`
 	Status     string   `json:"status"`
 	TagIds     []int    `json:"tag_ids"`
+	IsMain     bool     `json:"is_priority"`
 	CompleteBy int64    `json:"complete_by"`
 	BaseStruct
 }
@@ -36,6 +39,7 @@ func (note *Note) Strings() []string {
 	strs = append(strs, fPrintNoteField("Comments", note.Comments.Strings()))
 	strs = append(strs, fPrintNoteField("Status", note.Status))
 	strs = append(strs, fPrintNoteField("Tags", note.TagIds))
+	strs = append(strs, fPrintNoteField("IsMain", note.IsMain))
 	strs = append(strs, fPrintNoteField("CompleteBy", utils.UnixTimestampToLongTimeStr(note.CompleteBy)))
 	strs = append(strs, fPrintNoteField("CreatedAt", utils.UnixTimestampToLongTimeStr(note.CreatedAt)))
 	strs = append(strs, fPrintNoteField("UpdatedAt", utils.UnixTimestampToLongTimeStr(note.UpdatedAt)))
@@ -83,13 +87,12 @@ func (note *Note) AddComment(text string) error {
 	if len(utils.TrimString(text)) == 0 {
 		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's comment text is empty")
-	} else {
-		comment := &Comment{Text: text, BaseStruct: BaseStruct{CreatedAt: utils.CurrentUnixTimestamp()}}
-		note.Comments = append(note.Comments, comment)
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		fmt.Println("Updated the note")
-		return nil
 	}
+	comment := &Comment{Text: text, BaseStruct: BaseStruct{CreatedAt: utils.CurrentUnixTimestamp()}}
+	note.Comments = append(note.Comments, comment)
+	note.UpdatedAt = utils.CurrentUnixTimestamp()
+	fmt.Println("Updated the note")
+	return nil
 }
 
 // update note's text
@@ -97,33 +100,35 @@ func (note *Note) UpdateText(text string) error {
 	if len(utils.TrimString(text)) == 0 {
 		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's text is empty")
-	} else {
-		note.Text = text
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		fmt.Println("Updated the note")
-		return nil
 	}
+	note.Text = text
+	note.UpdatedAt = utils.CurrentUnixTimestamp()
+	fmt.Println("Updated the note")
+	return nil
 }
 
 // update note's due date
 // if input is "nil", the existing due date is cleared
 func (note *Note) UpdateCompleteBy(text string) error {
+	// handle edge-case of empty text
 	if len(utils.TrimString(text)) == 0 {
 		fmt.Printf("%v Skipping updating note with empty due date\n", utils.Symbols["warning"])
 		return errors.New("Note's due date is empty")
-	} else if text == "nil" {
+	}
+	// handle edge-case for clearning the existing due date
+	if text == "nil" {
 		note.CompleteBy = 0
 		note.UpdatedAt = utils.CurrentUnixTimestamp()
 		fmt.Println("Cleared the due date from the note")
 		return nil
-	} else {
-		format := "2-1-2006"
-		timeValue, _ := time.Parse(format, text)
-		note.CompleteBy = int64(timeValue.Unix())
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		fmt.Println("Updated the note with new due date")
-		return nil
 	}
+	// happy-path
+	format := "2-1-2006"
+	timeValue, _ := time.Parse(format, text)
+	note.CompleteBy = int64(timeValue.Unix())
+	note.UpdatedAt = utils.CurrentUnixTimestamp()
+	fmt.Println("Updated the note with new due date")
+	return nil
 }
 
 // update note's tags
@@ -147,6 +152,14 @@ func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
 	} else {
 		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["warning"])
 	}
+	return nil
+}
+
+// toggle note's main flag
+func (note *Note) ToggleMain() error {
+	note.IsMain = !(note.IsMain)
+	note.UpdatedAt = utils.CurrentUnixTimestamp()
+	fmt.Println("Updated the note's priority")
 	return nil
 }
 
@@ -175,6 +188,18 @@ func (notes Notes) WithStatus(status string) Notes {
 	var result Notes
 	for _, note := range notes {
 		if note.Status == status {
+			result = append(result, note)
+		}
+	}
+	return result
+}
+
+// filter notes which are set as main
+// return empty Notes if no main notes is found
+func (notes Notes) OnlyMain() Notes {
+	var result Notes
+	for _, note := range notes {
+		if note.IsMain {
 			result = append(result, note)
 		}
 	}

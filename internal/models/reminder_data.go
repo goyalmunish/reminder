@@ -141,6 +141,17 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) er
 	return nil
 }
 
+// toggle note's priority
+func (reminderData *ReminderData) ToggleNoteMainFlag(note *Note) error {
+	err := note.ToggleMain()
+	if err != nil {
+		return err
+	}
+	reminderData.UpdateDataFile()
+	fmt.Println("Updated the data file")
+	return nil
+}
+
 // register basic tags
 func (reminderData *ReminderData) RegisterBasicTags() {
 	if len(reminderData.Tags) == 0 {
@@ -187,7 +198,7 @@ func (reminderData *ReminderData) ListTags() error {
 	}
 	// operate on the selected a tag
 	tag := reminderData.Tags[tagIndex]
-	err = reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, "pending")
+	err = reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, "pending", false)
 	if err != nil {
 		utils.PrintErrorIfPresent(err)
 		// go back to ListTags
@@ -500,7 +511,8 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"),
 		fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"),
 		fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"),
-		fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text")},
+		fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"),
+		fmt.Sprintf("%v %v", utils.Symbols["text"], "Toggle priority")},
 		"Select Action")
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
@@ -540,6 +552,9 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		} else {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["warning"])
 		}
+	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Toggle priority"):
+		_ = reminderData.ToggleNoteMainFlag(note)
+		fmt.Print(note.ExternalText(reminderData))
 	}
 	return "stay"
 }
@@ -548,7 +563,8 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // in some cases, updated list notes will be fetched, so blank notes can be passed in those cases
 // unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake"
 // like utils.AskOptions, it prints any encountered error, and returns that error just for information
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string) error {
+// filter only notes with priority if `onlyMain` is true, otherwise return all
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string, onlyMain bool) error {
 	// check if passed notes is to be used or to fetch latest notes
 	if status == "done" {
 		// fetch all the done notes
@@ -569,6 +585,10 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	} else {
 		// use passed notes
 		fmt.Printf("Using passed notes, so the list will not be refreshed immediately.\n")
+	}
+	// filter only priority notes if IsMain is true
+	if onlyMain == true {
+		notes = reminderData.Notes.OnlyMain()
 	}
 	// sort notes
 	sort.Sort(Notes(notes))
@@ -599,7 +619,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		var updatedNotes Notes
 		updatedNotes = append(updatedNotes, note)
 		updatedNotes = append(updatedNotes, notes...)
-		reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status)
+		reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status, false)
 		return nil
 	}
 	// ask options about the selected note
@@ -607,7 +627,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	action := reminderData.PrintNoteAndAskOptions(note)
 	if action == "stay" {
 		// no action was selected for the note, go one step back
-		reminderData.PrintNotesAndAskOptions(notes, tagID, status)
+		reminderData.PrintNotesAndAskOptions(notes, tagID, status, false)
 	}
 	return nil
 }

@@ -201,6 +201,7 @@ func TestNoteStrings(t *testing.T) {
   |              :  [nil] c3
    |        Status:  pending
    |          Tags:  [1 2]
+   |        IsMain:  false
    |    CompleteBy:  Sunday, 03-Jan-21 10:20:35 UTC
    |     CreatedAt:  nil
    |     UpdatedAt:  nil
@@ -227,6 +228,7 @@ func TestExternalText(t *testing.T) {
   |          Tags:
   |              :  tag_1
   |              :  tag_2
+  |        IsMain:  false
   |    CompleteBy:  Sunday, 03-Jan-21 10:20:35 UTC
   |     CreatedAt:  nil
   |     UpdatedAt:  nil
@@ -422,6 +424,22 @@ func TestUpdateStatus(t *testing.T) {
 	err = note1.UpdateStatus("pending", []int{5, 6, 7})
 	utils.AssertEqual(t, err, nil)
 	utils.AssertEqual(t, note1.Status, "pending")
+}
+
+func TestToggleMain(t *testing.T) {
+	// create notes
+	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
+	// update TagIds
+	// case 1
+	originalPriority := note1.IsMain
+	err := note1.ToggleMain()
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, originalPriority != note1.IsMain, true)
+	// case 2
+	originalPriority = note1.IsMain
+	err = note1.ToggleMain()
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, originalPriority != note1.IsMain, true)
 }
 
 func TestFMakeSureFileExists(t *testing.T) {
