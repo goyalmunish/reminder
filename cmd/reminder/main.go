@@ -57,8 +57,6 @@ func flow() {
 		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending", false)
 	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Main Notes"):
 		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending", true)
-	case fmt.Sprintf("%v %v", utils.Symbols["done"], "Done Notes"):
-		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "done", false)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
 		_ = reminderData.SearchNotes()
 	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):

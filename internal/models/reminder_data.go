@@ -581,20 +581,29 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // in some cases, updated list notes will be fetched, so blank notes can be passed in those cases
 // unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake"
 // like utils.AskOptions, it prints any encountered error, and returns that error just for information
-// filter only notes with priority if `onlyMain` is true, otherwise return all
+// filter only the notes tagged as "main" if `onlyMain` is true (for given status), otherwise return all
 func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string, onlyMain bool) error {
 	// check if passed notes is to be used or to fetch latest notes
 	if status == "done" {
+		// ignore the passed notes
 		// fetch all the done notes
 		notes = reminderData.Notes.WithStatus("done")
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(notes))
 	} else if status == "pending" {
+		// ignore the passed notes
 		if tagID >= 0 {
+			// this is for listing all notes associated with given tag, with asked status
 			// fetch pending notes with given tagID
 			notes = reminderData.FindNotesByTagId(tagID, status)
 		} else if onlyMain {
-			notes = reminderData.UrgentNotes()
+			// this is for listing all main notes, with asked status
+			notes = reminderData.Notes.OnlyMain()
+			countAllMain := len(notes)
+			notes = notes.WithStatus(status)
+			countPendingMain := len(notes)
+			fmt.Printf("A total of %v/%v notes flagged as 'main':\n", countPendingMain, countAllMain)
 		} else {
+			// this is for listing all notes approaching due date
 			// fetch notes approaching due date
 			fmt.Println("Note: Following are the pending notes with due date:")
 			fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
@@ -605,10 +614,6 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	} else {
 		// use passed notes
 		fmt.Printf("Using passed notes, so the list will not be refreshed immediately.\n")
-	}
-	// filter only priority notes if IsMain is true
-	if onlyMain == true {
-		notes = reminderData.Notes.OnlyMain()
 	}
 	// sort notes
 	sort.Sort(Notes(notes))
