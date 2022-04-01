@@ -358,6 +358,12 @@ func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
 			Default:  defaultText,
 			Validate: ValidateNonEmptyString,
 		}
+	case "note_summary":
+		prompt = &promptui.Prompt{
+			Label:    "Note Summary",
+			Default:  defaultText,
+			Validate: ValidateNonEmptyString,
+		}
 	case "note_comment":
 		prompt = &promptui.Prompt{
 			Label:    "New Comment",

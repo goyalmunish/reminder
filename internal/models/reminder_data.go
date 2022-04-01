@@ -96,6 +96,17 @@ func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
 	return nil
 }
 
+// update note's summary
+func (reminderData *ReminderData) UpateNoteSummary(note *Note, text string) error {
+	err := note.UpdateSummary(text)
+	if err != nil {
+		return err
+	}
+	reminderData.UpdateDataFile()
+	fmt.Println("Updated the data file")
+	return nil
+}
+
 // update note's due date (complete by)
 func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
 	err := note.UpdateCompleteBy(text)
@@ -512,7 +523,8 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"),
 		fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"),
 		fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"),
-		fmt.Sprintf("%v %v", utils.Symbols["text"], "Toggle priority")},
+		fmt.Sprintf("%v %v", utils.Symbols["glossary"], "Update summary"),
+		fmt.Sprintf("%v %v", utils.Symbols["hat"], "Toggle main/incidental")},
 		"Select Action")
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
@@ -544,6 +556,12 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		utils.PrintErrorIfPresent(err)
 		reminderData.UpateNoteText(note, promptText)
 		fmt.Print(note.ExternalText(reminderData))
+	case fmt.Sprintf("%v %v", utils.Symbols["glossary"], "Update summary"):
+		promptNoteTextWithDefault := utils.GeneratePrompt("note_summary", note.Summary)
+		promptText, err := promptNoteTextWithDefault.Run()
+		utils.PrintErrorIfPresent(err)
+		reminderData.UpateNoteSummary(note, promptText)
+		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"):
 		tagIDs := reminderData.AskTagIds([]int{})
 		if len(tagIDs) > 0 {
@@ -552,7 +570,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		} else {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["warning"])
 		}
-	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Toggle priority"):
+	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Toggle main/incidental"):
 		_ = reminderData.ToggleNoteMainFlag(note)
 		fmt.Print(note.ExternalText(reminderData))
 	}
@@ -574,8 +592,10 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		if tagID >= 0 {
 			// fetch pending notes with given tagID
 			notes = reminderData.FindNotesByTagId(tagID, status)
+		} else if onlyMain {
+			notes = reminderData.UrgentNotes()
 		} else {
-			// fetch urgent notes
+			// fetch notes approaching due date
 			fmt.Println("Note: Following are the pending notes with due date:")
 			fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 			fmt.Println("  - within a week for repeat-annually and 2 days post due date (ignoring its year)")
