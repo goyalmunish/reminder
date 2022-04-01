@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -75,13 +74,15 @@ func (note *Note) SearchableText() string {
 		commentsText = append(commentsText, strings.Join(note.Comments.Strings(), ", "))
 	}
 	commentsText = append(commentsText, "]")
-	// get main-flag and status
-	mainFlag := fmt.Sprintf("[ IsMain=%s ]", strconv.FormatBool(note.IsMain))
-	noteStatus := fmt.Sprintf("[ %s ]", note.Status)
+	// get filters
+	mainFlag := "incidental"
+	if note.IsMain {
+	  mainFlag = "main"
+	}
+	filters := fmt.Sprintf("| %-11s | %-8s |", mainFlag, note.Status)
 	// get a complete searchable text array for note
 	var searchableText []string
-	searchableText = append(searchableText, mainFlag)
-	searchableText = append(searchableText, noteStatus)
+	searchableText = append(searchableText, filters)
 	searchableText = append(searchableText, note.Text)
 	searchableText = append(searchableText, note.Summary)
 	searchableText = append(searchableText, strings.Join(commentsText, ""))
