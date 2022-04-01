@@ -41,19 +41,19 @@ func flow() {
 	_, result, _ := utils.AskOption([]string{
 		fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
-		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Notes approaching Due Date"),
+		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Approaching Due Date"),
 		fmt.Sprintf("%v %v", utils.Symbols["hat"], "Main Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"),
-		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"),
 		fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"),
-		fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File")}, "Select Option")
+		fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File"),
+		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags")}, "Select Option")
 	// operate on main options
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
 		_ = reminderData.ListTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		reminderData.RegisterBasicTags()
-	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Notes approaching Due Date"):
+	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Approaching Due Date"):
 		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending", false)
 	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Main Notes"):
 		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending", true)
