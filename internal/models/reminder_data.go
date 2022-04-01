@@ -142,8 +142,8 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) er
 }
 
 // toggle note's priority
-func (reminderData *ReminderData) ToggleNotePriority(note *Note) error {
-	err := note.TogglePriority()
+func (reminderData *ReminderData) ToggleNoteMainFlag(note *Note) error {
+	err := note.ToggleMain()
 	if err != nil {
 		return err
 	}
@@ -553,7 +553,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["warning"])
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Toggle priority"):
-		_ = reminderData.ToggleNotePriority(note)
+		_ = reminderData.ToggleNoteMainFlag(note)
 		fmt.Print(note.ExternalText(reminderData))
 	}
 	return "stay"
@@ -563,8 +563,8 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // in some cases, updated list notes will be fetched, so blank notes can be passed in those cases
 // unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake"
 // like utils.AskOptions, it prints any encountered error, and returns that error just for information
-// filter only notes with priority if `onlyPriority` is true, otherwise return all
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string, onlyPriority bool) error {
+// filter only notes with priority if `onlyMain` is true, otherwise return all
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string, onlyMain bool) error {
 	// check if passed notes is to be used or to fetch latest notes
 	if status == "done" {
 		// fetch all the done notes
@@ -586,9 +586,9 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		// use passed notes
 		fmt.Printf("Using passed notes, so the list will not be refreshed immediately.\n")
 	}
-	// filter only priority notes if IsPriority is true
-	if onlyPriority == true {
-		notes = reminderData.Notes.WithPriority()
+	// filter only priority notes if IsMain is true
+	if onlyMain == true {
+		notes = reminderData.Notes.OnlyMain()
 	}
 	// sort notes
 	sort.Sort(Notes(notes))

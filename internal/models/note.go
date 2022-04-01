@@ -11,13 +11,15 @@ import (
 
 /*
 Note represents a task (a TO-DO item)
+
+A note can be main or main-note (incedental)
 */
 type Note struct {
 	Text       string   `json:"text"`
 	Comments   Comments `json:"comments"`
 	Status     string   `json:"status"`
 	TagIds     []int    `json:"tag_ids"`
-	IsPriority bool     `json:"is_priority"`
+	IsMain     bool     `json:"is_priority"`
 	CompleteBy int64    `json:"complete_by"`
 	BaseStruct
 }
@@ -37,7 +39,7 @@ func (note *Note) Strings() []string {
 	strs = append(strs, fPrintNoteField("Comments", note.Comments.Strings()))
 	strs = append(strs, fPrintNoteField("Status", note.Status))
 	strs = append(strs, fPrintNoteField("Tags", note.TagIds))
-	strs = append(strs, fPrintNoteField("IsPriority", note.IsPriority))
+	strs = append(strs, fPrintNoteField("IsMain", note.IsMain))
 	strs = append(strs, fPrintNoteField("CompleteBy", utils.UnixTimestampToLongTimeStr(note.CompleteBy)))
 	strs = append(strs, fPrintNoteField("CreatedAt", utils.UnixTimestampToLongTimeStr(note.CreatedAt)))
 	strs = append(strs, fPrintNoteField("UpdatedAt", utils.UnixTimestampToLongTimeStr(note.UpdatedAt)))
@@ -153,9 +155,9 @@ func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
 	return nil
 }
 
-// toggle note's priority
-func (note *Note) TogglePriority() error {
-	note.IsPriority = !(note.IsPriority)
+// toggle note's main flag
+func (note *Note) ToggleMain() error {
+	note.IsMain = !(note.IsMain)
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	fmt.Println("Updated the note's priority")
 	return nil
@@ -191,18 +193,18 @@ func (notes Notes) WithStatus(status string) Notes {
 	}
 	return result
 }
-// filter notes with priority
-// return empty Notes if no priority Note is found
-func (notes Notes) WithPriority() Notes {
+
+// filter notes which are set as main
+// return empty Notes if no main notes is found
+func (notes Notes) OnlyMain() Notes {
 	var result Notes
 	for _, note := range notes {
-		if note.IsPriority {
+		if note.IsMain {
 			result = append(result, note)
 		}
 	}
 	return result
 }
-
 
 // get all notes with given tagID and given status
 // return empty Notes if no matching Note is found (even when given tagID or status doesn't exist)
