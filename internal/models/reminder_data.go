@@ -141,6 +141,17 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) er
 	return nil
 }
 
+// toggle note's priority
+func (reminderData *ReminderData) ToggleNotePriority(note *Note) error {
+	err := note.TogglePriority()
+	if err != nil {
+		return err
+	}
+	reminderData.UpdateDataFile()
+	fmt.Println("Updated the data file")
+	return nil
+}
+
 // register basic tags
 func (reminderData *ReminderData) RegisterBasicTags() {
 	if len(reminderData.Tags) == 0 {
@@ -500,7 +511,8 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"),
 		fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"),
 		fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"),
-		fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text")},
+		fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"),
+		fmt.Sprintf("%v %v", utils.Symbols["text"], "Toggle priority")},
 		"Select Action")
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
@@ -540,6 +552,9 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		} else {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["warning"])
 		}
+	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Toggle priority"):
+		_ = reminderData.ToggleNotePriority(note)
+		fmt.Print(note.ExternalText(reminderData))
 	}
 	return "stay"
 }
