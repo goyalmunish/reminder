@@ -79,7 +79,7 @@ func (note *Note) SearchableText() string {
 	if note.IsMain {
 	  mainFlag = "main"
 	}
-	filters := fmt.Sprintf("| %-11s | %-8s |", mainFlag, note.Status)
+	filters := fmt.Sprintf("| %-10s | %-7s |", mainFlag, note.Status)
 	// get a complete searchable text array for note
 	var searchableText []string
 	searchableText = append(searchableText, filters)
