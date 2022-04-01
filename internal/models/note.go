@@ -12,7 +12,7 @@ import (
 /*
 Note represents a task (a TO-DO item)
 
-A note can be main or main-note (incedental)
+A note can be main or main-note (incidental)
 */
 type Note struct {
 	Text       string   `json:"text"`

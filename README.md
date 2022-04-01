@@ -31,6 +31,7 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
     - can be **updated** (📝) with its text, and also can be enhanced with time-stamped **comments** (💬); so that you can track how and when the progress happened
     - can be marked **done** (✅) or **pending** (⏰); marking it as "done" makes it invisible
     - can be associated with **due-date** (📅); tasks with upcoming deadlines automatically show up under the **"~Pending~ Notes approaching Due Date"** option under **Main Menu**
+    - can be set as "main" or non-main (incidental)
 - **Full-text search** (🔎) among all tasks.
 - **Tag-groups** for grouping tags, for managing priority-levels (⬆️ ⬇️) or workflow-stages.
 - Provides you with **"Register Basic Tags"** functionality to seed basic tags which have special meaning to the workflow.
