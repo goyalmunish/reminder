@@ -17,6 +17,7 @@ A note can be main or main-note (incidental)
 type Note struct {
 	Text       string   `json:"text"`
 	Comments   Comments `json:"comments"`
+	Summary    string   `json:"summary"`
 	Status     string   `json:"status"`
 	TagIds     []int    `json:"tag_ids"`
 	IsMain     bool     `json:"is_priority"`
@@ -37,6 +38,7 @@ func (note *Note) Strings() []string {
 	strs := make([]string, 0, 10)
 	strs = append(strs, fPrintNoteField("Text", note.Text))
 	strs = append(strs, fPrintNoteField("Comments", note.Comments.Strings()))
+	strs = append(strs, fPrintNoteField("Summary", note.Summary))
 	strs = append(strs, fPrintNoteField("Status", note.Status))
 	strs = append(strs, fPrintNoteField("Tags", note.TagIds))
 	strs = append(strs, fPrintNoteField("IsMain", note.IsMain))
@@ -54,7 +56,7 @@ func (note *Note) ExternalText(reminderData *ReminderData) string {
 	basicStrs := note.Strings()
 	// replace tag ids with tag slugs
 	tagsStr := fPrintNoteField("Tags", reminderData.TagsFromIds(note.TagIds).Slugs())
-	basicStrs[3] = tagsStr
+	basicStrs[4] = tagsStr
 	// create final list of strings
 	strs = append(strs, basicStrs...)
 	return strings.Join(strs, "")
@@ -77,6 +79,7 @@ func (note *Note) SearchableText() string {
 	noteStatus := "[" + note.Status + "]"
 	searchableText = append(searchableText, noteStatus)
 	searchableText = append(searchableText, note.Text)
+	searchableText = append(searchableText, note.Summary)
 	searchableText = append(searchableText, strings.Join(commentsText, ""))
 	// return searchable text for note a string
 	return strings.Join(searchableText, " ")
@@ -102,6 +105,18 @@ func (note *Note) UpdateText(text string) error {
 		return errors.New("Note's text is empty")
 	}
 	note.Text = text
+	note.UpdatedAt = utils.CurrentUnixTimestamp()
+	fmt.Println("Updated the note")
+	return nil
+}
+
+// update note's summary
+func (note *Note) UpdateSummary(text string) error {
+	if len(utils.TrimString(text)) == 0 {
+		fmt.Printf("%v Skipping updating note with empty summary\n", utils.Symbols["warning"])
+		return errors.New("Note's summary is empty")
+	}
+	note.Summary = text
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	fmt.Println("Updated the note")
 	return nil

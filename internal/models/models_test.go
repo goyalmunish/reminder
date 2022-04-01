@@ -199,6 +199,7 @@ func TestNoteStrings(t *testing.T) {
   |              :  [nil] c1
   |              :  [nil] c2
   |              :  [nil] c3
+   |       Summary:  
    |        Status:  pending
    |          Tags:  [1 2]
    |        IsMain:  false
@@ -224,6 +225,7 @@ func TestExternalText(t *testing.T) {
   |              :  [nil] c1
   |              :  [nil] c2
   |              :  [nil] c3
+  |       Summary:  
   |        Status:  pending
   |          Tags:
   |              :  tag_1
@@ -241,17 +243,17 @@ func TestSearchableText(t *testing.T) {
 	comments := models.Comments{&models.Comment{Text: "c1"}}
 	note := models.Note{Text: "a beautiful cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	got := note.SearchableText()
-	utils.AssertEqual(t, got, "[pending] a beautiful cat [[nil] c1]")
+	utils.AssertEqual(t, got, "[pending] a beautiful cat  [[nil] c1]")
 	// case 2
 	comments = models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "foo bar"}, &models.Comment{Text: "c3"}}
 	note = models.Note{Text: "a cute dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "[done] a cute dog [[nil] c1, [nil] foo bar, [nil] c3]")
+	utils.AssertEqual(t, got, "[done] a cute dog  [[nil] c1, [nil] foo bar, [nil] c3]")
 	// case 3
 	comments = models.Comments{}
 	note = models.Note{Text: "a cute dog", Comments: comments}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "[] a cute dog [no-comments]")
+	utils.AssertEqual(t, got, "[] a cute dog  [no-comments]")
 }
 
 func TestExternalTexts(t *testing.T) {
@@ -375,6 +377,20 @@ func TestUpdateText(t *testing.T) {
 	err = note1.UpdateText("")
 	utils.AssertEqual(t, strings.Contains(err.Error(), "Note's text is empty"), true)
 	utils.AssertEqual(t, note1.Text, "updated text 1")
+}
+
+func TestUpdateSummary(t *testing.T) {
+	// create notes
+	note1 := models.Note{Summary: "original summary", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
+	// update summary
+	// case 1
+	err := note1.UpdateSummary("updated summary 1")
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, note1.Summary, "updated summary 1")
+	// case 2
+	err = note1.UpdateSummary("")
+	utils.AssertEqual(t, strings.Contains(err.Error(), "Note's summary is empty"), true)
+	utils.AssertEqual(t, note1.Summary, "updated summary 1")
 }
 
 func TestUpdateCompleteBy(t *testing.T) {
