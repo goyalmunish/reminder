@@ -639,7 +639,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		var updatedNotes Notes
 		updatedNotes = append(updatedNotes, note)
 		updatedNotes = append(updatedNotes, notes...)
-		reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status, false)
+		reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status, onlyMain)
 		return nil
 	}
 	// ask options about the selected note
@@ -647,7 +647,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	action := reminderData.PrintNoteAndAskOptions(note)
 	if action == "stay" {
 		// no action was selected for the note, go one step back
-		reminderData.PrintNotesAndAskOptions(notes, tagID, status, false)
+		reminderData.PrintNotesAndAskOptions(notes, tagID, status, onlyMain)
 	}
 	return nil
 }
