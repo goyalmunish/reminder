@@ -24,4 +24,5 @@ var Symbols = map[string]string{
 	"add":          "➕",
 	"backup":       "💾",
 	"zzz":          "💤",
+	"hat":          "🎩",
 }
