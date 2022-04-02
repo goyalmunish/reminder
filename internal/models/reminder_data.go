@@ -165,15 +165,15 @@ func (reminderData *ReminderData) ToggleNoteMainFlag(note *Note) error {
 
 // register basic tags
 func (reminderData *ReminderData) RegisterBasicTags() {
-	if len(reminderData.Tags) == 0 {
-		fmt.Println("Adding tags:")
-		basicTags := FBasicTags()
-		reminderData.Tags = basicTags
-		reminderData.UpdateDataFile()
-		fmt.Printf("Added basic tags: %v\n", reminderData.Tags)
-	} else {
+	if len(reminderData.Tags) != 0 {
 		fmt.Printf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["warning"])
+		return
 	}
+	fmt.Println("Adding tags:")
+	basicTags := FBasicTags()
+	reminderData.Tags = basicTags
+	reminderData.UpdateDataFile()
+	fmt.Printf("Added basic tags: %v\n", reminderData.Tags)
 }
 
 // prompt a list of all tags (and their notes underneath)
@@ -258,7 +258,7 @@ func (reminderData *ReminderData) SearchNotes() error {
 }
 
 // fetch all pending notes which are urgent
-func (reminderData *ReminderData) UrgentNotes() Notes {
+func (reminderData *ReminderData) NotesApprachingDueDate() Notes {
 	allNotes := reminderData.Notes
 	pendingNotes := allNotes.WithStatus("pending")
 	// assuming there are at least 100 notes (on average)
@@ -373,9 +373,8 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	if err != nil {
 		utils.PrintErrorIfPresent(err)
 		return note, err
-	} else {
-		err = reminderData.newNoteAppend(note)
 	}
+	err = reminderData.newNoteAppend(note)
 	return note, nil
 }
 
@@ -459,13 +458,13 @@ func (reminderData *ReminderData) AutoBackup(gapSecs int64) string {
 	lastBackup := reminderData.LastBackupAt
 	gap := currentTime - lastBackup
 	fmt.Printf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs)
-	if gap >= gapSecs {
-		dstFile = reminderData.CreateBackup()
-		reminderData.LastBackupAt = currentTime
-		reminderData.UpdateDataFile()
-	} else {
+	if gap < gapSecs {
 		fmt.Printf("Skipping automatic backup\n")
+		return dstFile
 	}
+	dstFile = reminderData.CreateBackup()
+	reminderData.LastBackupAt = currentTime
+	reminderData.UpdateDataFile()
 	return dstFile
 }
 
@@ -609,7 +608,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 			fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 			fmt.Println("  - within a week for repeat-annually and 2 days post due date (ignoring its year)")
 			fmt.Println("  - within 3 days for repeat-monthly and 2 days post due date (ignoring its year and month)")
-			notes = reminderData.UrgentNotes()
+			notes = reminderData.NotesApprachingDueDate()
 		}
 	} else {
 		// use passed notes

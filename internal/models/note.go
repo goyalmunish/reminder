@@ -12,7 +12,7 @@ import (
 /*
 Note represents a task (a TO-DO item)
 
-A note can be main or main-note (incidental)
+A note can be main or incidental
 */
 type Note struct {
 	Text       string   `json:"text"`
@@ -20,7 +20,7 @@ type Note struct {
 	Summary    string   `json:"summary"`
 	Status     string   `json:"status"`
 	TagIds     []int    `json:"tag_ids"`
-	IsMain     bool     `json:"is_priority"`
+	IsMain     bool     `json:"is_main"`
 	CompleteBy int64    `json:"complete_by"`
 	BaseStruct
 }
@@ -30,6 +30,14 @@ type Notes []*Note
 func (c Notes) Len() int           { return len(c) }
 func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
+
+// NoteType returns type of the note: main or incidental
+func (note *Note) Type() string {
+	if note.IsMain {
+		return "main"
+	}
+	return "incidental"
+}
 
 // provide basic string representation (actually a slice of strings) of a note
 // with each element of slice representing certain field of the note
@@ -75,11 +83,7 @@ func (note *Note) SearchableText() string {
 	}
 	commentsText = append(commentsText, "]")
 	// get filters
-	mainFlag := "incidental"
-	if note.IsMain {
-	  mainFlag = "main"
-	}
-	filters := fmt.Sprintf("| %-10s | %-7s |", mainFlag, note.Status)
+	filters := fmt.Sprintf("| %-10s | %-7s |", note.Type(), note.Status)
 	// get a complete searchable text array for note
 	var searchableText []string
 	searchableText = append(searchableText, filters)
@@ -165,13 +169,15 @@ func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
 	noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
 	if len(noteIDsWithRepeat) != 0 {
 		fmt.Printf("%v Update skipped as one of the associated tag is a \"repeat\" group tag \n", utils.Symbols["warning"])
-	} else if note.Status != status {
-		note.Status = status
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		fmt.Println("Updated the note")
-	} else {
-		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["warning"])
+		return nil
 	}
+	if note.Status == status {
+		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["warning"])
+		return nil
+	}
+	note.Status = status
+	note.UpdatedAt = utils.CurrentUnixTimestamp()
+	fmt.Println("Updated the note")
 	return nil
 }
 

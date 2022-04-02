@@ -243,17 +243,17 @@ func TestSearchableText(t *testing.T) {
 	comments := models.Comments{&models.Comment{Text: "c1"}}
 	note := models.Note{Text: "a beautiful cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	got := note.SearchableText()
-	utils.AssertEqual(t, got, "[pending] a beautiful cat  [[nil] c1]")
+	utils.AssertEqual(t, got, "| incidental | pending | a beautiful cat  [[nil] c1]")
 	// case 2
 	comments = models.Comments{&models.Comment{Text: "c1"}, &models.Comment{Text: "foo bar"}, &models.Comment{Text: "c3"}}
 	note = models.Note{Text: "a cute dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "[done] a cute dog  [[nil] c1, [nil] foo bar, [nil] c3]")
+	utils.AssertEqual(t, got, "| incidental | done    | a cute dog  [[nil] c1, [nil] foo bar, [nil] c3]")
 	// case 3
 	comments = models.Comments{}
 	note = models.Note{Text: "a cute dog", Comments: comments}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "[] a cute dog  [no-comments]")
+	utils.AssertEqual(t, got, "| incidental |         | a cute dog  [no-comments]")
 }
 
 func TestExternalTexts(t *testing.T) {
@@ -735,7 +735,7 @@ func TestRegisterBasicTags(t *testing.T) {
 	utils.AssertEqual(t, len(reminderData.Tags), 7)
 }
 
-func TestUrgentNotes(t *testing.T) {
+func TestNotesApprachingDueDate(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
@@ -812,7 +812,7 @@ func TestUrgentNotes(t *testing.T) {
 	notes = append(notes, &models.Note{Text: "RMP07", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
 	reminderData.Notes = notes
 	// get urgent notes
-	urgentNotes := reminderData.UrgentNotes()
+	urgentNotes := reminderData.NotesApprachingDueDate()
 	var urgentNotesText []string
 	for _, note := range urgentNotes {
 		urgentNotesText = append(urgentNotesText, note.Text)
