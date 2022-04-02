@@ -735,7 +735,7 @@ func TestRegisterBasicTags(t *testing.T) {
 	utils.AssertEqual(t, len(reminderData.Tags), 7)
 }
 
-func TestUrgentNotes(t *testing.T) {
+func TestNotesApprachingDueDate(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
@@ -812,7 +812,7 @@ func TestUrgentNotes(t *testing.T) {
 	notes = append(notes, &models.Note{Text: "RMP07", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
 	reminderData.Notes = notes
 	// get urgent notes
-	urgentNotes := reminderData.UrgentNotes()
+	urgentNotes := reminderData.NotesApprachingDueDate()
 	var urgentNotesText []string
 	for _, note := range urgentNotes {
 		urgentNotesText = append(urgentNotesText, note.Text)

@@ -24,8 +24,6 @@ func flow() {
 	fmt.Println(reminderData.Stats())
 	// try automatic backup
 	reminderData.AutoBackup(24 * 60 * 60)
-	// TEST CODE STARTS ---->
-	// TEST CODE ENDS ------>
 	// ask the main menu
 	fmt.Println("| =========================== MAIN MENU =========================== |")
 	fmt.Println("|     Use 'Ctrl-c' to jump one level up (towards the Main Menu)     |")
