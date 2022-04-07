@@ -91,7 +91,10 @@ func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
 	if err != nil {
 		return err
 	}
-	reminderData.UpdateDataFile()
+	err = reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Updated the data file")
 	return nil
 }
@@ -102,7 +105,10 @@ func (reminderData *ReminderData) UpateNoteSummary(note *Note, text string) erro
 	if err != nil {
 		return err
 	}
-	reminderData.UpdateDataFile()
+	err = reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Updated the data file")
 	return nil
 }
@@ -113,7 +119,10 @@ func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) 
 	if err != nil {
 		return err
 	}
-	reminderData.UpdateDataFile()
+	err = reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Updated the data file")
 	return nil
 }
@@ -124,7 +133,10 @@ func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error 
 	if err != nil {
 		return err
 	}
-	reminderData.UpdateDataFile()
+	err = reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Updated the data file")
 	return nil
 }
@@ -135,7 +147,10 @@ func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error
 	if err != nil {
 		return err
 	}
-	reminderData.UpdateDataFile()
+	err = reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Updated the data file")
 	return nil
 }
@@ -147,7 +162,10 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) er
 	if err != nil {
 		return err
 	}
-	reminderData.UpdateDataFile()
+	err = reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Updated the data file")
 	return nil
 }
@@ -158,22 +176,29 @@ func (reminderData *ReminderData) ToggleNoteMainFlag(note *Note) error {
 	if err != nil {
 		return err
 	}
-	reminderData.UpdateDataFile()
+	err = reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Updated the data file")
 	return nil
 }
 
 // register basic tags
-func (reminderData *ReminderData) RegisterBasicTags() {
+func (reminderData *ReminderData) RegisterBasicTags() error {
 	if len(reminderData.Tags) != 0 {
 		fmt.Printf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["warning"])
-		return
+		return nil
 	}
 	fmt.Println("Adding tags:")
 	basicTags := FBasicTags()
 	reminderData.Tags = basicTags
-	reminderData.UpdateDataFile()
+	err := reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	fmt.Printf("Added basic tags: %v\n", reminderData.Tags)
+	return nil
 }
 
 // prompt a list of all tags (and their notes underneath)
@@ -204,7 +229,10 @@ func (reminderData *ReminderData) ListTags() error {
 	// check if user wants to add a new tag
 	if tagIndex == len(reminderData.SortedTagSlugs()) {
 		// add new tag
-		_, _ = reminderData.NewTagRegistration()
+		_, err = reminderData.NewTagRegistration()
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	// operate on the selected a tag
@@ -213,7 +241,10 @@ func (reminderData *ReminderData) ListTags() error {
 	if err != nil {
 		utils.PrintErrorIfPresent(err)
 		// go back to ListTags
-		reminderData.ListTags()
+		err = reminderData.ListTags()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -251,7 +282,10 @@ func (reminderData *ReminderData) SearchNotes() error {
 		action := reminderData.PrintNoteAndAskOptions(note)
 		if action == "stay" {
 			// no action was selected for the note, go one step back
-			reminderData.SearchNotes()
+			err := reminderData.SearchNotes()
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return err
@@ -356,7 +390,10 @@ func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 	// go ahead and append
 	fmt.Printf("Added Tag: %v\n", *tag)
 	reminderData.Tags = append(reminderData.Tags, tag)
-	reminderData.UpdateDataFile()
+	err := reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -375,6 +412,10 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 		return note, err
 	}
 	err = reminderData.newNoteAppend(note)
+	if err != nil {
+		utils.PrintErrorIfPresent(err)
+		return note, err
+	}
 	return note, nil
 }
 
@@ -382,7 +423,10 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 	fmt.Printf("Added Note: %v\n", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
-	reminderData.UpdateDataFile()
+	err := reminderData.UpdateDataFile()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -452,7 +496,7 @@ func (reminderData *ReminderData) DisplayDataFile() error {
 }
 
 // auto backup
-func (reminderData *ReminderData) AutoBackup(gapSecs int64) string {
+func (reminderData *ReminderData) AutoBackup(gapSecs int64) (string, error) {
 	var dstFile string
 	currentTime := utils.CurrentUnixTimestamp()
 	lastBackup := reminderData.LastBackupAt
@@ -460,12 +504,15 @@ func (reminderData *ReminderData) AutoBackup(gapSecs int64) string {
 	fmt.Printf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs)
 	if gap < gapSecs {
 		fmt.Printf("Skipping automatic backup\n")
-		return dstFile
+		return dstFile, nil
 	}
 	dstFile = reminderData.CreateBackup()
 	reminderData.LastBackupAt = currentTime
-	reminderData.UpdateDataFile()
-	return dstFile
+	err := reminderData.UpdateDataFile()
+	if err != nil {
+		return dstFile, err
+	}
+	return dstFile, nil
 }
 
 // method (recursive) to ask tagIDs that are to be associated with a note
@@ -530,7 +577,8 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		promptCommment := utils.GeneratePrompt("note_comment", "")
 		promptText, err := promptCommment.Run()
 		utils.PrintErrorIfPresent(err)
-		reminderData.AddNoteComment(note, promptText)
+		err = reminderData.AddNoteComment(note, promptText)
+		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
 		return "main-menu"
@@ -538,39 +586,46 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Println("No changes made")
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
-		_ = reminderData.UpdateNoteStatus(note, "done")
+		err := reminderData.UpdateNoteStatus(note, "done")
+		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"):
-		_ = reminderData.UpdateNoteStatus(note, "pending")
+		err := reminderData.UpdateNoteStatus(note, "pending")
+		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
 		promptCompleteBy := utils.GeneratePrompt("note_completed_by", "")
 		promptText, err := promptCompleteBy.Run()
 		utils.PrintErrorIfPresent(err)
-		reminderData.UpdateNoteCompleteBy(note, promptText)
+		err = reminderData.UpdateNoteCompleteBy(note, promptText)
+		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
 		promptNoteTextWithDefault := utils.GeneratePrompt("note_text", note.Text)
 		promptText, err := promptNoteTextWithDefault.Run()
 		utils.PrintErrorIfPresent(err)
-		reminderData.UpateNoteText(note, promptText)
+		err = reminderData.UpateNoteText(note, promptText)
+		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["glossary"], "Update summary"):
 		promptNoteTextWithDefault := utils.GeneratePrompt("note_summary", note.Summary)
 		promptText, err := promptNoteTextWithDefault.Run()
 		utils.PrintErrorIfPresent(err)
-		reminderData.UpateNoteSummary(note, promptText)
+		err = reminderData.UpateNoteSummary(note, promptText)
+		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"):
 		tagIDs := reminderData.AskTagIds([]int{})
 		if len(tagIDs) > 0 {
-			reminderData.UpdateNoteTags(note, tagIDs)
+			err := reminderData.UpdateNoteTags(note, tagIDs)
+			utils.PrintErrorIfPresent(err)
 			fmt.Print(note.ExternalText(reminderData))
 		} else {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["warning"])
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Toggle main/incidental"):
-		_ = reminderData.ToggleNoteMainFlag(note)
+		err := reminderData.ToggleNoteMainFlag(note)
+		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	}
 	return "stay"
@@ -643,7 +698,10 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		var updatedNotes Notes
 		updatedNotes = append(updatedNotes, note)
 		updatedNotes = append(updatedNotes, notes...)
-		reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status, onlyMain)
+		err = reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status, onlyMain)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	// ask options about the selected note
@@ -651,7 +709,10 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	action := reminderData.PrintNoteAndAskOptions(note)
 	if action == "stay" {
 		// no action was selected for the note, go one step back
-		reminderData.PrintNotesAndAskOptions(notes, tagID, status, onlyMain)
+		err = reminderData.PrintNotesAndAskOptions(notes, tagID, status, onlyMain)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -664,19 +725,27 @@ func FDefaultDataFile() string {
 }
 
 // function to make sure dataFilePath exists
-func FMakeSureFileExists(dataFilePath string) {
+func FMakeSureFileExists(dataFilePath string) error {
 	_, err := os.Stat(dataFilePath)
 	if err != nil {
 		fmt.Printf("Error finding existing data file: %v\n", err)
 		if errors.Is(err, fs.ErrNotExist) {
-			fmt.Printf("Generating new data file %v.\n", dataFilePath)
-			os.MkdirAll(path.Dir(dataFilePath), 0751)
+			fmt.Printf("Try generating new data file %v.\n", dataFilePath)
+			err := os.MkdirAll(path.Dir(dataFilePath), 0751)
+			if err != nil {
+				return err
+			}
 			reminderData := *FBlankReminder()
 			reminderData.DataFile = dataFilePath
 			err = reminderData.UpdateDataFile()
+			if err != nil {
+				return err
+			}
 		}
+		utils.PrintErrorIfPresent(err)
+		return err
 	}
-	utils.PrintErrorIfPresent(err)
+	return nil
 }
 
 // function to create blank ReminderData object

@@ -197,7 +197,9 @@ func TestTerminalSize(t *testing.T) {
 
 func TestPerformShellOperation(t *testing.T) {
 	dummyFile := "dummyFile"
-	defer utils.PerformShellOperation("rm -f", dummyFile)
+	defer func() {
+		_, _ = utils.PerformShellOperation("rm -f", dummyFile)
+	}()
 	// attempt to delete a non-existing file
 	_, err := utils.PerformShellOperation("rm", dummyFile)
 	utils.AssertEqual(t, err, errors.New("exit status 1"))
