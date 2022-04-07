@@ -1,0 +1,2 @@
+# run linters
+golangci-lint run
