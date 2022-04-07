@@ -17,13 +17,13 @@ import (
 func flow() {
 	// make sure DataFile exists
 	defaultDataFilePath := models.FDefaultDataFile()
-	models.FMakeSureFileExists(defaultDataFilePath)
+	_ = models.FMakeSureFileExists(defaultDataFilePath)
 	// read and parse the existing data
 	reminderData := *models.FReadDataFile(defaultDataFilePath)
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup
-	reminderData.AutoBackup(24 * 60 * 60)
+	_, _ = reminderData.AutoBackup(24 * 60 * 60)
 	// ask the main menu
 	fmt.Println("| =========================== MAIN MENU =========================== |")
 	fmt.Println("|     Use 'Ctrl-c' to jump one level up (towards the Main Menu)     |")
@@ -50,7 +50,7 @@ func flow() {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
 		_ = reminderData.ListTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
-		reminderData.RegisterBasicTags()
+		_ = reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Approaching Due Date"):
 		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending", false)
 	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Main Notes"):
