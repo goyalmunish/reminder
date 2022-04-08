@@ -13,10 +13,10 @@ import (
 	"reminder/pkg/utils"
 )
 
-// recursive function for overall flow
+// flow is recursive function for overall flow of interactivity
 func flow() {
 	// make sure DataFile exists
-	defaultDataFilePath := models.FDefaultDataFile()
+	defaultDataFilePath := models.DefaultDataFile()
 	_ = models.FMakeSureFileExists(defaultDataFilePath)
 	// read and parse the existing data
 	reminderData := *models.FReadDataFile(defaultDataFilePath)

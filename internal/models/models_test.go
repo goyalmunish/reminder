@@ -42,7 +42,7 @@ func (prompt *MockPromptNoteText) Run() (string, error) {
 // test examples
 
 func TestDataFile(t *testing.T) {
-	defaultDataFilePath := models.FDefaultDataFile()
+	defaultDataFilePath := models.DefaultDataFile()
 	utils.AssertEqual(t, strings.HasPrefix(defaultDataFilePath, "/"), true)
 	utils.AssertEqual(t, strings.HasSuffix(defaultDataFilePath, ".json"), true)
 }
@@ -168,8 +168,8 @@ func TestIdsForGroup(t *testing.T) {
 	utils.AssertEqual(t, tags.IdsForGroup("tag_group2"), []int{4})
 }
 
-func TestFBasicTags(t *testing.T) {
-	basicTags := models.FBasicTags()
+func TestBasicTags(t *testing.T) {
+	basicTags := models.BasicTags()
 	slugs := basicTags.Slugs()
 	want := "[current priority-urgent priority-medium priority-low repeat-annually repeat-monthly tips]"
 	utils.AssertEqual(t, slugs, want)
@@ -442,18 +442,18 @@ func TestUpdateStatus(t *testing.T) {
 	utils.AssertEqual(t, note1.Status, "pending")
 }
 
-func TestToggleMain(t *testing.T) {
+func TestToggleMainFlag(t *testing.T) {
 	// create notes
 	note1 := models.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: models.BaseStruct{UpdatedAt: 1600000001}}
 	// update TagIds
 	// case 1
 	originalPriority := note1.IsMain
-	err := note1.ToggleMain()
+	err := note1.ToggleMainFlag()
 	utils.AssertEqual(t, err, nil)
 	utils.AssertEqual(t, originalPriority != note1.IsMain, true)
 	// case 2
 	originalPriority = note1.IsMain
-	err = note1.ToggleMain()
+	err = note1.ToggleMainFlag()
 	utils.AssertEqual(t, err, nil)
 	utils.AssertEqual(t, originalPriority != note1.IsMain, true)
 }
@@ -849,10 +849,10 @@ func TestNewTagRegistration(t *testing.T) {
 	// TODO: yet to finish
 }
 
-func TestFNewTag(t *testing.T) {
+func TestNewTag(t *testing.T) {
 	mockPromptTagSlug := &MockPromptTagSlug{}
 	mockPromptTagGroup := &MockPromptTagGroup{}
-	tag, _ := models.FNewTag(10, mockPromptTagSlug, mockPromptTagGroup)
+	tag, _ := models.NewTag(10, mockPromptTagSlug, mockPromptTagGroup)
 	want := &models.Tag{
 		Id:    10,
 		Slug:  "test_tag_slug",
@@ -860,10 +860,10 @@ func TestFNewTag(t *testing.T) {
 	}
 	utils.AssertEqual(t, tag, want)
 }
-func TestFNewNote(t *testing.T) {
+func TestNewNote(t *testing.T) {
 	mockPromptNoteText := &MockPromptNoteText{}
 	tagIDs := []int{1, 3, 5}
-	note, _ := models.FNewNote(tagIDs, mockPromptNoteText)
+	note, _ := models.NewNote(tagIDs, mockPromptNoteText)
 	want := &models.Note{
 		Text:       "a random note text",
 		TagIds:     tagIDs,
