@@ -1,4 +1,4 @@
-package models
+package model
 
 /*
 A Prompter representing Prompt which can be Run.

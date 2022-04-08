@@ -10,5 +10,5 @@ run_go_fmt() {
 
 # run tests
 run_go_fmt "pkg/utils/"
-run_go_fmt "internal/models/"
+run_go_fmt "internal/model/"
 run_go_fmt "cmd/reminder/"

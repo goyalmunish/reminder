@@ -1,4 +1,4 @@
-package models
+package model
 
 /*
 A BaseStruct provides set of common fields.
