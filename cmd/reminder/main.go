@@ -1,7 +1,7 @@
 /*
 Tool `reminder` is a command-line (terminal) based interactive app for organizing tasks with minimal efforts.
 
-Just run it as `go run cmd/reminder/main.go`
+Just run it as `go run ./cmd/reminder`
 */
 package main
 
