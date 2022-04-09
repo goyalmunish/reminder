@@ -37,8 +37,11 @@ func (reminderData *ReminderData) UpdateDataFile(msg string) error {
 	reminderData.UpdatedAt = utils.CurrentUnixTimestamp()
 	// marshal the data
 	byteValue, err := json.MarshalIndent(&reminderData, "", "    ")
-	utils.PrintErrorIfPresent(err)
-	// commit the byte data to file
+	if err != nil {
+		utils.PrintErrorIfPresent(err)
+		return err
+	}
+	// persist the byte data to file
 	err = ioutil.WriteFile(reminderData.DataFile, byteValue, 0755)
 	if err != nil {
 		utils.PrintErrorIfPresent(err)
@@ -162,7 +165,7 @@ func (reminderData *ReminderData) RegisterBasicTags() error {
 	}
 	basicTags := BasicTags()
 	reminderData.Tags = basicTags
-	msg := fmt.Sprintf("Added basic tags: %v\n", reminderData.Tags)
+	msg := fmt.Sprintf("Added basic tags: %+v\n", reminderData.Tags)
 	return reminderData.UpdateDataFile(msg)
 }
 
