@@ -9,7 +9,6 @@
     - [Linting Code](#linting-code)
     - [Debugging Program](#debugging-program)
     - [Build Docker Image](#build-docker-image)
-    - [Additional Conventions](#additional-conventions)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -94,9 +93,3 @@ _Make use of [`build_image.sh`](./scripts/build_image.sh) to build and push (req
 cd reminder/
 . ./scripts/build_image.sh
 ```
-
-## Additional Conventions
-
-Here are some additional conventions followed:
-
-- Functions (not methods) are prefixed with `F` or `f`.

@@ -28,8 +28,6 @@ type ReminderData struct {
 	BaseStruct
 }
 
-// methods
-
 // UpdateDataFile updates data file.
 // The msg is any additional message to be printed.
 func (reminderData *ReminderData) UpdateDataFile(msg string) error {
