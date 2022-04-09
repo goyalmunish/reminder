@@ -32,7 +32,8 @@ type ReminderData struct {
 // methods
 
 // UpdateDataFile updates data file.
-func (reminderData *ReminderData) UpdateDataFile() error {
+// The msg is any additional message to be printed.
+func (reminderData *ReminderData) UpdateDataFile(msg string) error {
 	// update UpdatedAt field
 	// note that UpdatedAt of a whole ReminderData object is different
 	// from corresponding field of each note
@@ -42,8 +43,15 @@ func (reminderData *ReminderData) UpdateDataFile() error {
 	utils.PrintErrorIfPresent(err)
 	// commit the byte data to file
 	err = ioutil.WriteFile(reminderData.DataFile, byteValue, 0755)
-	utils.PrintErrorIfPresent(err)
-	return err
+	if err != nil {
+		utils.PrintErrorIfPresent(err)
+		return err
+	}
+	if msg != "" {
+		fmt.Println(msg)
+	}
+	fmt.Println("Updated the data file!")
+	return nil
 }
 
 // SortedTagSlugs sorts the tags in-place and return slugs.
@@ -91,12 +99,7 @@ func (reminderData *ReminderData) UpdateNoteText(note *Note, text string) error 
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
 // UpdateNoteSummary updates the note's summary.
@@ -105,12 +108,7 @@ func (reminderData *ReminderData) UpdateNoteSummary(note *Note, text string) err
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
 // UpdateNoteCompleteBy updates the note's due date (complete by).
@@ -119,12 +117,7 @@ func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) 
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
 // AddNoteComment adds note's comment.
@@ -133,12 +126,7 @@ func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error 
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
 // UpdateNoteTags updates note's tags.
@@ -147,12 +135,7 @@ func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
 // UpdateNoteStatus updates note's status.
@@ -162,12 +145,7 @@ func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) er
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
 // ToggleNoteMainFlag toggles note's priority.
@@ -176,12 +154,7 @@ func (reminderData *ReminderData) ToggleNoteMainFlag(note *Note) error {
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
 // RegisterBasicTags registers basic tags.
@@ -190,15 +163,10 @@ func (reminderData *ReminderData) RegisterBasicTags() error {
 		fmt.Printf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["warning"])
 		return nil
 	}
-	fmt.Println("Adding tags:")
 	basicTags := BasicTags()
 	reminderData.Tags = basicTags
-	err := reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Added basic tags: %v\n", reminderData.Tags)
-	return nil
+	msg := fmt.Sprintf("Added basic tags: %v\n", reminderData.Tags)
+	return reminderData.UpdateDataFile(msg)
 }
 
 // ListTags prompts a list of all tags (and their notes underneath).
@@ -390,11 +358,7 @@ func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 	// go ahead and append
 	fmt.Printf("Added Tag: %v\n", *tag)
 	reminderData.Tags = append(reminderData.Tags, tag)
-	err := reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
 // NewNoteRegistration registers new note.
@@ -423,11 +387,7 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 	fmt.Printf("Added Note: %v\n", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
-	err := reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
 // Stats returns current status.
@@ -508,11 +468,7 @@ func (reminderData *ReminderData) AutoBackup(gapSecs int64) (string, error) {
 	}
 	dstFile = reminderData.CreateBackup()
 	reminderData.LastBackupAt = currentTime
-	err := reminderData.UpdateDataFile()
-	if err != nil {
-		return dstFile, err
-	}
-	return dstFile, nil
+	return dstFile, reminderData.UpdateDataFile("")
 }
 
 // AskTagIds (recursive) ask tagIDs that are to be associated with a note..
@@ -737,10 +693,7 @@ func MakeSureFileExists(dataFilePath string) error {
 			}
 			reminderData := *BlankReminder()
 			reminderData.DataFile = dataFilePath
-			err = reminderData.UpdateDataFile()
-			if err != nil {
-				return err
-			}
+			return reminderData.UpdateDataFile("")
 		}
 		utils.PrintErrorIfPresent(err)
 		return err

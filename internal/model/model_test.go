@@ -508,7 +508,7 @@ func TestUpdateDataFile(t *testing.T) {
 	// old_updated_at := reminderData.UpdatedAt
 	testUser := model.User{Name: "Test User", EmailId: "user@test.com"}
 	reminderData.User = &testUser
-	_ = reminderData.UpdateDataFile()
+	_ = reminderData.UpdateDataFile("")
 	remiderDataRe := model.ReadDataFile(dataFilePath)
 	// utils.AssertEqual(t, remiderDataRe.UpdatedAt > old_updated_at, true)
 	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)
