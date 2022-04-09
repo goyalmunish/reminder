@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-// functions
-
 // printNoteField function prints the given field of a note.
 func printNoteField(fieldName string, fieldValue interface{}) string {
 	var strs []string
