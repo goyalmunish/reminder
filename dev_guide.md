@@ -6,6 +6,7 @@
     - [How to run in development mode?](#how-to-run-in-development-mode)
     - [Run Tests](#run-tests)
     - [Format Files](#format-files)
+    - [Linting Code](#linting-code)
     - [Debugging Program](#debugging-program)
     - [Build Docker Image](#build-docker-image)
     - [Additional Conventions](#additional-conventions)
@@ -22,14 +23,14 @@ Here's how you can run in development mode:
 cd reminder/
 
 # way 1
-go run cmd/reminder/main.go
+go run ./cmd/reminder
 
 # way 2
 cd cmd/reminder
 go run .
 
 # way 3
-. ./scripts/go_run
+make -s run
 ```
 
 ## Run Tests
@@ -44,6 +45,9 @@ cd reminder/
 
 # run tests without supressing printing to console
 CONSOLE_PRINT=true . ./scripts/go_test
+
+# or, using make
+make -s test
 ```
 
 ## Format Files
@@ -54,6 +58,15 @@ You can make use of [`go_fmt`](./scripts/go_fmt) to auto-format all `.go` files:
 cd reminder/
 
 . ./scripts/go_fmt
+
+# or using make
+make -s fmt
+```
+
+## Linting Code
+
+```sh
+make -s lint
 ```
 
 ## Debugging Program

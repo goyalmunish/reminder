@@ -1,5 +1,7 @@
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-repo_name := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+mkfile_name := $(lastword $(MAKEFILE_LIST))
+mkfile_path := $(abspath $(mkfile_name))
+repo_path := $(realpath $(dir $(mkfile_path)))
+repo_name := $(notdir ${repo_path})
 
 .PHONY: build
 build:
