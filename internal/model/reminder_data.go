@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -28,8 +27,6 @@ type ReminderData struct {
 	LastBackupAt int64  `json:"last_backup_at"`
 	BaseStruct
 }
-
-// methods
 
 // UpdateDataFile updates data file.
 // The msg is any additional message to be printed.
@@ -385,7 +382,7 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 
 // newNoteAppend appends a new note.
 func (reminderData *ReminderData) newNoteAppend(note *Note) error {
-	fmt.Printf("Added Note: %v\n", *note)
+	fmt.Printf("Added Note: %+v\n", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
 	return reminderData.UpdateDataFile("")
 }
@@ -671,62 +668,4 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		}
 	}
 	return nil
-}
-
-// functions
-
-// DefaultDataFile function returns default data file path.
-func DefaultDataFile() string {
-	return path.Join(os.Getenv("HOME"), "reminder", "data.json")
-}
-
-// MakeSureFileExists function makes sure that the dataFilePath exists.
-func MakeSureFileExists(dataFilePath string) error {
-	_, err := os.Stat(dataFilePath)
-	if err != nil {
-		fmt.Printf("Error finding existing data file: %v\n", err)
-		if errors.Is(err, fs.ErrNotExist) {
-			fmt.Printf("Try generating new data file %v.\n", dataFilePath)
-			err := os.MkdirAll(path.Dir(dataFilePath), 0751)
-			if err != nil {
-				return err
-			}
-			reminderData := *BlankReminder()
-			reminderData.DataFile = dataFilePath
-			return reminderData.UpdateDataFile("")
-		}
-		utils.PrintErrorIfPresent(err)
-		return err
-	}
-	return nil
-}
-
-// BlankReminder function creates blank ReminderData object.
-func BlankReminder() *ReminderData {
-	fmt.Println("Initializing the data file. Please provide following data.")
-	promptUserName := utils.GeneratePrompt("user_name", "")
-	name, err := promptUserName.Run()
-	utils.PrintErrorIfPresent(err)
-	promptUserEmail := utils.GeneratePrompt("user_email", "")
-	emailID, err := promptUserEmail.Run()
-	utils.PrintErrorIfPresent(err)
-	return &ReminderData{
-		User:     &User{Name: name, EmailId: emailID},
-		Notes:    Notes{},
-		Tags:     Tags{},
-		DataFile: DefaultDataFile(),
-	}
-}
-
-// ReadDataFile function reads data file.
-func ReadDataFile(dataFilePath string) *ReminderData {
-	var reminderData ReminderData
-	// read byte data from file
-	byteValue, err := ioutil.ReadFile(dataFilePath)
-	utils.PrintErrorIfPresent(err)
-	// parse json data
-	err = json.Unmarshal(byteValue, &reminderData)
-	utils.PrintErrorIfPresent(err)
-	// close the file
-	return &reminderData
 }

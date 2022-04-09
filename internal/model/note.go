@@ -26,17 +26,6 @@ type Note struct {
 	BaseStruct
 }
 
-/*
-A Notes is a slice of Note objects.
-
-By default it is sorted by its CreatedAt field.
-*/
-type Notes []*Note
-
-func (c Notes) Len() int           { return len(c) }
-func (c Notes) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
-func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
-
 // Type returns type of the note: main or incidental.
 func (note *Note) Type() string {
 	if note.IsMain {
@@ -108,7 +97,7 @@ func (note *Note) AddComment(text string) error {
 	}
 	comment := &Comment{Text: text, BaseStruct: BaseStruct{CreatedAt: utils.CurrentUnixTimestamp()}}
 	note.Comments = append(note.Comments, comment)
-	defer fmt.Println("Updated the note")
+	defer fmt.Println("Added the comment")
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
@@ -137,7 +126,7 @@ func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
 	}
 	// happy path
 	note.Status = status
-	defer fmt.Println("Updated the note")
+	defer fmt.Println("Updated the status")
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
@@ -152,7 +141,7 @@ func (note *Note) UpdateText(text string) error {
 	}
 	// happy path
 	note.Text = text
-	defer fmt.Println("Updated the note")
+	defer fmt.Println("Updated the text")
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
@@ -171,7 +160,7 @@ func (note *Note) UpdateSummary(text string) error {
 		defer fmt.Println("Cleared the due date from the note")
 	} else {
 		note.Summary = text
-		defer fmt.Println("Updated the note")
+		defer fmt.Println("Updated the summary")
 	}
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
@@ -208,105 +197,4 @@ func (note *Note) ToggleMainFlag() error {
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
-}
-
-// ExternalTexts returns display text (that is, external representation) of list of notes
-// with width of each note is truncated to maxStrLen.
-// It returns empty []string if there are no notes.
-func (notes Notes) ExternalTexts(maxStrLen int) []string {
-	// assuming there are at least (on average) 100s of notes
-	allTexts := make([]string, 0, 100)
-	for _, note := range notes {
-		noteText := note.Text
-		if maxStrLen > 0 {
-			if len(noteText) > maxStrLen {
-				noteText = fmt.Sprintf("%v%v", noteText[0:(maxStrLen-3)], "...")
-			}
-		}
-		noteText = fmt.Sprintf("%*v {C:%02d, S:%v, D:%v}", -maxStrLen, noteText, len(note.Comments), strings.ToUpper(note.Status[0:1]), utils.UnixTimestampToShortTimeStr(note.CompleteBy))
-		allTexts = append(allTexts, noteText)
-	}
-	return allTexts
-}
-
-// WithStatus filters notes with given status (such as "pending" status).
-// It returns empty Notes if no matching Note is found (even when given status doesn't exist).
-func (notes Notes) WithStatus(status string) Notes {
-	var result Notes
-	for _, note := range notes {
-		if note.Status == status {
-			result = append(result, note)
-		}
-	}
-	return result
-}
-
-// OnlyMain filters notes which are set as main.
-// It returns empty Notes if no main notes is found.
-func (notes Notes) OnlyMain() Notes {
-	var result Notes
-	for _, note := range notes {
-		if note.IsMain {
-			result = append(result, note)
-		}
-	}
-	return result
-}
-
-// WithTagIdAndStatus returns all notes with given tagID and given status.
-// It returns empty Notes if no matching Note is found (even when given tagID or status doesn't exist).
-func (notes Notes) WithTagIdAndStatus(tagID int, status string) Notes {
-	notesWithStatus := notes.WithStatus(status)
-	var result Notes
-	for _, note := range notesWithStatus {
-		if utils.IntPresentInSlice(tagID, note.TagIds) {
-			result = append(result, note)
-		}
-	}
-	return result
-}
-
-// functions
-
-// printNoteField function prints the given field of a note.
-func printNoteField(fieldName string, fieldValue interface{}) string {
-	var strs []string
-	fieldDynamicType := fmt.Sprintf("%T", fieldValue)
-	if fieldDynamicType == "[]string" {
-		items := fieldValue.([]string)
-		strs = append(strs, fmt.Sprintf("  |  %12v:\n", fieldName))
-		if items != nil {
-			for _, v := range items {
-				strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
-			}
-		}
-	} else {
-		strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", fieldName, fieldValue))
-	}
-	return strings.Join(strs, "")
-}
-
-// NewNote function provides prompt to registre a new Note.
-func NewNote(tagIDs []int, promptNoteText Prompter) (*Note, error) {
-	note := &Note{
-		Comments:   Comments{},
-		Status:     "pending",
-		CompleteBy: 0,
-		TagIds:     tagIDs,
-		BaseStruct: BaseStruct{
-			CreatedAt: utils.CurrentUnixTimestamp(),
-			UpdatedAt: utils.CurrentUnixTimestamp()},
-		// Text:       noteText,
-	}
-	noteText, err := promptNoteText.Run()
-	note.Text = utils.TrimString(noteText)
-	if err != nil || strings.Contains(note.Text, "^C") {
-		return note, err
-	}
-	if len(utils.TrimString(note.Text)) == 0 {
-		// this should never be encountered because of validation in earlier step
-		fmt.Printf("%v Skipping adding note with empty text\n", utils.Symbols["warning"])
-		return note, errors.New("Note's text is empty")
-	}
-	return note, nil
 }
