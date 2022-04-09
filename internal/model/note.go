@@ -108,32 +108,73 @@ func (note *Note) AddComment(text string) error {
 	}
 	comment := &Comment{Text: text, BaseStruct: BaseStruct{CreatedAt: utils.CurrentUnixTimestamp()}}
 	note.Comments = append(note.Comments, comment)
+	defer fmt.Println("Updated the note")
+	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
-	fmt.Println("Updated the note")
+	return nil
+}
+
+// UpdateTags updates note's tags.
+func (note *Note) UpdateTags(tagIDs []int) error {
+	note.TagIds = tagIDs
+	defer fmt.Println("Updated the note with tags")
+	// update the UpdatedAt as well
+	note.UpdatedAt = utils.CurrentUnixTimestamp()
+	return nil
+}
+
+// UpdateStatus updates note's status ("done"/"pending").
+// Status of a note tag with repeat tag cannot be mared as "done".
+func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
+	noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
+	if len(noteIDsWithRepeat) != 0 {
+		fmt.Printf("%v Update skipped as one of the associated tag is a \"repeat\" group tag \n", utils.Symbols["warning"])
+		return nil
+	}
+	if note.Status == status {
+		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["warning"])
+		return nil
+	}
+	// happy path
+	note.Status = status
+	defer fmt.Println("Updated the note")
+	// update the UpdatedAt as well
+	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
 }
 
 // UpdateText updates note's text.
+// Once updated, the text cannot be made empty.
 func (note *Note) UpdateText(text string) error {
 	if len(utils.TrimString(text)) == 0 {
 		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's text is empty")
 	}
+	// happy path
 	note.Text = text
+	defer fmt.Println("Updated the note")
+	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
-	fmt.Println("Updated the note")
 	return nil
 }
 
 // UpdateSummary updates note's summary.
+// If input is "nil", the existing summary is cleared.
 func (note *Note) UpdateSummary(text string) error {
 	if len(utils.TrimString(text)) == 0 {
 		fmt.Printf("%v Skipping updating note with empty summary\n", utils.Symbols["warning"])
 		return errors.New("Note's summary is empty")
 	}
-	note.Summary = text
+	// happy path
+	if text == "nil" {
+		note.Summary = ""
+		defer fmt.Println("Cleared the due date from the note")
+	} else {
+		note.Summary = text
+		defer fmt.Println("Updated the note")
+	}
+	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
-	fmt.Println("Updated the note")
 	return nil
 }
 
@@ -145,53 +186,27 @@ func (note *Note) UpdateCompleteBy(text string) error {
 		fmt.Printf("%v Skipping updating note with empty due date\n", utils.Symbols["warning"])
 		return errors.New("Note's due date is empty")
 	}
-	// handle edge-case for clearning the existing due date
+	// happy path
 	if text == "nil" {
 		note.CompleteBy = 0
-		note.UpdatedAt = utils.CurrentUnixTimestamp()
-		fmt.Println("Cleared the due date from the note")
-		return nil
+		defer fmt.Println("Cleared the due date from the note")
+	} else {
+		format := "2-1-2006"
+		timeValue, _ := time.Parse(format, text)
+		note.CompleteBy = int64(timeValue.Unix())
+		defer fmt.Println("Updated the note with new due date")
 	}
-	// happy-path
-	format := "2-1-2006"
-	timeValue, _ := time.Parse(format, text)
-	note.CompleteBy = int64(timeValue.Unix())
+	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
-	fmt.Println("Updated the note with new due date")
-	return nil
-}
-
-// UpdateTags updates note's tags.
-func (note *Note) UpdateTags(tagIDs []int) error {
-	note.TagIds = tagIDs
-	note.UpdatedAt = utils.CurrentUnixTimestamp()
-	fmt.Println("Updated the note with tags")
-	// never expecting an error here
-	return nil
-}
-
-// UpdateStatus updates note's status.
-func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
-	noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
-	if len(noteIDsWithRepeat) != 0 {
-		fmt.Printf("%v Update skipped as one of the associated tag is a \"repeat\" group tag \n", utils.Symbols["warning"])
-		return nil
-	}
-	if note.Status == status {
-		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["warning"])
-		return nil
-	}
-	note.Status = status
-	note.UpdatedAt = utils.CurrentUnixTimestamp()
-	fmt.Println("Updated the note")
 	return nil
 }
 
 // ToggleMainFlag toggles note's main flag.
 func (note *Note) ToggleMainFlag() error {
 	note.IsMain = !(note.IsMain)
+	defer fmt.Println("Toggled the note's main/incedental flag")
+	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
-	fmt.Println("Updated the note's priority")
 	return nil
 }
 
