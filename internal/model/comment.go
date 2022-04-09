@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"html/template"
@@ -6,23 +6,30 @@ import (
 )
 
 /*
-Comment is an update to a note
+A Comment is an update to a note.
 
-A comment belongs to a particular note
-A note can have multiple comments
+Consider it a statement representing an action to be taken/done or just an update about the Note.
+
+A comment belongs to a particular note,
+whereas a note can have multiple comments
 */
 type Comment struct {
 	Text string `json:"text"`
 	BaseStruct
 }
 
+/*
+A Comments is a slice of Comment objects.
+
+By default it is sorted by its CreatedAt field
+*/
 type Comments []*Comment
 
 func (c Comments) Len() int           { return len(c) }
 func (c Comments) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Comments) Less(i, j int) bool { return c[i].CreatedAt > c[j].CreatedAt }
 
-// provide basic string representation of a commment
+// String provides basic string representation of a commment.
 func (comment *Comment) String() string {
 	reportTemplate := `[{{.CreatedAt | mediumTimeStr}}] {{.Text}}`
 	funcMap := template.FuncMap{
@@ -31,7 +38,7 @@ func (comment *Comment) String() string {
 	return utils.TemplateResult(reportTemplate, funcMap, comment)
 }
 
-// provide basic string representation of commments
+// Strings provides representation of Commments in terms of slice of strings.
 func (comments Comments) Strings() []string {
 	// assuming each note will have 10 comments on average
 	strs := make([]string, 0, 10)

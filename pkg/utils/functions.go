@@ -1,3 +1,6 @@
+/*
+Package utils provides common utility functions that are not reminder specific
+*/
 package utils
 
 import (
@@ -18,29 +21,29 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-// location info for `time`
-// it can be set to update behavior of UnixTimestampToTime
+// Location variable provides location info for `time`.
+// It can be set to update behavior of UnixTimestampToTime.
 var Location *time.Location
 
-// get current time
+// CurrentTime function gets current time.
 func CurrentTime() time.Time {
 	return time.Now()
 }
 
-// get current unix timestamp
+// CurrentUnixTimestamp function gets current unix timestamp.
 func CurrentUnixTimestamp() int64 {
 	return int64(CurrentTime().Unix())
 }
 
-// return UTC location
+// UTCLocation function returns UTC location.
 func UTCLocation() *time.Location {
 	location, _ := time.LoadLocation("UTC")
 	return location
 }
 
-// convert unix timestamp to time
-// serve as central place to switch between UTC and local time
-// by default use local time, but behavior can be changed via `Location`
+// UnixTimestampToTime function converts unix timestamp to time.
+// It serves as central place to switch between UTC and local time.
+// by default use local time, but behavior can be changed via `Location`.
 func UnixTimestampToTime(unixTimestamp int64) time.Time {
 	t := time.Unix(unixTimestamp, 0)
 	if Location == nil {
@@ -49,7 +52,7 @@ func UnixTimestampToTime(unixTimestamp int64) time.Time {
 	return t.In(Location)
 }
 
-// convert unix timestamp to time string
+// UnixTimestampToTimeStr function converts unix timestamp to time string.
 func UnixTimestampToTimeStr(unixTimestamp int64, timeFormat string) string {
 	var timeAsStr string
 	if unixTimestamp > 0 {
@@ -60,22 +63,22 @@ func UnixTimestampToTimeStr(unixTimestamp int64, timeFormat string) string {
 	return timeAsStr
 }
 
-// convert unix timestamp to long time string
+// UnixTimestampToLongTimeStr function converts unix timestamp to long time string.
 func UnixTimestampToLongTimeStr(unixTimestamp int64) string {
 	return UnixTimestampToTimeStr(unixTimestamp, time.RFC850)
 }
 
-// convert unix timestamp to medium time string
+// UnixTimestampToMediumTimeStr function converts unix timestamp to medium time string.
 func UnixTimestampToMediumTimeStr(unixTimestamp int64) string {
 	return UnixTimestampToTimeStr(unixTimestamp, "02-Jan-06 15:04:05")
 }
 
-// convert unix timestamp to short time string
+// UnixTimestampToShortTimeStr function converts unix timestamp to short time string.
 func UnixTimestampToShortTimeStr(unixTimestamp int64) string {
 	return UnixTimestampToTimeStr(unixTimestamp, "02-Jan-06")
 }
 
-// get unix timestamp for date corresponding to current year
+// UnixTimestampForCorrespondingCurrentYear function gets unix timestamp for date corresponding to current year.
 func UnixTimestampForCorrespondingCurrentYear(month int, day int) int64 {
 	currentYear, _, _ := CurrentTime().Date()
 	format := "2006-1-2"
@@ -83,7 +86,7 @@ func UnixTimestampForCorrespondingCurrentYear(month int, day int) int64 {
 	return int64(timeValue.Unix())
 }
 
-// get unix timestamp for date corresponding to current year and current month
+// UnixTimestampForCorrespondingCurrentYearMonth function gets unix timestamp for date corresponding to current year and current month.
 func UnixTimestampForCorrespondingCurrentYearMonth(day int) int64 {
 	currentYear, currentMonth, _ := CurrentTime().Date()
 	format := "2006-1-2"
@@ -91,7 +94,7 @@ func UnixTimestampForCorrespondingCurrentYearMonth(day int) int64 {
 	return int64(timeValue.Unix())
 }
 
-// membership test for integer based array
+// IntPresentInSlice function performs membership test for integer based array.
 func IntPresentInSlice(a int, list []int) bool {
 	for _, b := range list {
 		if b == a {
@@ -101,7 +104,7 @@ func IntPresentInSlice(a int, list []int) bool {
 	return false
 }
 
-// get common elements of two integer based slices
+// GetCommonMembersIntSlices function gets common elements of two integer based slices.
 func GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int {
 	var arr []int
 	for _, e1 := range arr1 {
@@ -114,19 +117,19 @@ func GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int {
 	return arr
 }
 
-// print error if present
+// PrintErrorIfPresent function prints error if present.
 func PrintErrorIfPresent(err error) {
 	if err != nil {
 		fmt.Printf("%v %v\n", Symbols["error"], err)
 	}
 }
 
-// return a trimmed string (with spaces removed from ends)
+// TrimString function returns a trimmed string (with spaces removed from ends).
 func TrimString(str string) string {
 	return strings.TrimSpace(str)
 }
 
-// return a chopped strings (to a desired length)
+// ChopStrings function returns a chopped strings (to a desired length).
 func ChopStrings(texts []string, length int) []string {
 	// return original texts (actually copy of what was passed)
 	// if length value is not positive (considert ".." at the end)
@@ -144,12 +147,12 @@ func ChopStrings(texts []string, length int) []string {
 	return choppedStrings
 }
 
-// validate that input is string
+// ValidateString function validates that input is string.
 func ValidateString(input string) error {
 	return nil
 }
 
-// validate that input is non-empty string
+// ValidateNonEmptyString function validates that input is non-empty string.
 func ValidateNonEmptyString(input string) error {
 	input = TrimString(input)
 	if len(input) > 0 {
@@ -159,7 +162,7 @@ func ValidateNonEmptyString(input string) error {
 	}
 }
 
-// validate date string (DD-MM-YYYY)
+// ValidateDateString function validates date string (DD-MM-YYYY).
 // nil is also valid input
 func ValidateDateString(input string) error {
 	input = TrimString(input)
@@ -171,10 +174,10 @@ func ValidateDateString(input string) error {
 	}
 }
 
-// run given go template with given data and function map, and return the result as string
-// it is interesting to note that even though data is recieved as `interface{}`, the template
+// TemplateResult function runs given go template with given data and function map, and return the result as string.
+// It is interesting to note that even though data is recieved as `interface{}`, the template
 // is able to access those attributes without even having to perform type assertion to get
-// the underneath concrete value; this is contrary to masking behavior of interfaces
+// the underneath concrete value; this is contrary to masking behavior of interfaces.
 func TemplateResult(reportTemplate string, funcMap template.FuncMap, data interface{}) string {
 	/*
 		Issue with this function: It uses bytes.Buffer and converts it to string, but at the moment
@@ -194,7 +197,7 @@ func TemplateResult(reportTemplate string, funcMap template.FuncMap, data interf
 	}
 }
 
-// display spinner
+// Spinner function displays spinner.
 func Spinner(delay time.Duration) {
 	for {
 		for _, c := range `–\|/` {
@@ -204,7 +207,7 @@ func Spinner(delay time.Duration) {
 	}
 }
 
-// helper function to make assertion that `go` and `want` are nearly equal
+// AssertEqual function makes assertion that `go` and `want` are nearly equal.
 func AssertEqual(t *testing.T, got interface{}, want interface{}) {
 	if reflect.DeepEqual(got, want) {
 		t.Logf("Matched value (by deep equality): %v", want)
@@ -215,7 +218,7 @@ func AssertEqual(t *testing.T, got interface{}, want interface{}) {
 	}
 }
 
-// function to determine if it is time to show a repeat-based note/task
+// IsTimeForRepeatNote function determines if it is time to show a repeat-based note/task.
 // dependency: `CurrentUnixTimestamp`
 func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter int64) bool {
 	// fmt.Printf("Timestamp Curr: %v %v\n", noteTimestampCurrent, UnixTimestampToTime(noteTimestampCurrent))
@@ -230,9 +233,9 @@ func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimest
 		((currentTimestamp >= noteTimestampNext-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampNext+daysAfter*daysSecs))
 }
 
-// ask option to the user
-// print error, if encountered any (so that they don't have to printed by calling function)
-// return a tuple (chosen_index, chosen_string, error_if_any)
+// AskOption function asks option to the user.
+// It print error, if encountered any (so that they don't have to printed by calling function).
+// It return a tuple (chosen index, chosen string, err if any).
 func AskOption(options []string, label string) (int, string, error) {
 	if len(options) == 0 {
 		err := errors.New("Empty List")
@@ -258,8 +261,8 @@ func AskOption(options []string, label string) (int, string, error) {
 	return index, result, nil
 }
 
-// perform shell operation and return its output
-// note: it is better to avoid such functions
+// PerformShellOperation function performs shell operation and return its output.
+// Note: it is better to avoid such functions.
 func PerformShellOperation(exe string, args ...string) (string, error) {
 	executable, _ := exec.LookPath(exe)
 	cmd := &exec.Cmd{
@@ -271,7 +274,7 @@ func PerformShellOperation(exe string, args ...string) (string, error) {
 	return string(bytes), err
 }
 
-// get terminal size
+// TerminalSize function gets terminal size.
 func TerminalSize() (int, int) {
 	out, err := PerformShellOperation("stty", "size")
 	if err != nil {
@@ -284,41 +287,41 @@ func TerminalSize() (int, int) {
 	return height, width
 }
 
-// get terminal width
+// TerminalWidth function gets terminal width.
 func TerminalWidth() int {
 	_, width := TerminalSize()
 	return width
 }
 
-// check presence of a file
+// PerformFilePresence function checks presence of a file.
 func PerformFilePresence(filePath string) error {
 	output, err := PerformShellOperation("test", "-f", filePath)
 	fmt.Println(output)
 	return err
 }
 
-// check if a shell command is available
+// PerformWhich function checks if a shell command is available.
 func PerformWhich(shellCmd string) error {
 	output, err := PerformShellOperation("which", shellCmd)
 	fmt.Println(output)
 	return err
 }
 
-// cat a file
+// PerformCat function cats a file.
 func PerformCat(filePath string) error {
 	output, err := PerformShellOperation("cat", filePath)
 	fmt.Println(output)
 	return err
 }
 
-// get colored wdiff between two files
-func FPerformCwdiff(oldFilePath string, newFilePath string) error {
+// PerformCwdiff function gets colored wdiff between two files.
+func PerformCwdiff(oldFilePath string, newFilePath string) error {
 	output, err := PerformShellOperation("wdiff", "-n", "-w", "\033[30;41m", "-x", "\033[0m", "-y", "\033[30;42m", "-z", "\033[0m", oldFilePath, newFilePath)
 	fmt.Println(output)
 	return err
 }
 
-// generate promptui.Prompt
+// GeneratePrompt function generates promptui.Prompt.
 func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
 	var prompt *promptui.Prompt
 	switch promptName {
@@ -380,7 +383,7 @@ func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
 	return prompt
 }
 
-// generate promptui.Select
+// GenerateNoteSearchSelect function generates promptui.Select.
 func GenerateNoteSearchSelect(items []string, searchFunc func(string, int) bool) *promptui.Select {
 	prompt := &promptui.Select{
 		Label:             "Notes",

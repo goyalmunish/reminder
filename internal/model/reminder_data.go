@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"encoding/json"
@@ -18,7 +18,7 @@ import (
 )
 
 /*
-ReminderData represents whole reminder data-structure
+A ReminderData represents the whole reminder data-structure.
 */
 type ReminderData struct {
 	User         *User  `json:"user"`
@@ -31,10 +31,11 @@ type ReminderData struct {
 
 // methods
 
-// update data file
-func (reminderData *ReminderData) UpdateDataFile() error {
-	// update updated_at field
-	// note that updated_at of a whole remider_data object is different
+// UpdateDataFile updates data file.
+// The msg is any additional message to be printed.
+func (reminderData *ReminderData) UpdateDataFile(msg string) error {
+	// update UpdatedAt field
+	// note that UpdatedAt of a whole ReminderData object is different
 	// from corresponding field of each note
 	reminderData.UpdatedAt = utils.CurrentUnixTimestamp()
 	// marshal the data
@@ -42,12 +43,19 @@ func (reminderData *ReminderData) UpdateDataFile() error {
 	utils.PrintErrorIfPresent(err)
 	// commit the byte data to file
 	err = ioutil.WriteFile(reminderData.DataFile, byteValue, 0755)
-	utils.PrintErrorIfPresent(err)
-	return err
+	if err != nil {
+		utils.PrintErrorIfPresent(err)
+		return err
+	}
+	if msg != "" {
+		fmt.Println(msg)
+	}
+	fmt.Println("Updated the data file!")
+	return nil
 }
 
-// sort tags in-place and return slugs
-// empty Tags is returned if there are no tags
+// SortedTagSlugs sorts the tags in-place and return slugs.
+// Empty Tags is returned if there are no tags.
 func (reminderData *ReminderData) SortedTagSlugs() []string {
 	// sort tags in place
 	sort.Sort(reminderData.Tags)
@@ -55,27 +63,27 @@ func (reminderData *ReminderData) SortedTagSlugs() []string {
 	return reminderData.Tags.Slugs()
 }
 
-// get tag with given slug
+// TagFromSlug returns tag with given slug.
 func (reminderData *ReminderData) TagFromSlug(slug string) *Tag {
 	return reminderData.Tags.FromSlug(slug)
 }
 
-// get tags from tagIDs
+// TagsFromIds returns tags from tagIDs.
 func (reminderData *ReminderData) TagsFromIds(tagIDs []int) Tags {
 	return reminderData.Tags.FromIds(tagIDs)
 }
 
-// get tag ids for given group
+// TagIdsForGroup gets tag ids for given group.
 func (reminderData *ReminderData) TagIdsForGroup(group string) []int {
 	return reminderData.Tags.IdsForGroup(group)
 }
 
-// get all notes with given tagID and given status
+// FindNotesByTagId gets all notes with given tagID and given status.
 func (reminderData *ReminderData) FindNotesByTagId(tagID int, status string) Notes {
 	return reminderData.Notes.WithTagIdAndStatus(tagID, status)
 }
 
-// get all notes with given tagSlug and given status
+// FindNotesByTagSlug gets all notes with given tagSlug and given status.
 func (reminderData *ReminderData) FindNotesByTagSlug(tagSlug string, status string) Notes {
 	tag := reminderData.TagFromSlug(tagSlug)
 	// return empty Notes object for nil `tag`
@@ -85,124 +93,84 @@ func (reminderData *ReminderData) FindNotesByTagSlug(tagSlug string, status stri
 	return reminderData.FindNotesByTagId(tag.Id, status)
 }
 
-// update note's text
-func (reminderData *ReminderData) UpateNoteText(note *Note, text string) error {
+// UpdateNoteText updates note's text.
+func (reminderData *ReminderData) UpdateNoteText(note *Note, text string) error {
 	err := note.UpdateText(text)
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
-// update note's summary
-func (reminderData *ReminderData) UpateNoteSummary(note *Note, text string) error {
+// UpdateNoteSummary updates the note's summary.
+func (reminderData *ReminderData) UpdateNoteSummary(note *Note, text string) error {
 	err := note.UpdateSummary(text)
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
-// update note's due date (complete by)
+// UpdateNoteCompleteBy updates the note's due date (complete by).
 func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
 	err := note.UpdateCompleteBy(text)
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
-// add note's comment
+// AddNoteComment adds note's comment.
 func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error {
 	err := note.AddComment(text)
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
-// update note's tags
+// UpdateNoteTags updates note's tags.
 func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error {
 	err := note.UpdateTags(tagIDs)
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
-// update note's status
+// UpdateNoteStatus updates note's status.
 func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) error {
 	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
 	err := note.UpdateStatus(status, repeatTagIDs)
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
-// toggle note's priority
+// ToggleNoteMainFlag toggles note's priority.
 func (reminderData *ReminderData) ToggleNoteMainFlag(note *Note) error {
-	err := note.ToggleMain()
+	err := note.ToggleMainFlag()
 	if err != nil {
 		return err
 	}
-	err = reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Updated the data file")
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
-// register basic tags
+// RegisterBasicTags registers basic tags.
 func (reminderData *ReminderData) RegisterBasicTags() error {
 	if len(reminderData.Tags) != 0 {
 		fmt.Printf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["warning"])
 		return nil
 	}
-	fmt.Println("Adding tags:")
-	basicTags := FBasicTags()
+	basicTags := BasicTags()
 	reminderData.Tags = basicTags
-	err := reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Added basic tags: %v\n", reminderData.Tags)
-	return nil
+	msg := fmt.Sprintf("Added basic tags: %v\n", reminderData.Tags)
+	return reminderData.UpdateDataFile(msg)
 }
 
-// prompt a list of all tags (and their notes underneath)
-// like utils.AskOptions, it prints any encountered error, and returns that error just for information
+// ListTags prompts a list of all tags (and their notes underneath).
+// Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
 func (reminderData *ReminderData) ListTags() error {
 	// function to return a tag sumbol
 	// keep different tag symbol for empty tags
@@ -249,8 +217,8 @@ func (reminderData *ReminderData) ListTags() error {
 	return nil
 }
 
-// search throught all notes
-// like utils.AskOptions, it prints any encountered error, and returns that error just for information
+// SearchNotes searches throught all notes.
+// Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
 func (reminderData *ReminderData) SearchNotes() error {
 	// get texts of all notes
 	sort.Sort(reminderData.Notes)
@@ -291,7 +259,7 @@ func (reminderData *ReminderData) SearchNotes() error {
 	return err
 }
 
-// fetch all pending notes which are urgent
+// NotesApprachingDueDate fetches all pending notes which are urgent.
 func (reminderData *ReminderData) NotesApprachingDueDate() Notes {
 	allNotes := reminderData.Notes
 	pendingNotes := allNotes.WithStatus("pending")
@@ -347,7 +315,7 @@ func (reminderData *ReminderData) NotesApprachingDueDate() Notes {
 	return currentNotes
 }
 
-// register a new tag
+// NewTagRegistration registers a new tag.
 func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	// collect and ask info about the tag
 	tagID := reminderData.nextPossibleTagId()
@@ -355,7 +323,7 @@ func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	promptTagSlug := utils.GeneratePrompt("tag_slug", "")
 	promptTagGroup := utils.GeneratePrompt("tag_group", "")
 
-	tag, err := FNewTag(tagID, promptTagSlug, promptTagGroup)
+	tag, err := NewTag(tagID, promptTagSlug, promptTagGroup)
 
 	// validate and save data
 	if err != nil {
@@ -367,14 +335,14 @@ func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	return tagID, err
 }
 
-// (private) get next possible tagID
+// nextPossibleTagId gets next possible tagID.
 func (reminderData *ReminderData) nextPossibleTagId() int {
 	allTags := reminderData.Tags
 	allTagsLen := len(allTags)
 	return allTagsLen
 }
 
-// (private) append a new tag
+// newTagAppend appends a new tag.
 func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 	// check if tag's slug is already present
 	isNewSlug := true
@@ -390,14 +358,10 @@ func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
 	// go ahead and append
 	fmt.Printf("Added Tag: %v\n", *tag)
 	reminderData.Tags = append(reminderData.Tags, tag)
-	err := reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
-// register new note
+// NewNoteRegistration registers new note.
 func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
 	// collect info about the note
 	if tagIDs == nil {
@@ -405,7 +369,7 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 		tagIDs = make([]int, 0, 2)
 	}
 	promptNoteText := utils.GeneratePrompt("note_text", "")
-	note, err := FNewNote(tagIDs, promptNoteText)
+	note, err := NewNote(tagIDs, promptNoteText)
 	// validate and save data
 	if err != nil {
 		utils.PrintErrorIfPresent(err)
@@ -419,18 +383,14 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	return note, nil
 }
 
-// (private) append a new note
+// newNoteAppend appends a new note.
 func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 	fmt.Printf("Added Note: %v\n", *note)
 	reminderData.Notes = append(reminderData.Notes, note)
-	err := reminderData.UpdateDataFile()
-	if err != nil {
-		return err
-	}
-	return nil
+	return reminderData.UpdateDataFile("")
 }
 
-// return current status
+// Stats returns current status.
 func (reminderData *ReminderData) Stats() string {
 	reportTemplate := `
 Stats of "{{.DataFile}}"
@@ -444,9 +404,9 @@ Stats of "{{.DataFile}}"
 	return utils.TemplateResult(reportTemplate, funcMap, *reminderData)
 }
 
-// create timestamped backup
-// returns path of the data file
-// like utils.AskOptions, it prints any encountered error, but doesn't return the error
+// CreateBackup creates timestamped backup.
+// It returns path of the data file.
+// Like utils.AskOptions, it prints any encountered error, but doesn't return the error.
 func (reminderData *ReminderData) CreateBackup() string {
 	// get backup file name
 	ext := path.Ext(reminderData.DataFile)
@@ -472,8 +432,8 @@ func (reminderData *ReminderData) CreateBackup() string {
 	return dstFile
 }
 
-// display data file
-// like utils.AskOptions, it prints any encountered error, and returns that error just for information
+// DisplayDataFile displays the data file.
+// Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
 func (reminderData *ReminderData) DisplayDataFile() error {
 	fmt.Printf("Printing contents (and if possible, its difference since last backup) of %q:\n", reminderData.DataFile)
 	ext := path.Ext(reminderData.DataFile)
@@ -488,14 +448,14 @@ func (reminderData *ReminderData) DisplayDataFile() error {
 			fmt.Printf("Warning: `%v` file is not available yet\n", lnFile)
 			err = utils.PerformCat(reminderData.DataFile)
 		} else {
-			err = utils.FPerformCwdiff(lnFile, reminderData.DataFile)
+			err = utils.PerformCwdiff(lnFile, reminderData.DataFile)
 		}
 	}
 	utils.PrintErrorIfPresent(err)
 	return err
 }
 
-// auto backup
+// AutoBackup does auto backup.
 func (reminderData *ReminderData) AutoBackup(gapSecs int64) (string, error) {
 	var dstFile string
 	currentTime := utils.CurrentUnixTimestamp()
@@ -508,15 +468,11 @@ func (reminderData *ReminderData) AutoBackup(gapSecs int64) (string, error) {
 	}
 	dstFile = reminderData.CreateBackup()
 	reminderData.LastBackupAt = currentTime
-	err := reminderData.UpdateDataFile()
-	if err != nil {
-		return dstFile, err
-	}
-	return dstFile, nil
+	return dstFile, reminderData.UpdateDataFile("")
 }
 
-// method (recursive) to ask tagIDs that are to be associated with a note
-// it also registers tags for you, if user asks
+// AskTagIds (recursive) ask tagIDs that are to be associated with a note..
+// It also registers tags for you, if user asks.
 func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	var err error
 	var tagID int
@@ -555,9 +511,9 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	return tagIDs
 }
 
-// method to print note and display options
-// like utils.AskOptions, it prints any encountered error, but doesn't returns that error just for information
-// it return string representing workflow direction
+// PrintNoteAndAskOptions prints note and display options.
+// Like utils.AskOptions, it prints any encountered error, but doesn't returns that error just for information.
+// It return string representing workflow direction.
 func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	fmt.Print(note.ExternalText(reminderData))
 	_, noteOption, _ := utils.AskOption([]string{
@@ -604,14 +560,14 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		promptNoteTextWithDefault := utils.GeneratePrompt("note_text", note.Text)
 		promptText, err := promptNoteTextWithDefault.Run()
 		utils.PrintErrorIfPresent(err)
-		err = reminderData.UpateNoteText(note, promptText)
+		err = reminderData.UpdateNoteText(note, promptText)
 		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["glossary"], "Update summary"):
 		promptNoteTextWithDefault := utils.GeneratePrompt("note_summary", note.Summary)
 		promptText, err := promptNoteTextWithDefault.Run()
 		utils.PrintErrorIfPresent(err)
-		err = reminderData.UpateNoteSummary(note, promptText)
+		err = reminderData.UpdateNoteSummary(note, promptText)
 		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"):
@@ -631,11 +587,11 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	return "stay"
 }
 
-// method (recursively) to print notes interactively
-// in some cases, updated list notes will be fetched, so blank notes can be passed in those cases
-// unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake"
-// like utils.AskOptions, it prints any encountered error, and returns that error just for information
-// filter only the notes tagged as "main" if `onlyMain` is true (for given status), otherwise return all
+// PrintNotesAndAskOptions (recursively) prints notes interactively.
+// In some cases, updated list notes will be fetched, so blank notes can be passed in those cases.
+// Unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake".
+// Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
+// Filter only the notes tagged as "main" if `onlyMain` is true (for given status), otherwise return all.
 func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string, onlyMain bool) error {
 	// check if passed notes is to be used or to fetch latest notes
 	if status == "done" {
@@ -719,13 +675,13 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 
 // functions
 
-// function to return default data file path
-func FDefaultDataFile() string {
+// DefaultDataFile function returns default data file path.
+func DefaultDataFile() string {
 	return path.Join(os.Getenv("HOME"), "reminder", "data.json")
 }
 
-// function to make sure dataFilePath exists
-func FMakeSureFileExists(dataFilePath string) error {
+// MakeSureFileExists function makes sure that the dataFilePath exists.
+func MakeSureFileExists(dataFilePath string) error {
 	_, err := os.Stat(dataFilePath)
 	if err != nil {
 		fmt.Printf("Error finding existing data file: %v\n", err)
@@ -735,12 +691,9 @@ func FMakeSureFileExists(dataFilePath string) error {
 			if err != nil {
 				return err
 			}
-			reminderData := *FBlankReminder()
+			reminderData := *BlankReminder()
 			reminderData.DataFile = dataFilePath
-			err = reminderData.UpdateDataFile()
-			if err != nil {
-				return err
-			}
+			return reminderData.UpdateDataFile("")
 		}
 		utils.PrintErrorIfPresent(err)
 		return err
@@ -748,8 +701,8 @@ func FMakeSureFileExists(dataFilePath string) error {
 	return nil
 }
 
-// function to create blank ReminderData object
-func FBlankReminder() *ReminderData {
+// BlankReminder function creates blank ReminderData object.
+func BlankReminder() *ReminderData {
 	fmt.Println("Initializing the data file. Please provide following data.")
 	promptUserName := utils.GeneratePrompt("user_name", "")
 	name, err := promptUserName.Run()
@@ -761,12 +714,12 @@ func FBlankReminder() *ReminderData {
 		User:     &User{Name: name, EmailId: emailID},
 		Notes:    Notes{},
 		Tags:     Tags{},
-		DataFile: FDefaultDataFile(),
+		DataFile: DefaultDataFile(),
 	}
 }
 
-// function to read data file
-func FReadDataFile(dataFilePath string) *ReminderData {
+// ReadDataFile function reads data file.
+func ReadDataFile(dataFilePath string) *ReminderData {
 	var reminderData ReminderData
 	// read byte data from file
 	byteValue, err := ioutil.ReadFile(dataFilePath)

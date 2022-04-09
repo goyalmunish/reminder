@@ -1,6 +1,0 @@
-# way 1
-# cd cmd/reminder
-# go run .
-
-# way 2
-go run cmd/reminder/main.go

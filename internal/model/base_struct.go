@@ -1,7 +1,7 @@
-package models
+package model
 
 /*
-BaseStruct represents set of common fields
+A BaseStruct provides set of common fields.
 */
 type BaseStruct struct {
 	CreatedAt int64 `json:"created_at,omitempty"`

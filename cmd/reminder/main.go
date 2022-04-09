@@ -1,7 +1,7 @@
 /*
 Tool `reminder` is a command-line (terminal) based interactive app for organizing tasks with minimal efforts.
 
-Just run it as `go run cmd/reminder/main.go`
+Just run it as `go run ./cmd/reminder`
 */
 package main
 
@@ -9,17 +9,17 @@ import (
 	"fmt"
 	"time"
 
-	"reminder/internal/models"
+	"reminder/internal/model"
 	"reminder/pkg/utils"
 )
 
-// recursive function for overall flow
+// flow is recursive function for overall flow of interactivity
 func flow() {
 	// make sure DataFile exists
-	defaultDataFilePath := models.FDefaultDataFile()
-	_ = models.FMakeSureFileExists(defaultDataFilePath)
+	defaultDataFilePath := model.DefaultDataFile()
+	_ = model.MakeSureFileExists(defaultDataFilePath)
 	// read and parse the existing data
-	reminderData := *models.FReadDataFile(defaultDataFilePath)
+	reminderData := *model.ReadDataFile(defaultDataFilePath)
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup
@@ -52,9 +52,9 @@ func flow() {
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
 		_ = reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Approaching Due Date"):
-		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending", false)
+		_ = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", false)
 	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Main Notes"):
-		_ = reminderData.PrintNotesAndAskOptions(models.Notes{}, -1, "pending", true)
+		_ = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", true)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
 		_ = reminderData.SearchNotes()
 	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
