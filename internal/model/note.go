@@ -175,6 +175,13 @@ func (note *Note) UpdateCompleteBy(text string) error {
 		defer fmt.Println("Cleared the due date from the note")
 	} else {
 		format := "2-1-2006"
+		// set current year as year if year part is missing
+		year := utils.CurrentTime().Year()
+		timeSplit := strings.Split(text, "-")
+		if len(timeSplit) == 2 {
+			text = fmt.Sprintf("%s-%d", text, year)
+		}
+		// parse and set the date
 		timeValue, _ := time.Parse(format, text)
 		note.CompleteBy = int64(timeValue.Unix())
 		defer fmt.Println("Updated the note with new due date")
