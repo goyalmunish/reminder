@@ -92,7 +92,6 @@ func (note *Note) SearchableText() string {
 // AddComment adds a new comment to note.
 func (note *Note) AddComment(text string) error {
 	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping adding comment with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's comment text is empty")
 	}
 	comment := &Comment{Text: text, BaseStruct: BaseStruct{CreatedAt: utils.CurrentUnixTimestamp()}}
@@ -117,12 +116,10 @@ func (note *Note) UpdateTags(tagIDs []int) error {
 func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
 	noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
 	if len(noteIDsWithRepeat) != 0 {
-		fmt.Printf("%v Update skipped as one of the associated tag is a \"repeat\" group tag \n", utils.Symbols["warning"])
-		return nil
+		return errors.New("Note is part of a \"repeat\" group")
 	}
 	if note.Status == status {
-		fmt.Printf("%v Update skipped as there were no changes\n", utils.Symbols["warning"])
-		return nil
+		return errors.New("Desired status is same as existing one")
 	}
 	// happy path
 	note.Status = status
@@ -136,7 +133,6 @@ func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
 // Once updated, the text cannot be made empty.
 func (note *Note) UpdateText(text string) error {
 	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping updating note with empty text\n", utils.Symbols["warning"])
 		return errors.New("Note's text is empty")
 	}
 	// happy path
@@ -151,7 +147,6 @@ func (note *Note) UpdateText(text string) error {
 // If input is "nil", the existing summary is cleared.
 func (note *Note) UpdateSummary(text string) error {
 	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping updating note with empty summary\n", utils.Symbols["warning"])
 		return errors.New("Note's summary is empty")
 	}
 	// happy path
@@ -172,7 +167,6 @@ func (note *Note) UpdateSummary(text string) error {
 func (note *Note) UpdateCompleteBy(text string) error {
 	// handle edge-case of empty text
 	if len(utils.TrimString(text)) == 0 {
-		fmt.Printf("%v Skipping updating note with empty due date\n", utils.Symbols["warning"])
 		return errors.New("Note's due date is empty")
 	}
 	// happy path
@@ -181,6 +175,13 @@ func (note *Note) UpdateCompleteBy(text string) error {
 		defer fmt.Println("Cleared the due date from the note")
 	} else {
 		format := "2-1-2006"
+		// set current year as year if year part is missing
+		year := utils.CurrentTime().Year()
+		timeSplit := strings.Split(text, "-")
+		if len(timeSplit) == 2 {
+			text = fmt.Sprintf("%s-%d", text, year)
+		}
+		// parse and set the date
 		timeValue, _ := time.Parse(format, text)
 		note.CompleteBy = int64(timeValue.Unix())
 		defer fmt.Println("Updated the note with new due date")

@@ -430,7 +430,7 @@ func TestUpdateStatus(t *testing.T) {
 	// update TagIds
 	// case 1
 	err := note1.UpdateStatus("done", []int{1, 2, 3})
-	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, err, errors.New("Note is part of a \"repeat\" group"))
 	utils.AssertEqual(t, note1.Status, "pending")
 	// case 2
 	err = note1.UpdateStatus("done", []int{5, 6, 7})

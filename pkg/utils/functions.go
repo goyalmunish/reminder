@@ -162,11 +162,11 @@ func ValidateNonEmptyString(input string) error {
 	}
 }
 
-// ValidateDateString function validates date string (DD-MM-YYYY).
+// ValidateDateString function validates date string (DD-MM-YYYY) or (DD-MM).
 // nil is also valid input
 func ValidateDateString(input string) error {
 	input = TrimString(input)
-	re := regexp.MustCompile("^((0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[012])-((19|20)\\d\\d)|(nil))$")
+	re := regexp.MustCompile("^((0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[012])(-((19|20)\\d\\d))?|(nil))$")
 	if re.MatchString(input) {
 		return nil
 	} else {
@@ -375,7 +375,7 @@ func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
 		}
 	case "note_completed_by":
 		prompt = &promptui.Prompt{
-			Label:    "Due Date (format: DD-MM-YYYY), or enter nil to clear existing value",
+			Label:    "Due Date (format: DD-MM-YYYY or DD-MM), or enter nil to clear existing value",
 			Default:  defaultText,
 			Validate: ValidateDateString,
 		}
