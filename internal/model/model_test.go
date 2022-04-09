@@ -458,7 +458,7 @@ func TestToggleMainFlag(t *testing.T) {
 	utils.AssertEqual(t, originalPriority != note1.IsMain, true)
 }
 
-func TestFMakeSureFileExists(t *testing.T) {
+func TestMakeSureFileExists(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
@@ -468,7 +468,7 @@ func TestFMakeSureFileExists(t *testing.T) {
 	utils.AssertEqual(t, err != nil, true)
 	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), true)
 	// attempt to create the file and required dirs, when the file doesn't exist already
-	_ = model.FMakeSureFileExists(dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath)
 	// prove that the file was created
 	stats, err := os.Stat(dataFilePath)
 	utils.AssertEqual(t, err != nil, false)
@@ -478,7 +478,7 @@ func TestFMakeSureFileExists(t *testing.T) {
 	modificationTime := stats.ModTime()
 	// attempt to create the file and required dirs, when the file does exist already
 	time.Sleep(10 * time.Millisecond)
-	_ = model.FMakeSureFileExists(dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath)
 	utils.AssertEqual(t, err != nil, false)
 	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), false)
 	stats, _ = os.Stat(dataFilePath)
@@ -487,14 +487,14 @@ func TestFMakeSureFileExists(t *testing.T) {
 
 }
 
-func TestFReadDataFile(t *testing.T) {
+func TestReadDataFile(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.FMakeSureFileExists(dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath)
 	// attempt to read file and parse it
-	reminderData := model.FReadDataFile(dataFilePath)
+	reminderData := model.ReadDataFile(dataFilePath)
 	utils.AssertEqual(t, reminderData.UpdatedAt > 0, true)
 }
 
@@ -503,13 +503,13 @@ func TestUpdateDataFile(t *testing.T) {
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.FMakeSureFileExists(dataFilePath)
-	reminderData := model.FReadDataFile(dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath)
+	reminderData := model.ReadDataFile(dataFilePath)
 	// old_updated_at := reminderData.UpdatedAt
 	testUser := model.User{Name: "Test User", EmailId: "user@test.com"}
 	reminderData.User = &testUser
 	_ = reminderData.UpdateDataFile()
-	remiderDataRe := model.FReadDataFile(dataFilePath)
+	remiderDataRe := model.ReadDataFile(dataFilePath)
 	// utils.AssertEqual(t, remiderDataRe.UpdatedAt > old_updated_at, true)
 	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)
 }
@@ -728,8 +728,8 @@ func TestRegisterBasicTags(t *testing.T) {
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.FMakeSureFileExists(dataFilePath)
-	reminderData := model.FReadDataFile(dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath)
+	reminderData := model.ReadDataFile(dataFilePath)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
 	utils.AssertEqual(t, len(reminderData.Tags), 7)
@@ -740,8 +740,8 @@ func TestNotesApprachingDueDate(t *testing.T) {
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.FMakeSureFileExists(dataFilePath)
-	reminderData := model.FReadDataFile(dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath)
+	reminderData := model.ReadDataFile(dataFilePath)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
 	// get current time
@@ -829,8 +829,8 @@ func TestPrintStats(t *testing.T) {
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.FMakeSureFileExists(dataFilePath)
-	reminderData := model.FReadDataFile(dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath)
+	reminderData := model.ReadDataFile(dataFilePath)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
 	got := reminderData.Stats()
@@ -843,10 +843,9 @@ Stats of "temp_test_dir/mydata.json"
 }
 
 func TestNewTagRegistration(t *testing.T) {
-	var dataFilePath = "test_data_file.json"
-	reminderData := model.FReadDataFile(dataFilePath)
+	dataFilePath := path.Join("..", "..", "test", "test_data_file.json")
+	reminderData := model.ReadDataFile(dataFilePath)
 	utils.AssertEqual(t, len(reminderData.Tags), 5)
-	// TODO: yet to finish
 }
 
 func TestNewTag(t *testing.T) {

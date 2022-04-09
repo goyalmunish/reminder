@@ -42,7 +42,7 @@ func UTCLocation() *time.Location {
 }
 
 // UnixTimestampToTime function converts unix timestamp to time.
-// It serve as central place to switch between UTC and local time
+// It serves as central place to switch between UTC and local time.
 // by default use local time, but behavior can be changed via `Location`.
 func UnixTimestampToTime(unixTimestamp int64) time.Time {
 	t := time.Unix(unixTimestamp, 0)
@@ -235,7 +235,7 @@ func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimest
 
 // AskOption function asks option to the user.
 // It print error, if encountered any (so that they don't have to printed by calling function).
-// It return a tuple (chosen_index, chosen_string, error_if_any).
+// It return a tuple (chosen index, chosen string, err if any).
 func AskOption(options []string, label string) (int, string, error) {
 	if len(options) == 0 {
 		err := errors.New("Empty List")

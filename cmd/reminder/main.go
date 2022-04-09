@@ -17,9 +17,9 @@ import (
 func flow() {
 	// make sure DataFile exists
 	defaultDataFilePath := model.DefaultDataFile()
-	_ = model.FMakeSureFileExists(defaultDataFilePath)
+	_ = model.MakeSureFileExists(defaultDataFilePath)
 	// read and parse the existing data
-	reminderData := *model.FReadDataFile(defaultDataFilePath)
+	reminderData := *model.ReadDataFile(defaultDataFilePath)
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup

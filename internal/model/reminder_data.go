@@ -33,8 +33,8 @@ type ReminderData struct {
 
 // UpdateDataFile updates data file.
 func (reminderData *ReminderData) UpdateDataFile() error {
-	// update updated_at field
-	// note that updated_at of a whole remider_data object is different
+	// update UpdatedAt field
+	// note that UpdatedAt of a whole ReminderData object is different
 	// from corresponding field of each note
 	reminderData.UpdatedAt = utils.CurrentUnixTimestamp()
 	// marshal the data
@@ -724,8 +724,8 @@ func DefaultDataFile() string {
 	return path.Join(os.Getenv("HOME"), "reminder", "data.json")
 }
 
-// FMakeSureFileExists function makes sure that the dataFilePath exists.
-func FMakeSureFileExists(dataFilePath string) error {
+// MakeSureFileExists function makes sure that the dataFilePath exists.
+func MakeSureFileExists(dataFilePath string) error {
 	_, err := os.Stat(dataFilePath)
 	if err != nil {
 		fmt.Printf("Error finding existing data file: %v\n", err)
@@ -735,7 +735,7 @@ func FMakeSureFileExists(dataFilePath string) error {
 			if err != nil {
 				return err
 			}
-			reminderData := *FBlankReminder()
+			reminderData := *BlankReminder()
 			reminderData.DataFile = dataFilePath
 			err = reminderData.UpdateDataFile()
 			if err != nil {
@@ -748,8 +748,8 @@ func FMakeSureFileExists(dataFilePath string) error {
 	return nil
 }
 
-// FBlankReminder function creates blank ReminderData object.
-func FBlankReminder() *ReminderData {
+// BlankReminder function creates blank ReminderData object.
+func BlankReminder() *ReminderData {
 	fmt.Println("Initializing the data file. Please provide following data.")
 	promptUserName := utils.GeneratePrompt("user_name", "")
 	name, err := promptUserName.Run()
@@ -765,8 +765,8 @@ func FBlankReminder() *ReminderData {
 	}
 }
 
-// FReadDataFile function reads data file.
-func FReadDataFile(dataFilePath string) *ReminderData {
+// ReadDataFile function reads data file.
+func ReadDataFile(dataFilePath string) *ReminderData {
 	var reminderData ReminderData
 	// read byte data from file
 	byteValue, err := ioutil.ReadFile(dataFilePath)

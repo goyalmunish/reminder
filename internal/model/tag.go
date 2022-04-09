@@ -90,13 +90,15 @@ func (tags Tags) IdsForGroup(group string) []int {
 // Here some of the tags will have special meaning/functionality
 // such as repeat-annually and repeat-monthly.
 func BasicTags() Tags {
-	basicTagsMap := []map[string]string{{"slug": "current", "group": ""},
+	basicTagsMap := []map[string]string{
+		{"slug": "current", "group": ""},
 		{"slug": "priority-urgent", "group": "priority"},
 		{"slug": "priority-medium", "group": "priority"},
 		{"slug": "priority-low", "group": "priority"},
 		{"slug": "repeat-annually", "group": "repeat"},
 		{"slug": "repeat-monthly", "group": "repeat"},
-		{"slug": "tips", "group": "tips"}}
+		{"slug": "tips", "group": "tips"},
+	}
 	var basicTags Tags
 	for index, tagMap := range basicTagsMap {
 		tag := Tag{
