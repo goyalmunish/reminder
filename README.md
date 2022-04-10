@@ -189,6 +189,9 @@ Otherwise, you can just run it as:
 
 ```sh
 make run
+
+# or as
+go run ./cmd/reminder
 ```
 
 ## Features/Issues to be worked upon

@@ -13,4 +13,4 @@
 
 # Directories to be ignored
 bin/
-# vendor/
+vendor/
