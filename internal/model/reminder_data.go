@@ -165,8 +165,8 @@ func (reminderData *ReminderData) ToggleNoteMainFlag(note *Note) error {
 // RegisterBasicTags registers basic tags.
 func (reminderData *ReminderData) RegisterBasicTags() error {
 	if len(reminderData.Tags) != 0 {
-		fmt.Printf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["warning"])
-		return nil
+		msg := fmt.Sprintf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["warning"])
+		return errors.New(msg)
 	}
 	basicTags := BasicTags()
 	reminderData.Tags = basicTags
@@ -247,7 +247,6 @@ func (reminderData *ReminderData) SearchNotes() error {
 	fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
 	index, _, err := promptNoteSelection.Run()
 	if err != nil {
-		utils.PrintErrorIfPresent(err)
 		return err
 	}
 	if index >= 0 {
@@ -412,7 +411,7 @@ Stats of "{{.DataFile}}"
 // CreateBackup creates timestamped backup.
 // It returns path of the data file.
 // Like utils.AskOptions, it prints any encountered error, but doesn't return the error.
-func (reminderData *ReminderData) CreateBackup() string {
+func (reminderData *ReminderData) CreateBackup() (string, error) {
 	// get backup file name
 	ext := path.Ext(reminderData.DataFile)
 	dstFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_" + strconv.FormatInt(int64(utils.CurrentUnixTimestamp()), 10) + ext
@@ -420,9 +419,13 @@ func (reminderData *ReminderData) CreateBackup() string {
 	fmt.Printf("Creating backup at %q\n", dstFile)
 	// create backup
 	byteValue, err := ioutil.ReadFile(reminderData.DataFile)
-	utils.PrintErrorIfPresent(err)
+	if err != nil {
+		return dstFile, err
+	}
 	err = ioutil.WriteFile(dstFile, byteValue, 0644)
-	utils.PrintErrorIfPresent(err)
+	if err != nil {
+		return dstFile, err
+	}
 	// create alias of latest backup
 	fmt.Printf("Creating symlink at %q\n", lnFile)
 	executable, _ := exec.LookPath("ln")
@@ -433,8 +436,10 @@ func (reminderData *ReminderData) CreateBackup() string {
 		Stdin:  os.Stdin,
 	}
 	err = cmd.Run()
-	utils.PrintErrorIfPresent(err)
-	return dstFile
+	if err != nil {
+		return dstFile, err
+	}
+	return dstFile, nil
 }
 
 // DisplayDataFile displays the data file.
@@ -456,7 +461,6 @@ func (reminderData *ReminderData) DisplayDataFile() error {
 			err = utils.PerformCwdiff(lnFile, reminderData.DataFile)
 		}
 	}
-	utils.PrintErrorIfPresent(err)
 	return err
 }
 
@@ -471,7 +475,7 @@ func (reminderData *ReminderData) AutoBackup(gapSecs int64) (string, error) {
 		fmt.Printf("Skipping automatic backup\n")
 		return dstFile, nil
 	}
-	dstFile = reminderData.CreateBackup()
+	dstFile, _ = reminderData.CreateBackup()
 	reminderData.LastBackupAt = currentTime
 	return dstFile, reminderData.UpdateDataFile("")
 }
@@ -653,7 +657,6 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		}
 		note, err := reminderData.NewNoteRegistration([]int{tagID})
 		if err != nil {
-			utils.PrintErrorIfPresent(err)
 			return err
 		}
 		var updatedNotes Notes

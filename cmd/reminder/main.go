@@ -36,6 +36,7 @@ func flow() {
 		But, if you are inside PromptUI's `Run()`, then it cancels the input and moves to next
 		statement in the code.
 	*/
+	var err error
 	_, result, _ := utils.AskOption([]string{
 		fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
@@ -48,23 +49,24 @@ func flow() {
 	// operate on main options
 	switch result {
 	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
-		_ = reminderData.ListTags()
+		err = reminderData.ListTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
-		_ = reminderData.RegisterBasicTags()
+		err = reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Approaching Due Date"):
-		_ = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", false)
+		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", false)
 	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Main Notes"):
-		_ = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", true)
+		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", true)
 	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
-		_ = reminderData.SearchNotes()
+		err = reminderData.SearchNotes()
 	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
-		_ = reminderData.CreateBackup()
+		_, err = reminderData.CreateBackup()
 	case fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File"):
-		_ = reminderData.DisplayDataFile()
+		err = reminderData.DisplayDataFile()
 	case fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):
 		fmt.Println("Exiting...")
 		return
 	}
+	utils.PrintErrorIfPresent(err)
 	flow()
 }
 
