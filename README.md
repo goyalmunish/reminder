@@ -9,7 +9,7 @@
         - [Easily run the tool via Docker (recommended)](#easily-run-the-tool-via-docker-recommended)
         - [Non-Docker Setup](#non-docker-setup)
             - [Install `go`](#install-go)
-            - [Install the tool](#install-the-tool)
+            - [Install the tool (optional)](#install-the-tool-optional)
             - [Run the tool](#run-the-tool)
     - [Features/Issues to be worked upon](#featuresissues-to-be-worked-upon)
     - [Contributing towards development](#contributing-towards-development)
@@ -153,34 +153,13 @@ brew install golang
 
 For other platforms, check [official `go` download and install guide](https://golang.org/dl/).
 
-Otherwise, you can also use one of the [Golang Offical Images](https://hub.docker.com/_/golang) to run tool from a Docker container. For example,
-
-```sh
-GOLANG_IMAGE=golang:1.17.2-alpine3.14
-GOLANG_VERSION=1.17
-
-# run the image
-docker pull ${GOLANG_IMAGE}
-docker run -it -d --privileged --name golang${GOLANG_VERSION} ${GOLANG_IMAGE}
-
-# exec into the container
-docker exec -it golang${GOLANG_VERSION} /bin/sh
-```
-
-If `git` and `ssh` are not available (for instance case of fresh `alpine` image, from above), install them as:
-
-```sh
-apk add git
-apk add openssh
-```
-
 Check installed version:
 
 ```sh
 go version
 ```
 
-#### Install the tool
+#### Install the tool (optional)
 
 Clone the repo:
 
@@ -194,16 +173,25 @@ Install the tool as:
 
 ```sh
 cd reminder
-go install cmd/reminder/main.go
-mv ${GOPATH}/bin/main ${GOPATH}/bin/reminder
+go install ./cmd/reminder
+mv ${GOPATH}/bin/reminder ${GOPATH}/bin/reminder
 ```
 
 #### Run the tool
 
-If your `go/bin` path is alreay in `PATH`, then you can just run the tool as:
+If you have installed the tool, and your `go/bin` path is alreay in `PATH`, then you can just run it as:
 
 ```sh
 reminder
+```
+
+Otherwise, you can just run it as:
+
+```sh
+make run
+
+# or as
+go run ./cmd/reminder
 ```
 
 ## Features/Issues to be worked upon
