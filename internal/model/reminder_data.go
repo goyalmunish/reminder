@@ -36,6 +36,11 @@ func (reminderData *ReminderData) UpdateDataFile(msg string) error {
 	// from corresponding field of each note
 	reminderData.UpdatedAt = utils.CurrentUnixTimestamp()
 	// marshal the data
+	// Refer https://pkg.go.dev/encoding/json#MarshalIndent
+	// Note: String values encoded as JSON strings are coerced to valid
+	// UTF-8, replacing invalid bytes with Unicode replacement rune. So
+	// that the JSON will be safe to embed inside HTML <script> tags, the
+	// string is encoded using HTMLEscape.
 	byteValue, err := json.MarshalIndent(&reminderData, "", "    ")
 	if err != nil {
 		utils.PrintErrorIfPresent(err)
