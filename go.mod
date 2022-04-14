@@ -2,13 +2,9 @@ module reminder
 
 go 1.18
 
-require (
-	github.com/AlecAivazis/survey/v2 v2.3.4
-	github.com/manifoldco/promptui v0.9.0
-)
+require github.com/AlecAivazis/survey/v2 v2.3.4
 
 require (
-	github.com/chzyer/readline v1.5.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
