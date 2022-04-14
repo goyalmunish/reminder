@@ -234,18 +234,17 @@ func (reminderData *ReminderData) SearchNotes() error {
 		allTexts = append(allTexts, note.SearchableText())
 	}
 	// function to search across notes
-	searchNotes := func(input string, idx int) bool {
-		input = strings.ToLower(input)
-		noteText := allTexts[idx]
-		if strings.Contains(strings.ToLower(noteText), input) {
+	searchNotes := func(filterValue string, optValue string, optIndex int) bool {
+		filterValue = strings.ToLower(filterValue)
+		noteText := allTexts[optIndex]
+		if strings.Contains(strings.ToLower(noteText), filterValue) {
 			return true
 		}
 		return false
 	}
 	// display prompt
-	promptNoteSelection := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
 	fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
-	index, _, err := promptNoteSelection.Run()
+	index, err := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
 	if err != nil {
 		return err
 	}

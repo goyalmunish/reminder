@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/manifoldco/promptui"
 )
 
@@ -383,14 +384,15 @@ func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
 	return prompt
 }
 
-// GenerateNoteSearchSelect function generates promptui.Select.
-func GenerateNoteSearchSelect(items []string, searchFunc func(string, int) bool) *promptui.Select {
-	prompt := &promptui.Select{
-		Label:             "Notes",
-		Items:             items,
-		Size:              25,
-		StartInSearchMode: true,
-		Searcher:          searchFunc,
+// GenerateNoteSearchSelect function generates survey.Select and return index of selected option.
+func GenerateNoteSearchSelect(items []string, searchFunc func(filter string, value string, index int) bool) (int, error) {
+	var selectedIndex int
+	prompt := &survey.Select{
+		Message:  "Search: ",
+		Options:  items,
+		PageSize: 25,
+		Filter:   searchFunc,
 	}
-	return prompt
+	err := survey.AskOne(prompt, &selectedIndex, survey.WithFilter(searchFunc))
+	return selectedIndex, err
 }
