@@ -7,7 +7,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"reminder/internal/model"
 	"reminder/pkg/utils"
@@ -71,6 +70,6 @@ func flow() {
 }
 
 func main() {
-	go utils.Spinner(100 * time.Millisecond)
+	// go utils.Spinner(100 * time.Millisecond)
 	flow()
 }

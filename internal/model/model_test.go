@@ -849,22 +849,22 @@ func TestNewTagRegistration(t *testing.T) {
 }
 
 func TestNewTag(t *testing.T) {
-	mockPromptTagSlug := &MockPromptTagSlug{}
-	mockPromptTagGroup := &MockPromptTagGroup{}
-	tag, _ := model.NewTag(10, mockPromptTagSlug, mockPromptTagGroup)
+	dummySlug := "test_tag_slug"
+	dummyGroup := "test_tag_group"
+	tag, _ := model.NewTag(10, dummySlug, dummyGroup)
 	want := &model.Tag{
 		Id:    10,
-		Slug:  "test_tag_slug",
-		Group: "test_tag_group",
+		Slug:  dummySlug,
+		Group: dummyGroup,
 	}
 	utils.AssertEqual(t, tag, want)
 }
 func TestNewNote(t *testing.T) {
-	mockPromptNoteText := &MockPromptNoteText{}
 	tagIDs := []int{1, 3, 5}
-	note, _ := model.NewNote(tagIDs, mockPromptNoteText)
+	dummyText := "a random note text"
+	note, _ := model.NewNote(tagIDs, dummyText)
 	want := &model.Note{
-		Text:       "a random note text",
+		Text:       dummyText,
 		TagIds:     tagIDs,
 		Status:     note.Status,
 		BaseStruct: model.BaseStruct{UpdatedAt: note.UpdatedAt, CreatedAt: note.CreatedAt},

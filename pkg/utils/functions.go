@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/manifoldco/promptui"
 )
 
 // Location variable provides location info for `time`.
@@ -246,20 +245,20 @@ func AskOption(options []string, label string) (int, string, error) {
 	// note: any item in options should not have \n character
 	// otherwise such item is observed to not getting appear
 	// in the rendered list
-	prompt := promptui.Select{
-		Label:  label,
-		Items:  options,
-		Size:   25,
-		Stdout: &bellSkipper{},
+	var selectedIndex int
+	prompt := &survey.Select{
+		Message:  label,
+		Options:  options,
+		PageSize: 25,
 	}
-	index, result, err := prompt.Run()
+	err := survey.AskOne(prompt, &selectedIndex)
 	if err != nil {
 		// error can happen if user raises an interrupt (such as Ctrl-c, SIGINT)
 		fmt.Printf("%v Prompt failed %v\n", Symbols["warning"], err)
 		return -1, "", err
 	}
-	fmt.Printf("You chose %d:%q\n", index, result)
-	return index, result, nil
+	fmt.Printf("You chose %d:%q\n", selectedIndex, options[selectedIndex])
+	return selectedIndex, options[selectedIndex], nil
 }
 
 // PerformShellOperation function performs shell operation and return its output.
@@ -322,66 +321,72 @@ func PerformCwdiff(oldFilePath string, newFilePath string) error {
 	return err
 }
 
-// GeneratePrompt function generates promptui.Prompt.
-func GeneratePrompt(promptName string, defaultText string) *promptui.Prompt {
-	var prompt *promptui.Prompt
+// GeneratePrompt function generates survey.Input.
+func GeneratePrompt(promptName string, defaultText string) (string, error) {
+	var prompt *survey.Input
+	var validator survey.Validator
+	var answer string
+
 	switch promptName {
 	case "user_name":
-		prompt = &promptui.Prompt{
-			Label:    "User Name",
-			Default:  defaultText,
-			Validate: ValidateString,
+		prompt = &survey.Input{
+			Message: "User Name: ",
+			Default: defaultText,
 		}
+		validator = survey.Required
 	case "user_email":
-		prompt = &promptui.Prompt{
-			Label:    "User Email",
-			Default:  defaultText,
-			Validate: ValidateString,
+		prompt = &survey.Input{
+			Message: "User Email: ",
+			Default: defaultText,
 		}
+		validator = survey.MinLength(0)
 	case "tag_slug":
-		prompt = &promptui.Prompt{
-			Label:    "Tag Slug",
-			Default:  defaultText,
-			Validate: ValidateNonEmptyString,
+		prompt = &survey.Input{
+			Message: "Tag Slug: ",
+			Default: defaultText,
 		}
+		validator = survey.MinLength(1)
 	case "tag_group":
-		prompt = &promptui.Prompt{
-			Label:    "Tag Group",
-			Default:  defaultText,
-			Validate: ValidateString,
+		prompt = &survey.Input{
+			Message: "Tag Group: ",
+			Default: defaultText,
 		}
+		validator = survey.MinLength(1)
 	case "tag_another":
-		prompt = &promptui.Prompt{
-			Label:    "Add another tag: yes/no (default: no):",
-			Default:  defaultText,
-			Validate: ValidateString,
+		prompt = &survey.Input{
+			Message: "Add another tag: yes/no (default: no): ",
+			Default: defaultText,
 		}
+		validator = survey.MinLength(1)
 	case "note_text":
-		prompt = &promptui.Prompt{
-			Label:    "Note Text",
-			Default:  defaultText,
-			Validate: ValidateNonEmptyString,
+		prompt = &survey.Input{
+			Message: "Note Text: ",
+			Default: defaultText,
 		}
+		validator = survey.MinLength(1)
 	case "note_summary":
-		prompt = &promptui.Prompt{
-			Label:    "Note Summary",
-			Default:  defaultText,
-			Validate: ValidateNonEmptyString,
+		prompt = &survey.Input{
+			Message: "Note Summary: ",
+			Default: defaultText,
 		}
+		validator = survey.MinLength(1)
 	case "note_comment":
-		prompt = &promptui.Prompt{
-			Label:    "New Comment",
-			Default:  defaultText,
-			Validate: ValidateNonEmptyString,
+		prompt = &survey.Input{
+			Message: "New Comment: ",
+			Default: defaultText,
 		}
+		validator = survey.MinLength(1)
 	case "note_completed_by":
-		prompt = &promptui.Prompt{
-			Label:    "Due Date (format: DD-MM-YYYY or DD-MM), or enter nil to clear existing value",
-			Default:  defaultText,
-			Validate: ValidateDateString,
+		prompt = &survey.Input{
+			Message: "Due Date (format: DD-MM-YYYY or DD-MM), or enter nil to clear existing value: ",
+			Default: defaultText,
 		}
+		// TODO: This needs to be fixed
+		// Validate: ValidateDateString,
+		validator = survey.MinLength(1)
 	}
-	return prompt
+	err := survey.AskOne(prompt, &answer, survey.WithValidator(validator))
+	return answer, err
 }
 
 // GenerateNoteSearchSelect function generates survey.Select and return index of selected option.
@@ -393,6 +398,6 @@ func GenerateNoteSearchSelect(items []string, searchFunc func(filter string, val
 		PageSize: 25,
 		Filter:   searchFunc,
 	}
-	err := survey.AskOne(prompt, &selectedIndex, survey.WithFilter(searchFunc))
+	err := survey.AskOne(prompt, &selectedIndex)
 	return selectedIndex, err
 }
