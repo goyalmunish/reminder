@@ -30,8 +30,10 @@ func printNoteField(fieldName string, fieldValue interface{}) string {
 	return strings.Join(strs, "")
 }
 
-// NewNote function provides prompt to registre a new Note.
-func NewNote(tagIDs []int, promptNoteText Prompter) (*Note, error) {
+// NewNote function provides prompt to register a new Note, and returns its answer.
+func NewNote(tagIDs []int, useText string) (*Note, error) {
+	var noteText string
+	var err error
 	note := &Note{
 		Comments:   Comments{},
 		Status:     "pending",
@@ -42,7 +44,14 @@ func NewNote(tagIDs []int, promptNoteText Prompter) (*Note, error) {
 			UpdatedAt: utils.CurrentUnixTimestamp()},
 		// Text:       noteText,
 	}
-	noteText, err := promptNoteText.Run()
+	if useText == "" {
+		noteText, err = utils.GeneratePrompt("note_text", "")
+		if err != nil {
+			return note, err
+		}
+	} else {
+		noteText = useText
+	}
 	note.Text = utils.TrimString(noteText)
 	if err != nil || strings.Contains(note.Text, "^C") {
 		return note, err
@@ -85,7 +94,11 @@ func BasicTags() Tags {
 }
 
 // NewTag funciton provides prompt for creating new Tag.
-func NewTag(tagID int, promptTagSlug Prompter, promptTagGroup Prompter) (*Tag, error) {
+// Pass useSlug and/or useGroup to use given values instead of prompting user.
+func NewTag(tagID int, useSlug string, useGroup string) (*Tag, error) {
+	var err error
+	var tagSlug string
+	var tagGroup string
 	tag := &Tag{
 		Id: tagID,
 		BaseStruct: BaseStruct{
@@ -95,13 +108,17 @@ func NewTag(tagID int, promptTagSlug Prompter, promptTagGroup Prompter) (*Tag, e
 		// Group:     tagGroup,
 	}
 	// ask for tag slug
-	tagSlug, err := promptTagSlug.Run()
+	if useSlug == "" {
+		tagSlug, err = utils.GeneratePrompt("tag_slug", "")
+		// in case of error or Ctrl-c as input, don't create the tag
+		if err != nil || strings.Contains(tag.Slug, "^C") {
+			return tag, err
+		}
+	} else {
+		tagSlug = useSlug
+	}
 	tag.Slug = utils.TrimString(tagSlug)
 	tag.Slug = strings.ToLower(tag.Slug)
-	// in case of error or Ctrl-c as input, don't create the tag
-	if err != nil || strings.Contains(tag.Slug, "^C") {
-		return tag, err
-	}
 	if len(utils.TrimString(tag.Slug)) == 0 {
 		// this should never be encountered because of validation in earlier step
 		fmt.Printf("%v Skipping adding tag with empty slug\n", utils.Symbols["warning"])
@@ -109,9 +126,13 @@ func NewTag(tagID int, promptTagSlug Prompter, promptTagGroup Prompter) (*Tag, e
 		return tag, err
 	}
 	// ask for tag's group
-	tagGroup, err := promptTagGroup.Run()
-	if err != nil {
-		return tag, err
+	if useGroup == "" {
+		tagGroup, err = utils.GeneratePrompt("tag_group", "")
+		if err != nil {
+			return tag, err
+		}
+	} else {
+		tagGroup = useGroup
 	}
 	tag.Group = strings.ToLower(tagGroup)
 	// return successful tag
@@ -147,11 +168,9 @@ func MakeSureFileExists(dataFilePath string) error {
 // BlankReminder function creates blank ReminderData object.
 func BlankReminder() *ReminderData {
 	fmt.Println("Initializing the data file. Please provide following data.")
-	promptUserName := utils.GeneratePrompt("user_name", "")
-	name, err := promptUserName.Run()
+	name, err := utils.GeneratePrompt("user_name", "")
 	utils.PrintErrorIfPresent(err)
-	promptUserEmail := utils.GeneratePrompt("user_email", "")
-	emailID, err := promptUserEmail.Run()
+	emailID, err := utils.GeneratePrompt("user_email", "")
 	utils.PrintErrorIfPresent(err)
 	return &ReminderData{
 		User:     &User{Name: name, EmailId: emailID},

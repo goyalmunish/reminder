@@ -234,18 +234,17 @@ func (reminderData *ReminderData) SearchNotes() error {
 		allTexts = append(allTexts, note.SearchableText())
 	}
 	// function to search across notes
-	searchNotes := func(input string, idx int) bool {
-		input = strings.ToLower(input)
-		noteText := allTexts[idx]
-		if strings.Contains(strings.ToLower(noteText), input) {
+	searchNotes := func(filterValue string, optValue string, optIndex int) bool {
+		filterValue = strings.ToLower(filterValue)
+		noteText := allTexts[optIndex]
+		if strings.Contains(strings.ToLower(noteText), filterValue) {
 			return true
 		}
 		return false
 	}
 	// display prompt
-	promptNoteSelection := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
 	fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
-	index, _, err := promptNoteSelection.Run()
+	index, err := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
 	if err != nil {
 		return err
 	}
@@ -324,10 +323,7 @@ func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 	// collect and ask info about the tag
 	tagID := reminderData.nextPossibleTagId()
 
-	promptTagSlug := utils.GeneratePrompt("tag_slug", "")
-	promptTagGroup := utils.GeneratePrompt("tag_group", "")
-
-	tag, err := NewTag(tagID, promptTagSlug, promptTagGroup)
+	tag, err := NewTag(tagID, "", "")
 
 	// validate and save data
 	if err != nil {
@@ -372,8 +368,7 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 		// assuming each note with have on average 2 tags
 		tagIDs = make([]int, 0, 2)
 	}
-	promptNoteText := utils.GeneratePrompt("note_text", "")
-	note, err := NewNote(tagIDs, promptNoteText)
+	note, err := NewNote(tagIDs, "")
 	// validate and save data
 	if err != nil {
 		utils.PrintErrorIfPresent(err)
@@ -504,8 +499,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 		tagIDs = append(tagIDs, tagID)
 	}
 	// check with user if another tag is to be added
-	promtTagAnother := utils.GeneratePrompt("tag_another", "")
-	promptText, err := promtTagAnother.Run()
+	promptText, err := utils.GeneratePrompt("tag_another", "")
 	utils.PrintErrorIfPresent(err)
 	promptText = strings.ToLower(promptText)
 	nextTag := false
@@ -539,8 +533,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		"Select Action")
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
-		promptCommment := utils.GeneratePrompt("note_comment", "")
-		promptText, err := promptCommment.Run()
+		promptText, err := utils.GeneratePrompt("note_comment", "")
 		utils.PrintErrorIfPresent(err)
 		err = reminderData.AddNoteComment(note, promptText)
 		utils.PrintErrorIfPresent(err)
@@ -559,22 +552,19 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
-		promptCompleteBy := utils.GeneratePrompt("note_completed_by", "")
-		promptText, err := promptCompleteBy.Run()
+		promptText, err := utils.GeneratePrompt("note_completed_by", "")
 		utils.PrintErrorIfPresent(err)
 		err = reminderData.UpdateNoteCompleteBy(note, promptText)
 		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
-		promptNoteTextWithDefault := utils.GeneratePrompt("note_text", note.Text)
-		promptText, err := promptNoteTextWithDefault.Run()
+		promptText, err := utils.GeneratePrompt("note_text", note.Text)
 		utils.PrintErrorIfPresent(err)
 		err = reminderData.UpdateNoteText(note, promptText)
 		utils.PrintErrorIfPresent(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["glossary"], "Update summary"):
-		promptNoteTextWithDefault := utils.GeneratePrompt("note_summary", note.Summary)
-		promptText, err := promptNoteTextWithDefault.Run()
+		promptText, err := utils.GeneratePrompt("note_summary", note.Summary)
 		utils.PrintErrorIfPresent(err)
 		err = reminderData.UpdateNoteSummary(note, promptText)
 		utils.PrintErrorIfPresent(err)
@@ -644,7 +634,6 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	} else {
 		promptText = fmt.Sprintf("Select Note")
 	}
-	// ask user to select a note
 	noteIndex, _, err := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
 	if (err != nil) || (noteIndex == -1) {
 		return err
