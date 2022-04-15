@@ -244,6 +244,7 @@ func AskOption(options []string, label string) (int, string, error) {
 		Message:  label,
 		Options:  options,
 		PageSize: 25,
+		VimMode:  true,
 	}
 	err := survey.AskOne(prompt, &selectedIndex)
 	if err != nil {
@@ -396,6 +397,7 @@ func GenerateNoteSearchSelect(items []string, searchFunc func(filter string, val
 		Options:  items,
 		PageSize: 25,
 		Filter:   searchFunc,
+		VimMode:  true,
 	}
 	err := survey.AskOne(prompt, &selectedIndex)
 	return selectedIndex, err
