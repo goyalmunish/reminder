@@ -116,7 +116,7 @@ Additionally, from the **Main Menu**:
 
 ### Easily run the tool via Docker (recommended)
 
-_This is the easiest way to get going, if you have [Docker](https://docs.docker.com/get-docker/) installed. Just issue the following commands:_
+_This is the easiest way to get going, if you have [Docker](https://docs.docker.com/get-docker/) installed. Just download the [`reminder` image](https://hub.docker.com/r/goyalmunish/reminder/tags) by issuing the following commands:_
 
 ```sh
 # pull the image
