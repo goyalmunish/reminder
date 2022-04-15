@@ -147,30 +147,24 @@ func ChopStrings(texts []string, length int) []string {
 	return choppedStrings
 }
 
-// ValidateString function validates that input is string.
-func ValidateString(input string) error {
-	return nil
-}
-
-// ValidateNonEmptyString function validates that input is non-empty string.
-func ValidateNonEmptyString(input string) error {
-	input = TrimString(input)
-	if len(input) > 0 {
-		return nil
-	} else {
-		return errors.New("Empty input")
-	}
-}
-
 // ValidateDateString function validates date string (DD-MM-YYYY) or (DD-MM).
 // nil is also valid input
-func ValidateDateString(input string) error {
-	input = TrimString(input)
-	re := regexp.MustCompile("^((0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[012])(-((19|20)\\d\\d))?|(nil))$")
-	if re.MatchString(input) {
-		return nil
-	} else {
-		return errors.New("Invalid input")
+func ValidateDateString() survey.Validator {
+	// return a validator that checks the length of the string
+	return func(val interface{}) error {
+		if str, ok := val.(string); ok {
+			// if the string is shorter than the given value
+			input := TrimString(str)
+			re := regexp.MustCompile("^((0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[012])(-((19|20)\\d\\d))?|(nil))$")
+			if re.MatchString(input) {
+				return nil
+			} else {
+				return fmt.Errorf("The input must be in the format DD-MM-YYYY or DD-MM.")
+			}
+		} else {
+			// otherwise we cannot convert the value into a string and cannot enforce length
+			return fmt.Errorf("Invalid type %v", reflect.TypeOf(val).Name())
+		}
 	}
 }
 
@@ -323,69 +317,74 @@ func PerformCwdiff(oldFilePath string, newFilePath string) error {
 
 // GeneratePrompt function generates survey.Input.
 func GeneratePrompt(promptName string, defaultText string) (string, error) {
-	var prompt *survey.Input
 	var validator survey.Validator
 	var answer string
+	var err error
 
 	switch promptName {
 	case "user_name":
-		prompt = &survey.Input{
+		prompt := &survey.Input{
 			Message: "User Name: ",
 			Default: defaultText,
 		}
 		validator = survey.Required
+		err = survey.AskOne(prompt, &answer, survey.WithValidator(validator))
 	case "user_email":
-		prompt = &survey.Input{
+		prompt := &survey.Input{
 			Message: "User Email: ",
 			Default: defaultText,
 		}
 		validator = survey.MinLength(0)
+		err = survey.AskOne(prompt, &answer, survey.WithValidator(validator))
 	case "tag_slug":
-		prompt = &survey.Input{
+		prompt := &survey.Input{
 			Message: "Tag Slug: ",
 			Default: defaultText,
 		}
 		validator = survey.MinLength(1)
+		err = survey.AskOne(prompt, &answer, survey.WithValidator(validator))
 	case "tag_group":
-		prompt = &survey.Input{
+		prompt := &survey.Input{
 			Message: "Tag Group: ",
 			Default: defaultText,
 		}
 		validator = survey.MinLength(1)
+		err = survey.AskOne(prompt, &answer, survey.WithValidator(validator))
 	case "tag_another":
-		prompt = &survey.Input{
+		prompt := &survey.Input{
 			Message: "Add another tag: yes/no (default: no): ",
 			Default: defaultText,
 		}
 		validator = survey.MinLength(1)
+		err = survey.AskOne(prompt, &answer, survey.WithValidator(validator))
 	case "note_text":
-		prompt = &survey.Input{
+		prompt := &survey.Input{
 			Message: "Note Text: ",
 			Default: defaultText,
 		}
 		validator = survey.MinLength(1)
+		err = survey.AskOne(prompt, &answer, survey.WithValidator(validator))
 	case "note_summary":
-		prompt = &survey.Input{
+		prompt := &survey.Multiline{
 			Message: "Note Summary: ",
 			Default: defaultText,
 		}
 		validator = survey.MinLength(1)
+		err = survey.AskOne(prompt, &answer, survey.WithValidator(validator))
 	case "note_comment":
-		prompt = &survey.Input{
+		prompt := &survey.Multiline{
 			Message: "New Comment: ",
 			Default: defaultText,
 		}
 		validator = survey.MinLength(1)
+		err = survey.AskOne(prompt, &answer, survey.WithValidator(validator))
 	case "note_completed_by":
-		prompt = &survey.Input{
+		prompt := &survey.Input{
 			Message: "Due Date (format: DD-MM-YYYY or DD-MM), or enter nil to clear existing value: ",
 			Default: defaultText,
 		}
-		// TODO: This needs to be fixed
-		// Validate: ValidateDateString,
-		validator = survey.MinLength(1)
+		err = survey.AskOne(prompt, &answer, survey.WithValidator(ValidateDateString()))
 	}
-	err := survey.AskOne(prompt, &answer, survey.WithValidator(validator))
 	return answer, err
 }
 
