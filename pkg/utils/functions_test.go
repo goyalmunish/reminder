@@ -134,25 +134,16 @@ func TestChopStrings(t *testing.T) {
 	utils.AssertEqual(t, utils.ChopStrings(strings, 9), want)
 }
 
-func TestValidateString(t *testing.T) {
-	utils.AssertEqual(t, utils.ValidateString("str"), nil)
-	utils.AssertEqual(t, utils.ValidateString(""), nil)
-}
-
-func TestValidateNonEmptyString(t *testing.T) {
-	utils.AssertEqual(t, utils.ValidateNonEmptyString("str"), nil)
-	utils.AssertEqual(t, utils.ValidateNonEmptyString(""), errors.New("Empty input"))
-}
-
 func TestValidateDateString(t *testing.T) {
-	utils.AssertEqual(t, utils.ValidateDateString("31-12-2020"), nil)
-	utils.AssertEqual(t, utils.ValidateDateString("nil"), nil)
-	utils.AssertEqual(t, utils.ValidateDateString("12-31-2020"), errors.New("Invalid input"))
-	utils.AssertEqual(t, utils.ValidateDateString("2020-12-31"), errors.New("Invalid input"))
-	utils.AssertEqual(t, utils.ValidateDateString("2020-31-"), errors.New("Invalid input"))
-	utils.AssertEqual(t, utils.ValidateDateString("2020-31"), errors.New("Invalid input"))
-	utils.AssertEqual(t, utils.ValidateDateString("2020-"), errors.New("Invalid input"))
-	utils.AssertEqual(t, utils.ValidateDateString("2020"), errors.New("Invalid input"))
+	errorMsg := "The input must be in the format DD-MM-YYYY or DD-MM."
+	utils.AssertEqual(t, utils.ValidateDateString()("31-12-2020"), nil)
+	utils.AssertEqual(t, utils.ValidateDateString()("nil"), nil)
+	utils.AssertEqual(t, utils.ValidateDateString()("12-31-2020"), errors.New(errorMsg))
+	utils.AssertEqual(t, utils.ValidateDateString()("2020-12-31"), errors.New(errorMsg))
+	utils.AssertEqual(t, utils.ValidateDateString()("2020-31-"), errors.New(errorMsg))
+	utils.AssertEqual(t, utils.ValidateDateString()("2020-31"), errors.New(errorMsg))
+	utils.AssertEqual(t, utils.ValidateDateString()("2020-"), errors.New(errorMsg))
+	utils.AssertEqual(t, utils.ValidateDateString()("2020"), errors.New(errorMsg))
 }
 
 func TestTemplateResult(t *testing.T) {
