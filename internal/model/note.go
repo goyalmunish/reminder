@@ -176,9 +176,12 @@ func (note *Note) UpdateCompleteBy(text string) error {
 	} else {
 		format := "2-1-2006"
 		// set current year as year if year part is missing
-		year := utils.CurrentTime().Year()
 		timeSplit := strings.Split(text, "-")
 		if len(timeSplit) == 2 {
+			year, err := utils.YearForDueDateDDMM(text)
+			if err != nil {
+				return err
+			}
 			text = fmt.Sprintf("%s-%d", text, year)
 		}
 		// parse and set the date

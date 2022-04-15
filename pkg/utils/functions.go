@@ -94,6 +94,30 @@ func UnixTimestampForCorrespondingCurrentYearMonth(day int) int64 {
 	return int64(timeValue.Unix())
 }
 
+// YearForDueDateDDMM return the current year if DD-MM is falling after current date, otherwise returns next year
+func YearForDueDateDDMM(dateMonth string) (int, error) {
+	format := "2-1-2006"
+	currentTime := CurrentTime()
+	// set current year as year if year part is missing
+	timeSplit := strings.Split(dateMonth, "-")
+	if len(timeSplit) != 2 {
+		return 0, fmt.Errorf("Provided dateMonth string, %s, is not in DD-MM format", dateMonth)
+	}
+	// test with current year
+	year := currentTime.Year()
+	dateString := fmt.Sprintf("%s-%d", dateMonth, year)
+	testTimeValue, err := time.Parse(format, dateString)
+	if err != nil {
+		return 0, err
+	}
+	if testTimeValue.Unix() <= currentTime.Unix() {
+		// the due date falls before current date in current year
+		// so, select next year instead
+		year += 1
+	}
+	return year, nil
+}
+
 // IntPresentInSlice function performs membership test for integer based array.
 func IntPresentInSlice(a int, list []int) bool {
 	for _, b := range list {

@@ -788,26 +788,26 @@ func TestNotesApprachingDueDate(t *testing.T) {
 	notes = append(notes, &model.Note{Text: "RAP02", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600}) // expected
 	notes = append(notes, &model.Note{Text: "RAP03", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime})             // expected
 	notes = append(notes, &model.Note{Text: "RAP04", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600}) // expected
-	notes = append(notes, &model.Note{Text: "RAP05", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 6*24*3600}) // expected
+	notes = append(notes, &model.Note{Text: "RAP05", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600}) // expected
 	notes = append(notes, &model.Note{Text: "RAP06", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
 	notes = append(notes, &model.Note{Text: "RAP07", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600 - 2*365})
 	notes = append(notes, &model.Note{Text: "RAP08", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600 - 2*365}) // expected
 	notes = append(notes, &model.Note{Text: "RAP09", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*365})             // expected
 	notes = append(notes, &model.Note{Text: "RAP10", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600 - 2*365}) // expected
-	notes = append(notes, &model.Note{Text: "RAP11", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 6*24*3600 - 2*365}) // expected
+	notes = append(notes, &model.Note{Text: "RAP11", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 - 2*365}) // expected
 	notes = append(notes, &model.Note{Text: "RAP12", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600 - 2*365})
 	notes = append(notes, &model.Note{Text: "RAP13", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600 + 2*365})
 	notes = append(notes, &model.Note{Text: "RAP14", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600 + 2*365}) // expected
 	notes = append(notes, &model.Note{Text: "RAP15", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*365})             // expected
 	notes = append(notes, &model.Note{Text: "RAP16", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600 + 2*365}) // expected
-	notes = append(notes, &model.Note{Text: "RAP17", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 6*24*3600 + 2*365}) // expected
+	notes = append(notes, &model.Note{Text: "RAP17", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 + 2*365}) // expected
 	notes = append(notes, &model.Note{Text: "RAP18", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600 + 2*365})
 	// repeat-monthly pending notes
 	notes = append(notes, &model.Note{Text: "RMP01", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})
 	notes = append(notes, &model.Note{Text: "RMP02", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600}) // expected
 	notes = append(notes, &model.Note{Text: "RMP03", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime})             // expected
-	notes = append(notes, &model.Note{Text: "RMP04", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600}) // expected
-	notes = append(notes, &model.Note{Text: "RMP05", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600}) // expected
+	notes = append(notes, &model.Note{Text: "RMP04", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600}) // expected
+	notes = append(notes, &model.Note{Text: "RMP05", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 3*24*3600}) // expected
 	notes = append(notes, &model.Note{Text: "RMP06", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600})
 	notes = append(notes, &model.Note{Text: "RMP07", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
 	reminderData.Notes = notes
@@ -820,7 +820,7 @@ func TestNotesApprachingDueDate(t *testing.T) {
 	utils.AssertEqual(t, urgentNotesText, []string{
 		"NRP01a", "NRP02a", "NRP02b", "NRP03a", "NRP04a", "NRP04b", "NRP05a", "NRP05b", "NRP06a",
 		"RAP02", "RAP03", "RAP04", "RAP05", "RAP08", "RAP09", "RAP10", "RAP11", "RAP14", "RAP15", "RAP16", "RAP17",
-		"RMP02", "RMP03", "RMP04", "RMP05",
+		"RMP02", "RMP03",
 	})
 }
 
