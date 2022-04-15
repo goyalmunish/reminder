@@ -87,9 +87,15 @@ cd cmd/reminder
 
 ## Build Docker Image
 
-_Make use of [`build_image.sh`](./scripts/build_image.sh) to build and push (requires admin rights) Docker image:_
+_Make use of [`build_image.sh`](./scripts/build_image.sh) to build and push (requires admin rights) [Docker image](https://hub.docker.com/r/goyalmunish/reminder/tags):_
 
 ```sh
+# cd into repo
 cd reminder/
-. ./scripts/build_image.sh
+
+# example, setting version
+VERSION=v1.0.0
+
+# building images and pushing them
+. ./scripts/build_image.sh VERSION
 ```
