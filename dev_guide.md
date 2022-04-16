@@ -7,8 +7,7 @@
     - [Run Tests](#run-tests)
     - [Format Files](#format-files)
     - [Linting Code](#linting-code)
-    - [Debugging Program](#debugging-program)
-    - [Build Docker Image](#build-docker-image)
+    - [Build and Push the Docker Image](#build-and-push-the-docker-image)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -45,7 +44,7 @@ cd reminder/
 # run tests without supressing printing to console
 CONSOLE_PRINT=true . ./scripts/go_test
 
-# or, using make
+# or, using make (without print support)
 make -s test
 ```
 
@@ -68,24 +67,7 @@ make -s fmt
 make -s lint
 ```
 
-## Debugging Program
-
-Here are some hints for debugging:
-
-```sh
-cd reminder/
-cd cmd/reminder
-
-~/bin/dlv debug
-
-> break main.main
-> continue
-> <next>, <list>, <continue>
-> call <function>
-> print <expression>
-```
-
-## Build Docker Image
+## Build and Push the Docker Image
 
 _Make use of [`build_image.sh`](./scripts/build_image.sh) to build and push (requires admin rights) [Docker image](https://hub.docker.com/r/goyalmunish/reminder/tags):_
 
@@ -97,5 +79,5 @@ cd reminder/
 VERSION=v1.0.0
 
 # building images and pushing them
-. ./scripts/build_image.sh VERSION
+. ./scripts/build_image.sh ${VERSION}
 ```
