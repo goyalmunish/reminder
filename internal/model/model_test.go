@@ -254,6 +254,11 @@ func TestSearchableText(t *testing.T) {
 	note = model.Note{Text: "a cute dog", Comments: comments}
 	got = note.SearchableText()
 	utils.AssertEqual(t, got, "| incidental |         | a cute dog  [no-comments]")
+	// case 4
+	comments = model.Comments{}
+	note = model.Note{Text: "first line\nsecondline\nthird line", Comments: comments}
+	got = note.SearchableText()
+	utils.AssertEqual(t, got, "| incidental |         | first line NWL secondline NWL third line  [no-comments]")
 }
 
 func TestExternalTexts(t *testing.T) {

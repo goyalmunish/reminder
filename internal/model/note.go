@@ -85,8 +85,12 @@ func (note *Note) SearchableText() string {
 	searchableText = append(searchableText, note.Text)
 	searchableText = append(searchableText, note.Summary)
 	searchableText = append(searchableText, strings.Join(commentsText, ""))
+	// form a single string
+	text := strings.Join(searchableText, " ")
+	// address some special characters
+	text = strings.ReplaceAll(text, "\n", " NWL ")
 	// return searchable text for note a string
-	return strings.Join(searchableText, " ")
+	return text
 }
 
 // AddComment adds a new comment to note.
