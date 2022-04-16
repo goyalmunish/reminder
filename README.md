@@ -126,13 +126,13 @@ docker pull goyalmunish/reminder
 mkdir -p ~/reminder
 
 # spin up the container, with data file shared from the host machine
-docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder
+docker run -it --rm --name reminder -v ~/reminder:/root/reminder goyalmunish/reminder
 ```
 
 _For subsequent runs, better add the below alias to `~/.bashrc` ( or `~/.zshrc`, etc), so that you can invoke the tool, just by typing `reminder`:_
 
 ```sh
-alias reminder='docker run -it -v ~/reminder:/root/reminder goyalmunish/reminder'
+alias reminder='docker run -it --rm --name reminder -v ~/reminder:/root/reminder goyalmunish/reminder'
 ```
 
 _Run the tool:_
