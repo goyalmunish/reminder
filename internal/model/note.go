@@ -82,7 +82,7 @@ func (note *Note) SearchableText() string {
 	// get a complete searchable text array for note
 	var searchableText []string
 	searchableText = append(searchableText, filters)
-	searchableText = append(searchableText, note.Text)
+	searchableText = append(searchableText, fmt.Sprintf("├ %s ┤", note.Text))
 	searchableText = append(searchableText, note.Summary)
 	searchableText = append(searchableText, strings.Join(commentsText, ""))
 	// form a single string
