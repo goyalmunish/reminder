@@ -26,5 +26,5 @@ var Symbols = map[string]string{
 	"zzz":          "💤",
 	"hat":          "🎩",
 	"glossary":     "📖",
-	"plan":         "🤔",
+	"think":        "🤔",
 }

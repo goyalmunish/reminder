@@ -43,7 +43,7 @@ func flow() {
 		fmt.Sprintf("%v %v", utils.Symbols["hat"], "Main Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"),
 		fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"),
-		fmt.Sprintf("%v %v", utils.Symbols["plan"], "Plan Ahead"),
+		fmt.Sprintf("%v %v", utils.Symbols["think"], "Plan Ahead"),
 		fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File"),
 		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags")}, "Select Option")
 	// operate on main options

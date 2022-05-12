@@ -201,7 +201,7 @@ func TestNotesByDueDate(t *testing.T) {
 	for _, value := range notes {
 		gotTexts = append(gotTexts, value.Text)
 	}
-	wantTexts := []string{"2", "1", "3", "4"}
+	wantTexts := []string{"4", "3", "1", "2"}
 	utils.AssertEqual(t, gotTexts, wantTexts)
 }
 
