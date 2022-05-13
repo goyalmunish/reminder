@@ -21,7 +21,7 @@ func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 // ExternalTexts returns display text (that is, external representation) of list of notes
 // with width of each note is truncated to maxStrLen.
 // It returns empty []string if there are no notes.
-func (notes Notes) ExternalTexts(maxStrLen int) []string {
+func (notes Notes) ExternalTexts(maxStrLen int, repeatAnnuallyTagId int, repeatMonthlyTagId int) []string {
 	// assuming there are at least (on average) 100s of notes
 	allTexts := make([]string, 0, 100)
 	for _, note := range notes {
@@ -31,7 +31,9 @@ func (notes Notes) ExternalTexts(maxStrLen int) []string {
 				noteText = fmt.Sprintf("%v%v", noteText[0:(maxStrLen-3)], "...")
 			}
 		}
-		noteText = fmt.Sprintf("%*v {C:%02d, S:%v, D:%v}", -maxStrLen, noteText, len(note.Comments), strings.ToUpper(note.Status[0:1]), utils.UnixTimestampToShortTimeStr(note.CompleteBy))
+		noteText = fmt.Sprintf(
+			"%*v {R: %s, C:%02d, S:%v, D:%v}", -maxStrLen, noteText,
+			note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), len(note.Comments), strings.ToUpper(note.Status[0:1]), utils.UnixTimestampToShortTimeStr(note.CompleteBy))
 		allTexts = append(allTexts, noteText)
 	}
 	return allTexts
