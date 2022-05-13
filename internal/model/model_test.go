@@ -286,19 +286,19 @@ func TestExternalTexts(t *testing.T) {
 	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}, &model.Comment{Text: "baz"}}
 	notes = append(notes, &model.Note{Text: "cute brown dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
 	// case 2
-	got := notes.ExternalTexts(0)
+	got := notes.ExternalTexts(0, 0, 0)
 	want := "[beautiful little cat {C:01, S:P, D:03-Jan-21} cute brown dog {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 3
-	got = notes.ExternalTexts(5)
+	got = notes.ExternalTexts(5, 0, 0)
 	want = "[be... {C:01, S:P, D:03-Jan-21} cu... {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 4
-	got = notes.ExternalTexts(15)
+	got = notes.ExternalTexts(15, 0, 0)
 	want = "[beautiful li... {C:01, S:P, D:03-Jan-21} cute brown dog  {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 5
-	got = notes.ExternalTexts(25)
+	got = notes.ExternalTexts(25, 0, 0)
 	want = "[beautiful little cat      {C:01, S:P, D:03-Jan-21} cute brown dog            {C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 }
@@ -460,6 +460,20 @@ func TestUpdateStatus(t *testing.T) {
 	err = note1.UpdateStatus("pending", []int{5, 6, 7})
 	utils.AssertEqual(t, err, nil)
 	utils.AssertEqual(t, note1.Status, "pending")
+}
+
+func TestRepeatType(t *testing.T) {
+	repeatAnnuallyTagId := 3
+	repeatMonthlyTagId := 4
+	// create notes
+	note1 := model.Note{Text: "original text1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note2 := model.Note{Text: "original text2", Status: "done", TagIds: []int{3, 5}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note3 := model.Note{Text: "original text3", Status: "done", TagIds: []int{2, 6}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	// assert repeat type
+	utils.AssertEqual(t, note1.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "M")
+	utils.AssertEqual(t, note2.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "A")
+	utils.AssertEqual(t, note3.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "N")
+	utils.AssertEqual(t, note3.RepeatType(0, 0), "N")
 }
 
 func TestToggleMainFlag(t *testing.T) {

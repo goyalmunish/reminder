@@ -21,6 +21,8 @@ func (c Notes) Less(i, j int) bool { return c[i].UpdatedAt > c[j].UpdatedAt }
 // ExternalTexts returns display text (that is, external representation) of list of notes
 // with width of each note is truncated to maxStrLen.
 // It returns empty []string if there are no notes.
+// Note: You may use repeatAnnuallyTagId and repeatMonthlyTagId as 0, if they are not required
+// In the output: R means repeate-type, C means number of comments, S means status, and D means due date
 func (notes Notes) ExternalTexts(maxStrLen int, repeatAnnuallyTagId int, repeatMonthlyTagId int) []string {
 	// assuming there are at least (on average) 100s of notes
 	allTexts := make([]string, 0, 100)
