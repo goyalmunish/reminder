@@ -210,7 +210,7 @@ func (reminderData *ReminderData) ListTags() error {
 	}
 	// operate on the selected a tag
 	tag := reminderData.Tags[tagIndex]
-	err = reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, "pending", false, "default")
+	err = reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, "pending", false)
 	if err != nil {
 		utils.PrintErrorIfPresent(err)
 		// go back to ListTags
@@ -591,7 +591,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // Unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake".
 // Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
 // Filter only the notes tagged as "main" if `onlyMain` is true (for given status), otherwise return all.
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string, onlyMain bool, sortBy string) error {
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string, onlyMain bool) error {
 	// check if passed notes is to be used or to fetch latest notes
 	if status == "done" {
 		// ignore the passed notes
@@ -625,12 +625,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		fmt.Printf("Using passed notes, so the list will not be refreshed immediately.\n")
 	}
 	// sort notes
-	switch sortBy {
-	case "due-date":
-		sort.Sort(NotesByDueDate(notes))
-	case "default":
-		sort.Sort(Notes(notes))
-	}
+	sort.Sort(Notes(notes))
 	texts := notes.ExternalTexts(utils.TerminalWidth() - 50)
 	// ask user to select a note
 	promptText := ""
@@ -656,7 +651,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		var updatedNotes Notes
 		updatedNotes = append(updatedNotes, note)
 		updatedNotes = append(updatedNotes, notes...)
-		err = reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status, onlyMain, sortBy)
+		err = reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status, onlyMain)
 		if err != nil {
 			return err
 		}
@@ -667,7 +662,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	action := reminderData.PrintNoteAndAskOptions(note)
 	if action == "stay" {
 		// no action was selected for the note, go one step back
-		err = reminderData.PrintNotesAndAskOptions(notes, tagID, status, onlyMain, sortBy)
+		err = reminderData.PrintNotesAndAskOptions(notes, tagID, status, onlyMain)
 		if err != nil {
 			return err
 		}
