@@ -263,7 +263,8 @@ func (reminderData *ReminderData) SearchNotes() error {
 }
 
 // NotesApprachingDueDate fetches all pending notes which are urgent.
-func (reminderData *ReminderData) NotesApprachingDueDate() Notes {
+// It accepts multiper as an argument to stretch the look ahead
+func (reminderData *ReminderData) NotesApprachingDueDate(multiplier int64) Notes {
 	allNotes := reminderData.Notes
 	pendingNotes := allNotes.WithStatus("pending")
 	// assuming there are at least 100 notes (on average)
@@ -274,7 +275,7 @@ func (reminderData *ReminderData) NotesApprachingDueDate() Notes {
 		noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
 		// first process notes WITHOUT tag with group "repeat"
 		// start showing such notes 7 days in advance from their due date, and until they are marked done
-		minDay := note.CompleteBy - 7*24*60*60
+		minDay := note.CompleteBy - multiplier*7*24*60*60
 		currentTimestamp := utils.CurrentUnixTimestamp()
 		if (len(noteIDsWithRepeat) == 0) && (note.CompleteBy != 0) && (currentTimestamp >= minDay) {
 			currentNotes = append(currentNotes, note)
@@ -295,9 +296,12 @@ func (reminderData *ReminderData) NotesApprachingDueDate() Notes {
 				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYear(int(noteMonth), noteDay)
 				noteTimestampPrevious := noteTimestampCurrent - 365*24*60*60
 				noteTimestampNext := noteTimestampCurrent + 365*24*60*60
-				daysBefore := int64(3) // days before to start showing the note
-				daysAfter := int64(7)  // days after until to show the note
-				if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
+				daysBefore := int64(multiplier * 3) // days before to start showing the note
+				daysAfter := int64(7)               // days after until to show the note
+				shouldDisplay, matchingTimestamp := utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
+				// temporarity update note's timestamp
+				note.CompleteBy = matchingTimestamp
+				if shouldDisplay {
 					currentNotes = append(currentNotes, note)
 				}
 			}
@@ -307,9 +311,12 @@ func (reminderData *ReminderData) NotesApprachingDueDate() Notes {
 				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYearMonth(noteDay)
 				noteTimestampPrevious := noteTimestampCurrent - 30*24*60*60
 				noteTimestampNext := noteTimestampCurrent + 30*24*60*60
-				daysBefore := int64(1) // days beofre to start showing the note
-				daysAfter := int64(3)  // days after until to show the note
-				if utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter) {
+				daysBefore := int64(multiplier * 1) // days beofre to start showing the note
+				daysAfter := int64(3)               // days after until to show the note
+				shouldDisplay, matchingTimestamp := utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
+				// temporarity update note's timestamp
+				note.CompleteBy = matchingTimestamp
+				if shouldDisplay {
 					currentNotes = append(currentNotes, note)
 				}
 			}
@@ -611,6 +618,9 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 			notes = notes.WithStatus(status)
 			countPendingMain := len(notes)
 			fmt.Printf("A total of %v/%v notes flagged as 'main':\n", countPendingMain, countAllMain)
+		} else if sortBy == "due-date" {
+			// look ahead a year (52 weeks)
+			notes = reminderData.NotesApprachingDueDate(52)
 		} else {
 			// this is for listing all notes approaching due date
 			// fetch notes approaching due date
@@ -618,7 +628,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 			fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 			fmt.Println("  - within 3 days for repeat-annually and a week post due date (ignoring its year)")
 			fmt.Println("  - within 1 day for repeat-monthly and 3 days post due date (ignoring its year and month)")
-			notes = reminderData.NotesApprachingDueDate()
+			notes = reminderData.NotesApprachingDueDate(1)
 		}
 	} else {
 		// use passed notes

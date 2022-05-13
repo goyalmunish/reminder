@@ -238,7 +238,9 @@ func AssertEqual(t *testing.T, got interface{}, want interface{}) {
 
 // IsTimeForRepeatNote function determines if it is time to show a repeat-based note/task.
 // dependency: `CurrentUnixTimestamp`
-func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter int64) bool {
+// It accepts current, previous and next timestamp of a task, and
+// checks to see if any of the current timestamp falls in between [TIMESTAMP - DaysBefore, TIMESTAMP + DaysAfter]
+func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter int64) (bool, int64) {
 	// fmt.Printf("Timestamp Curr: %v %v\n", noteTimestampCurrent, UnixTimestampToTime(noteTimestampCurrent))
 	// fmt.Printf("Timestamp Prev: %v %v\n", noteTimestampPrevious, UnixTimestampToTime(noteTimestampPrevious))
 	// fmt.Printf("Timestamp Next: %v %v\n", noteTimestampNext, UnixTimestampToTime(noteTimestampNext))
@@ -246,9 +248,17 @@ func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimest
 	// fmt.Printf("Days after: %v\n", daysAfter)
 	currentTimestamp := CurrentUnixTimestamp()
 	daysSecs := int64(24 * 60 * 60)
-	return ((currentTimestamp >= noteTimestampCurrent-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampCurrent+daysAfter*daysSecs)) ||
-		((currentTimestamp >= noteTimestampPrevious-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampPrevious+daysAfter*daysSecs)) ||
-		((currentTimestamp >= noteTimestampNext-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampNext+daysAfter*daysSecs))
+	condCurr := ((currentTimestamp >= noteTimestampCurrent-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampCurrent+daysAfter*daysSecs))
+	condNext := ((currentTimestamp >= noteTimestampNext-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampNext+daysAfter*daysSecs))
+	condPrev := ((currentTimestamp >= noteTimestampPrevious-daysBefore*daysSecs) && (currentTimestamp <= noteTimestampPrevious+daysAfter*daysSecs))
+	// find which timestamp matched
+	matchingTimestamp := noteTimestampPrevious
+	if condCurr {
+		matchingTimestamp = noteTimestampCurrent
+	} else if condNext {
+		matchingTimestamp = noteTimestampNext
+	}
+	return condCurr || condNext || condPrev, matchingTimestamp
 }
 
 // AskOption function asks option to the user.
