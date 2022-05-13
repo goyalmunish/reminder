@@ -190,6 +190,21 @@ func TestNotes(t *testing.T) {
 	utils.AssertEqual(t, gotTexts, wantTexts)
 }
 
+func TestNotesByDueDate(t *testing.T) {
+	var notes []*model.Note
+	notes = append(notes, &model.Note{Text: "1", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: 1800000003})
+	notes = append(notes, &model.Note{Text: "2", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}, CompleteBy: 1800000004})
+	notes = append(notes, &model.Note{Text: "3", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}, CompleteBy: 1800000002})
+	notes = append(notes, &model.Note{Text: "4", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}, CompleteBy: 1800000001})
+	sort.Sort(model.NotesByDueDate(notes))
+	var gotTexts []string
+	for _, value := range notes {
+		gotTexts = append(gotTexts, value.Text)
+	}
+	wantTexts := []string{"4", "3", "1", "2"}
+	utils.AssertEqual(t, gotTexts, wantTexts)
+}
+
 func TestNoteStrings(t *testing.T) {
 	utils.Location = utils.UTCLocation()
 	comments := model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "c2"}, &model.Comment{Text: "c3"}}
@@ -817,7 +832,7 @@ func TestNotesApprachingDueDate(t *testing.T) {
 	notes = append(notes, &model.Note{Text: "RMP07", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
 	reminderData.Notes = notes
 	// get urgent notes
-	urgentNotes := reminderData.NotesApprachingDueDate()
+	urgentNotes := reminderData.NotesApprachingDueDate(1)
 	var urgentNotesText []string
 	for _, note := range urgentNotes {
 		urgentNotesText = append(urgentNotesText, note.Text)
