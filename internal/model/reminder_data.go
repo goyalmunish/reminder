@@ -263,8 +263,8 @@ func (reminderData *ReminderData) SearchNotes() error {
 }
 
 // NotesApprachingDueDate fetches all pending notes which are urgent.
-// It accepts multiper as an argument to stretch the look ahead
-func (reminderData *ReminderData) NotesApprachingDueDate(multiplier int64) Notes {
+// It accepts view as an argument with "default" or "long" as acceptable values
+func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
 	allNotes := reminderData.Notes
 	pendingNotes := allNotes.WithStatus("pending")
 	// assuming there are at least 100 notes (on average)
@@ -275,7 +275,10 @@ func (reminderData *ReminderData) NotesApprachingDueDate(multiplier int64) Notes
 		noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
 		// first process notes WITHOUT tag with group "repeat"
 		// start showing such notes 7 days in advance from their due date, and until they are marked done
-		minDay := note.CompleteBy - multiplier*7*24*60*60
+		minDay := note.CompleteBy - 7*24*60*60
+		if view == "long" {
+			minDay = note.CompleteBy - 365*24*60*60
+		}
 		currentTimestamp := utils.CurrentUnixTimestamp()
 		if (len(noteIDsWithRepeat) == 0) && (note.CompleteBy != 0) && (currentTimestamp >= minDay) {
 			currentNotes = append(currentNotes, note)
@@ -296,8 +299,11 @@ func (reminderData *ReminderData) NotesApprachingDueDate(multiplier int64) Notes
 				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYear(int(noteMonth), noteDay)
 				noteTimestampPrevious := noteTimestampCurrent - 365*24*60*60
 				noteTimestampNext := noteTimestampCurrent + 365*24*60*60
-				daysBefore := int64(multiplier * 3) // days before to start showing the note
+				daysBefore := int64(3) // days before to start showing the note
 				daysAfter := int64(7)               // days after until to show the note
+				if view == "long" {
+					daysBefore = int64(365)
+				}
 				shouldDisplay, matchingTimestamp := utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
 				// temporarity update note's timestamp
 				note.CompleteBy = matchingTimestamp
@@ -311,8 +317,11 @@ func (reminderData *ReminderData) NotesApprachingDueDate(multiplier int64) Notes
 				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYearMonth(noteDay)
 				noteTimestampPrevious := noteTimestampCurrent - 30*24*60*60
 				noteTimestampNext := noteTimestampCurrent + 30*24*60*60
-				daysBefore := int64(multiplier * 1) // days beofre to start showing the note
+				daysBefore := int64(1) // days beofre to start showing the note
 				daysAfter := int64(3)               // days after until to show the note
+				if view == "long" {
+					daysBefore = int64(31)
+				}
 				shouldDisplay, matchingTimestamp := utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
 				// temporarity update note's timestamp
 				note.CompleteBy = matchingTimestamp
@@ -620,7 +629,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 			fmt.Printf("A total of %v/%v notes flagged as 'main':\n", countPendingMain, countAllMain)
 		} else if sortBy == "due-date" {
 			// look ahead a year (52 weeks)
-			notes = reminderData.NotesApprachingDueDate(52)
+			notes = reminderData.NotesApprachingDueDate("long")
 		} else {
 			// this is for listing all notes approaching due date
 			// fetch notes approaching due date
@@ -628,7 +637,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 			fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 			fmt.Println("  - within 3 days for repeat-annually and a week post due date (ignoring its year)")
 			fmt.Println("  - within 1 day for repeat-monthly and 3 days post due date (ignoring its year and month)")
-			notes = reminderData.NotesApprachingDueDate(1)
+			notes = reminderData.NotesApprachingDueDate("default")
 		}
 	} else {
 		// use passed notes

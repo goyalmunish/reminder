@@ -258,22 +258,22 @@ func TestSearchableText(t *testing.T) {
 	comments := model.Comments{&model.Comment{Text: "c1"}}
 	note := model.Note{Text: "a beautiful cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	got := note.SearchableText()
-	utils.AssertEqual(t, got, "| incidental | pending | a beautiful cat  [[nil] c1]")
+	utils.AssertEqual(t, got, "| incidental | pending | ├ a beautiful cat ┤  [[nil] c1]")
 	// case 2
 	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}}
 	note = model.Note{Text: "a cute dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "| incidental | done    | a cute dog  [[nil] c1, [nil] foo bar, [nil] c3]")
+	utils.AssertEqual(t, got, "| incidental | done    | ├ a cute dog ┤  [[nil] c1, [nil] foo bar, [nil] c3]")
 	// case 3
 	comments = model.Comments{}
 	note = model.Note{Text: "a cute dog", Comments: comments}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "| incidental |         | a cute dog  [no-comments]")
+	utils.AssertEqual(t, got, "| incidental |         | ├ a cute dog ┤  [no-comments]")
 	// case 4
 	comments = model.Comments{}
 	note = model.Note{Text: "first line\nsecondline\nthird line", Comments: comments}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "| incidental |         | first line NWL secondline NWL third line  [no-comments]")
+	utils.AssertEqual(t, got, "| incidental |         | ├ first line NWL secondline NWL third line ┤  [no-comments]")
 }
 
 func TestExternalTexts(t *testing.T) {
@@ -287,19 +287,19 @@ func TestExternalTexts(t *testing.T) {
 	notes = append(notes, &model.Note{Text: "cute brown dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
 	// case 2
 	got := notes.ExternalTexts(0, 0, 0)
-	want := "[beautiful little cat {C:01, S:P, D:03-Jan-21} cute brown dog {C:04, S:D, D:03-Jan-21}]"
+	want := "[beautiful little cat {R: -, C:01, S:P, D:03-Jan-21} cute brown dog {R: -, C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 3
 	got = notes.ExternalTexts(5, 0, 0)
-	want = "[be... {C:01, S:P, D:03-Jan-21} cu... {C:04, S:D, D:03-Jan-21}]"
+	want = "[be... {R: -, C:01, S:P, D:03-Jan-21} cu... {R: -, C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 4
 	got = notes.ExternalTexts(15, 0, 0)
-	want = "[beautiful li... {C:01, S:P, D:03-Jan-21} cute brown dog  {C:04, S:D, D:03-Jan-21}]"
+	want = "[beautiful li... {R: -, C:01, S:P, D:03-Jan-21} cute brown dog  {R: -, C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 5
 	got = notes.ExternalTexts(25, 0, 0)
-	want = "[beautiful little cat      {C:01, S:P, D:03-Jan-21} cute brown dog            {C:04, S:D, D:03-Jan-21}]"
+	want = "[beautiful little cat      {R: -, C:01, S:P, D:03-Jan-21} cute brown dog            {R: -, C:04, S:D, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 }
 
@@ -846,7 +846,7 @@ func TestNotesApprachingDueDate(t *testing.T) {
 	notes = append(notes, &model.Note{Text: "RMP07", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
 	reminderData.Notes = notes
 	// get urgent notes
-	urgentNotes := reminderData.NotesApprachingDueDate(1)
+	urgentNotes := reminderData.NotesApprachingDueDate("default")
 	var urgentNotesText []string
 	for _, note := range urgentNotes {
 		urgentNotesText = append(urgentNotesText, note.Text)
