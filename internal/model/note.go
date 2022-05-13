@@ -199,7 +199,7 @@ func (note *Note) UpdateCompleteBy(text string) error {
 }
 
 // RepeatType return - (Not-repeat), A (Annual-Repeat), or M (Monthly-Repeat) string
-// representing repeate-type of the note
+// representing repeat-type of the note
 func (note *Note) RepeatType(repeatAnnuallyTagId int, repeatMonthlyTagId int) string {
 	repeat := "-" // non-repeat
 	if utils.IntPresentInSlice(repeatAnnuallyTagId, note.TagIds) {

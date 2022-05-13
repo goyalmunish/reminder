@@ -472,8 +472,8 @@ func TestRepeatType(t *testing.T) {
 	// assert repeat type
 	utils.AssertEqual(t, note1.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "M")
 	utils.AssertEqual(t, note2.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "A")
-	utils.AssertEqual(t, note3.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "N")
-	utils.AssertEqual(t, note3.RepeatType(0, 0), "N")
+	utils.AssertEqual(t, note3.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "-")
+	utils.AssertEqual(t, note3.RepeatType(0, 0), "-")
 }
 
 func TestToggleMainFlag(t *testing.T) {
