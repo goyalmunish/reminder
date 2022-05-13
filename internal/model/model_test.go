@@ -846,7 +846,7 @@ func TestNotesApprachingDueDate(t *testing.T) {
 	notes = append(notes, &model.Note{Text: "RMP07", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
 	reminderData.Notes = notes
 	// get urgent notes
-	urgentNotes := reminderData.NotesApprachingDueDate(1)
+	urgentNotes := reminderData.NotesApprachingDueDate("default")
 	var urgentNotesText []string
 	for _, note := range urgentNotes {
 		urgentNotesText = append(urgentNotesText, note.Text)
