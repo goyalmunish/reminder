@@ -190,6 +190,21 @@ func TestNotes(t *testing.T) {
 	utils.AssertEqual(t, gotTexts, wantTexts)
 }
 
+func TestNotesByDueDate(t *testing.T) {
+	var notes []*model.Note
+	notes = append(notes, &model.Note{Text: "1", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: 1800000003})
+	notes = append(notes, &model.Note{Text: "2", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}, CompleteBy: 1800000004})
+	notes = append(notes, &model.Note{Text: "3", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}, CompleteBy: 1800000002})
+	notes = append(notes, &model.Note{Text: "4", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}, CompleteBy: 1800000001})
+	sort.Sort(model.NotesByDueDate(notes))
+	var gotTexts []string
+	for _, value := range notes {
+		gotTexts = append(gotTexts, value.Text)
+	}
+	wantTexts := []string{"2", "1", "3", "4"}
+	utils.AssertEqual(t, gotTexts, wantTexts)
+}
+
 func TestNoteStrings(t *testing.T) {
 	utils.Location = utils.UTCLocation()
 	comments := model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "c2"}, &model.Comment{Text: "c3"}}
