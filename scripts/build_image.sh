@@ -1,6 +1,7 @@
 # running instructions:
 # from root of the project, execute me as
 # `. ./scripts/build_image.sh`
+# `. ./scripts/build_image.sh v1.6.0`
 
 # set required environment variables
 REMINDER_IMAGE=reminder
