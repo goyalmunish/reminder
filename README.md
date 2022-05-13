@@ -24,19 +24,20 @@ _This is a simple **terminal-based fully-interactive reminder tool**. It is not 
 
 _Apart from being **fully-interactive** and **terminal-based**, the other major features it comes with are:_
 
-- Easy to categorize **tasks** (also referred to as **"notes"**) with **tags** (🏷 ).
+- Easy to categorize **tasks** (referred as **"notes"**) with **tags** (🏷 ).
 - List and **manage tasks** (change status, update text, add comments, update due-date, etc) of a given tag.
 - Each task can be associated with **multiple tags**, and so show up under all of its tags.
 - A given task:
     - can be **updated** (📝) with its text, and also can be enhanced with time-stamped **comments** (💬); so that you can track how and when the progress happened
-    - can be marked **done** (✅) or **pending** (⏰); marking it as "done" makes it invisible
-    - can be associated with **due-date** (📅); tasks with upcoming deadlines automatically show up under the **"~Pending~ Approaching Due Date"** option under **Main Menu**
-    - can be set as "main" or non-main (incidental)
+    - can be marked **done** (✅) or **pending** (⏰); marking it as "done" makes it disappear (soft-delete)
+    - can be associated with **due-date** (📅); tasks with upcoming deadlines automatically show up under the **"Approaching Due Date"** option under **Main Menu**
+    - can be set as "main" or non-main (incidental); tasks marked as "main", show up under dedicated view **Main Notes**
 - **Full-text search** (🔎) among all tasks.
-- **Tag-groups** for grouping tags, for managing priority-levels (⬆️ ⬇️) or workflow-stages.
+- **Tag-groups** for grouping tags, for managing priority-levels (⬆️ ⬇️) or workflow-stages. For example, a task (note) can be part of only one tag out of tags (for example, `priority-low`, `priority-medium`, and `priority-high` ) part of same tag-group.
 - Provides you with **"Register Basic Tags"** functionality to seed basic tags which have special meaning to the workflow.
-- All of your **data** (📋) remains with **only you**; so, any of your sensitive information doesn't leave your machine.
-- The **data** remains in a human-readable and usable format. This is useful even if you choose to move away.
+- All of your **data** (📋) remains with **only you**; so, any of your sensitive information burried inside any of your tasks, doesn't leave your machine.
+- The **data** remains in a human-readable and usable format. This is useful when you require to edit your file manually.
+- Allows your to **Look Ahead** whole year in advance.
 - Easily take **time-stamped backups** (💾).
 - Provides you a way to easily add/remove tags to any of the existing tasks.
 
@@ -49,7 +50,7 @@ The [Screencast of Basic Features](./assets/videos/screencast_basic_features.mov
 Once you invoke the tool (for example, by using the [alias **`reminder`**)](#easily-run-the-tool-via-docker-recommended), you are presented with its **Main Menu**. Use **Up-Arrow** and **Down-Arrow** keys to navigate up and down:
 
 <p align="center">
-  <img src="./assets/images/screen_basic_tags_01.png" width="100%">
+  <img src="./assets/images/screen_home_list_stuff.png" width="100%">
 </p>
 
 You may like to take a good look at the options of the **Main Menu** (as shown above), as we'll be talking about it through out this guide.
@@ -72,45 +73,34 @@ Now, from within the **"List Stuff"** option, you can add a new tag using **"Add
 
 On selecting a tag (navigating to the tag and hitting **Enter** key), all of its tasks show up as a list of selectable items. You can then **navigate to a given task** and hit **Enter** key to bring up a **menu to update the task** (it lets you change its text, add comments, mark it as pending, mark it as done, add due-date, change its existing tag(s)). The following figures shows you how this menu looks like:
 
-Note: The **"~Pending~ Approaching Due Date"** shows you tasks that require your immediate attention. In general, tasks with a **due-date** in upcoming `7` days start showing up under this option (and remain there until they are marked done). The tags **"repeat-monthly"** and **"repeat-annually"** are special; tasks tagged with them also show up under the **"~Pending~ Approaching Due Date"** option close to their due-dates in their respective monthly and annual frequencies. These rules are also listed under **"~Pending~ Approaching Due Date"** option as a reference.
+Note: The **"Approaching Due Date"** shows you tasks that require your immediate attention. In general, tasks with a **due-date** in upcoming `7` days start showing up under this option (and remain there until they are marked done). The tags **"repeat-monthly"** and **"repeat-annually"** are special; tasks tagged with them also show up under the **"Approaching Due Date"** option close to their due-dates in their respective monthly and annual frequencies. These rules are also listed under **"Approaching Due Date"** option for a reference.
 
 <p align="center">
-  <img src="./assets/images/screen_search_04.png" width="100%">
+  <img src="./assets/images/screen_home_approaching_due_date.png" width="100%">
 </p>
 
-With time, you will add more tags and hundreds of tasks under them. These **stats** will show up **on top of your main-menu screen** (as shown below):
+With time, you will add more tags and hundreds of tasks under them. These **stats** will show up **on top of your main-menu screen** (as shown in previous image):
 
-<p align="center">
-  <img src="./assets/images/screen_home.png" width="100%">
-</p>
-
-The above status states that there are currently 22 tags, a total of 330 tasks, and out of them 204 tasks are in the **"pending"** state. The tasks marked as **"done"** become **invisible** (but not deleted, and will still show up under **"Done Notes"** and in Search results).
+Here, the status states that there are currently 21 tags, a total of 164 tasks, and out of them 80 tasks are in the **"pending"** state. The tasks marked as **"done"** disappear (but not deleted, and will still show up under **"Done Notes"** and in Search results).
 
 The **"Search Notes"** option lets you perform a **full-text search** (with each task's status, text and its comments) through all tasks. You can use `[done]` as search text to filter only tasks which are done, similarly use `[pending]` for tasks which are pending.
 
 <p align="center">
-  <img src="./assets/images/screen_search_01.png" width="100%">
+  <img src="./assets/images/screen_home_search.png" width="100%">
 </p>
 
 The **result list** updates as you add or delete characters in the **search field** (without hitting Enter-key):
 
 <p align="center">
-  <img src="./assets/images/screen_search_03.png" width="100%">
+  <img src="./assets/images/screen_search_list.png" width="100%">
 </p>
 
-The figures such as 1618211581 that you see in the above results are timestamps of the comments added to the corresponding tasks.
-
-You can navigate to a search entry (a task) and hit **Enter** key to bring up the **menu to update the task** (similar to how we updated tasks under a tag):
-
-<p align="center">
-  <img src="./assets/images/screen_search_04.png" width="100%">
-</p>
+You can navigate to a search entry (a task) and hit **Enter** key to bring up the **menu to update the task** (similar to how we updated tasks under a tag).
 
 Additionally, from the **Main Menu**:
 
 - use the **"Exit"** option to exit the tool. You can come back it to later from where you left off (that is, with your data intact)
-- use the **"Create Backup"** option to create time-stamped backup of your data file (on host machine)
-- use the **"Done Note"** option to display done tasks (which are otherwise invisible under the **"List Stuff"**)
+- use the **"Create Backup"** option to create manual time-stamped backup of your data file (on host machine)
 
 ## How to Run?
 
