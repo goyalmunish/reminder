@@ -198,6 +198,18 @@ func (note *Note) UpdateCompleteBy(text string) error {
 	return nil
 }
 
+// RepeatType return - (Not-repeat), A (Annual-Repeat), or M (Monthly-Repeat) string
+// representing repeat-type of the note
+func (note *Note) RepeatType(repeatAnnuallyTagId int, repeatMonthlyTagId int) string {
+	repeat := "-" // non-repeat
+	if utils.IntPresentInSlice(repeatAnnuallyTagId, note.TagIds) {
+		repeat = "A"
+	} else if utils.IntPresentInSlice(repeatMonthlyTagId, note.TagIds) {
+		repeat = "M"
+	}
+	return repeat
+}
+
 // ToggleMainFlag toggles note's main flag.
 func (note *Note) ToggleMainFlag() error {
 	note.IsMain = !(note.IsMain)

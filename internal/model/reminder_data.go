@@ -641,7 +641,9 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	case "default":
 		sort.Sort(Notes(notes))
 	}
-	texts := notes.ExternalTexts(utils.TerminalWidth() - 50)
+	repeatAnnuallyTag := reminderData.TagFromSlug("repeat-annually")
+	repeatMonthlyTag := reminderData.TagFromSlug("repeat-monthly")
+	texts := notes.ExternalTexts(utils.TerminalWidth()-50, repeatAnnuallyTag.Id, repeatMonthlyTag.Id)
 	// ask user to select a note
 	promptText := ""
 	if tagID >= 0 {
