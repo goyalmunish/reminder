@@ -108,6 +108,20 @@ Additionally, from the **Main Menu**:
 
 _This is the easiest way to get going, if you have [Docker](https://docs.docker.com/get-docker/) installed. Just download the [`reminder` image](https://hub.docker.com/r/goyalmunish/reminder/tags) by issuing the following commands:_
 
+_**Using Script:**_
+
+Make sure first to clone the repo and `cd` into it.
+
+```sh
+# pull latest reminder image, make sure ~/reminder directory exists, and run the tool
+. ./scripts/run_via_docker.sh
+
+# run the tool (just run, without pulling image and other initialization steps)
+. ./scripts/run_via_docker.sh fast
+```
+
+_**Using Direct Way:**_
+
 ```sh
 # pull the image (or get the latest image)
 docker pull goyalmunish/reminder
@@ -126,12 +140,7 @@ _For subsequent runs, better add the below alias to `~/.bashrc` ( or `~/.zshrc`,
 alias reminder='docker run -it --rm --name reminder -v ~/reminder:/root/reminder goyalmunish/reminder'
 ```
 
-_Run the tool:_
-
-```sh
-# run the tool
-reminder
-```
+_Then, run the tool using `reminder` command._
 
 ### Non-Docker Setup
 
