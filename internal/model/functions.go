@@ -44,15 +44,7 @@ func printNoteField(fieldName string, fieldValue interface{}) string {
 			for _, v := range items {
 				if strings.Contains(v, "\n") {
 					// the string is multi-line
-					data := strings.Split(v, "\n")
-					heading, subItems := data[0], data[1:]
-					strs = appendSimpleField("", heading, strs)
-					for _, e := range subItems {
-						e = strings.TrimSpace(e)
-						if e != "" {
-							strs = append(strs, fmt.Sprintf("  |  %18v %v\n", "", e))
-						}
-					}
+					strs = appendMultiLineField(v, strs)
 				} else {
 					strs = appendSimpleField("", v, strs)
 				}
