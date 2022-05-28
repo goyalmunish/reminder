@@ -13,10 +13,10 @@ import (
 )
 
 // appendMultiLineField prints a multi-line string with first line as its heading
-func appendMultiLineField(multiLineString string, appendTo []string) []string {
+func appendMultiLineField(fieldName, multiLineString string, appendTo []string) []string {
 	data := strings.Split(multiLineString, "\n")
 	heading, subItems := data[0], data[1:]
-	appendTo = append(appendTo, fmt.Sprintf("  |  %12v:  %v\n", "", heading))
+	appendTo = append(appendTo, fmt.Sprintf("  |  %12v:  %v\n", fieldName, heading))
 	for _, e := range subItems {
 		e = strings.TrimSpace(e)
 		if e != "" {
@@ -43,12 +43,20 @@ func printNoteField(fieldName string, fieldValue interface{}) string {
 		if items != nil {
 			for _, v := range items {
 				if strings.Contains(v, "\n") {
-					// the string is multi-line
-					strs = appendMultiLineField(v, strs)
+					// useful for multi-line comments
+					strs = appendMultiLineField("", v, strs)
 				} else {
 					strs = appendSimpleField("", v, strs)
 				}
 			}
+		}
+	} else if fieldDynamicType == "string" {
+		value := fieldValue.(string)
+		if strings.Contains(value, "\n") {
+			// useful for multi-line summary
+			strs = appendMultiLineField(fieldName, value, strs)
+		} else {
+			strs = appendSimpleField(fieldName, fieldValue, strs)
 		}
 	} else {
 		strs = appendSimpleField(fieldName, fieldValue, strs)
