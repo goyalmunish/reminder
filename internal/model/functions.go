@@ -12,6 +12,26 @@ import (
 	"strings"
 )
 
+// appendMultiLineField prints a multi-line string with first line as its heading
+func appendMultiLineField(fieldName, multiLineString string, appendTo []string) []string {
+	data := strings.Split(multiLineString, "\n")
+	heading, subItems := data[0], data[1:]
+	appendTo = append(appendTo, fmt.Sprintf("  |  %12v:  %v\n", fieldName, heading))
+	for _, e := range subItems {
+		e = strings.TrimSpace(e)
+		if e != "" {
+			appendTo = append(appendTo, fmt.Sprintf("  |  %18v %v\n", "", e))
+		}
+	}
+	return appendTo
+}
+
+// appendSimpleField appends a simple (string or similar) field
+func appendSimpleField(fieldName, fieldValue interface{}, appendTo []string) []string {
+	appendTo = append(appendTo, fmt.Sprintf("  |  %12v:  %v\n", fieldName, fieldValue))
+	return appendTo
+}
+
 // printNoteField function prints the given field of a note.
 func printNoteField(fieldName string, fieldValue interface{}) string {
 	var strs []string
@@ -23,23 +43,23 @@ func printNoteField(fieldName string, fieldValue interface{}) string {
 		if items != nil {
 			for _, v := range items {
 				if strings.Contains(v, "\n") {
-					// the string is multi-line
-					data := strings.Split(v, "\n")
-					heading, subItems := data[0], data[1:]
-					strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", heading))
-					for _, e := range subItems {
-						e = strings.TrimSpace(e)
-						if e != "" {
-							strs = append(strs, fmt.Sprintf("  |  %18v %v\n", "", e))
-						}
-					}
+					// useful for multi-line comments
+					strs = appendMultiLineField("", v, strs)
 				} else {
-					strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
+					strs = appendSimpleField("", v, strs)
 				}
 			}
 		}
+	} else if fieldDynamicType == "string" {
+		value := fieldValue.(string)
+		if strings.Contains(value, "\n") {
+			// useful for multi-line summary
+			strs = appendMultiLineField(fieldName, value, strs)
+		} else {
+			strs = appendSimpleField(fieldName, fieldValue, strs)
+		}
 	} else {
-		strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", fieldName, fieldValue))
+		strs = appendSimpleField(fieldName, fieldValue, strs)
 	}
 	return strings.Join(strs, "")
 }
