@@ -300,7 +300,7 @@ func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
 				noteTimestampPrevious := noteTimestampCurrent - 365*24*60*60
 				noteTimestampNext := noteTimestampCurrent + 365*24*60*60
 				daysBefore := int64(3) // days before to start showing the note
-				daysAfter := int64(7)               // days after until to show the note
+				daysAfter := int64(7)  // days after until to show the note
 				if view == "long" {
 					daysBefore = int64(365)
 				}
@@ -318,7 +318,7 @@ func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
 				noteTimestampPrevious := noteTimestampCurrent - 30*24*60*60
 				noteTimestampNext := noteTimestampCurrent + 30*24*60*60
 				daysBefore := int64(1) // days beofre to start showing the note
-				daysAfter := int64(3)               // days after until to show the note
+				daysAfter := int64(3)  // days after until to show the note
 				if view == "long" {
 					daysBefore = int64(31)
 				}
