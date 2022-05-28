@@ -207,11 +207,14 @@ func TestNotesByDueDate(t *testing.T) {
 
 func TestNoteStrings(t *testing.T) {
 	utils.Location = utils.UTCLocation()
-	comments := model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "c2"}, &model.Comment{Text: "c3"}}
+	comments := model.Comments{&model.Comment{Text: "c1:\n- line 1\n\n- line 2\n- line 3"}, &model.Comment{Text: "c2"}, &model.Comment{Text: "c3"}}
 	note := &model.Note{Text: "dummy text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	want := `[  |          Text:  dummy text
    |      Comments:
-  |              :  [nil] c1
+  |              :  [nil] c1:
+  |                     - line 1
+  |                     - line 2
+  |                     - line 3
   |              :  [nil] c2
   |              :  [nil] c3
    |       Summary:  
