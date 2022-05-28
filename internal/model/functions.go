@@ -16,12 +16,26 @@ import (
 func printNoteField(fieldName string, fieldValue interface{}) string {
 	var strs []string
 	fieldDynamicType := fmt.Sprintf("%T", fieldValue)
+	// construct the display text based on value type
 	if fieldDynamicType == "[]string" {
 		items := fieldValue.([]string)
 		strs = append(strs, fmt.Sprintf("  |  %12v:\n", fieldName))
 		if items != nil {
 			for _, v := range items {
-				strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
+				if strings.Contains(v, "\n") {
+					// the string is multi-line
+					data := strings.Split(v, "\n")
+					heading, subItems := data[0], data[1:]
+					strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", heading))
+					for _, e := range subItems {
+						e = strings.TrimSpace(e)
+						if e != "" {
+							strs = append(strs, fmt.Sprintf("  |  %18v %v\n", "", e))
+						}
+					}
+				} else {
+					strs = append(strs, fmt.Sprintf("  |  %12v:  %v\n", "", v))
+				}
 			}
 		}
 	} else {
