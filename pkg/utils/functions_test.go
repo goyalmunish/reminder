@@ -21,7 +21,7 @@ import (
 
 	// "github.com/golang/mock/gomock"
 
-	utils "reminder/pkg/utils"
+	utils "github.com/goyalmunish/reminder/pkg/utils"
 )
 
 func TestCurrentUnixTimestamp(t *testing.T) {

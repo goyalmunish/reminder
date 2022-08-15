@@ -41,14 +41,12 @@ func printNoteField(fieldName string, fieldValue interface{}) string {
 	if fieldDynamicType == "[]string" {
 		items := fieldValue.([]string)
 		strs = append(strs, fmt.Sprintf("  |  %12v:\n", fieldName))
-		if items != nil {
-			for _, v := range items {
-				if strings.Contains(v, "\n") {
-					// useful for multi-line comments
-					strs = appendMultiLineField("", v, strs)
-				} else {
-					strs = appendSimpleField("", v, strs)
-				}
+		for _, v := range items {
+			if strings.Contains(v, "\n") {
+				// useful for multi-line comments
+				strs = appendMultiLineField("", v, strs)
+			} else {
+				strs = appendSimpleField("", v, strs)
 			}
 		}
 	} else if fieldDynamicType == "string" {

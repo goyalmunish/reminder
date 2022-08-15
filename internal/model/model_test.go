@@ -14,8 +14,8 @@ import (
 
 	// "github.com/golang/mock/gomock"
 
-	model "reminder/internal/model"
-	utils "reminder/pkg/utils"
+	model "github.com/goyalmunish/reminder/internal/model"
+	utils "github.com/goyalmunish/reminder/pkg/utils"
 )
 
 // mocks

@@ -179,7 +179,7 @@ func ValidateDateString() survey.Validator {
 		if str, ok := val.(string); ok {
 			// if the string is shorter than the given value
 			input := TrimString(str)
-			re := regexp.MustCompile("^((0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[012])(-((19|20)\\d\\d))?|(nil))$")
+			re := regexp.MustCompile(`^((0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[012])(-((19|20)\\d\\d))?|(nil))$`)
 			if re.MatchString(input) {
 				return nil
 			} else {
