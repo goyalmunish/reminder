@@ -237,10 +237,7 @@ func (reminderData *ReminderData) SearchNotes() error {
 	searchNotes := func(filterValue string, optValue string, optIndex int) bool {
 		filterValue = strings.ToLower(filterValue)
 		noteText := allTexts[optIndex]
-		if strings.Contains(strings.ToLower(noteText), filterValue) {
-			return true
-		}
-		return false
+		return strings.Contains(strings.ToLower(noteText), filterValue)
 	}
 	// display prompt
 	fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
@@ -658,7 +655,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	if tagID >= 0 {
 		promptText = fmt.Sprintf("Select Note (for the tag %v %v)", utils.Symbols["tag"], reminderData.TagsFromIds([]int{tagID})[0].Slug)
 	} else {
-		promptText = fmt.Sprintf("Select Note")
+		promptText = "Select Note"
 	}
 	noteIndex, _, err := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
 	if (err != nil) || (noteIndex == -1) {
