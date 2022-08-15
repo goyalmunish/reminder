@@ -43,13 +43,13 @@ func (reminderData *ReminderData) UpdateDataFile(msg string) error {
 	// string is encoded using HTMLEscape.
 	byteValue, err := json.MarshalIndent(&reminderData, "", "    ")
 	if err != nil {
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		return err
 	}
 	// persist the byte data to file
 	err = ioutil.WriteFile(reminderData.DataFile, byteValue, 0755)
 	if err != nil {
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		return err
 	}
 	if msg != "" {
@@ -212,7 +212,7 @@ func (reminderData *ReminderData) ListTags() error {
 	tag := reminderData.Tags[tagIndex]
 	err = reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, "pending", false, "default")
 	if err != nil {
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		// go back to ListTags
 		err = reminderData.ListTags()
 		if err != nil {
@@ -340,7 +340,7 @@ func (reminderData *ReminderData) NewTagRegistration() (int, error) {
 
 	// validate and save data
 	if err != nil {
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		return 0, err
 	} else {
 		err, _ = reminderData.newTagAppend(tag), tagID
@@ -384,12 +384,12 @@ func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, erro
 	note, err := NewNote(tagIDs, "")
 	// validate and save data
 	if err != nil {
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		return note, err
 	}
 	err = reminderData.newNoteAppend(note)
 	if err != nil {
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		return note, err
 	}
 	return note, nil
@@ -513,7 +513,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	}
 	// check with user if another tag is to be added
 	promptText, err := utils.GeneratePrompt("tag_another", "")
-	utils.PrintErrorIfPresent(err)
+	utils.PrintError(err)
 	promptText = strings.ToLower(promptText)
 	nextTag := false
 	for _, yes := range []string{"yes", "y"} {
@@ -547,9 +547,9 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
 		promptText, err := utils.GeneratePrompt("note_comment", "")
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		err = reminderData.AddNoteComment(note, promptText)
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
 		return "main-menu"
@@ -558,42 +558,42 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
 		err := reminderData.UpdateNoteStatus(note, "done")
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"):
 		err := reminderData.UpdateNoteStatus(note, "pending")
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
 		promptText, err := utils.GeneratePrompt("note_completed_by", "")
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		err = reminderData.UpdateNoteCompleteBy(note, promptText)
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
 		promptText, err := utils.GeneratePrompt("note_text", note.Text)
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		err = reminderData.UpdateNoteText(note, promptText)
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["glossary"], "Update summary"):
 		promptText, err := utils.GeneratePrompt("note_summary", note.Summary)
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		err = reminderData.UpdateNoteSummary(note, promptText)
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"):
 		tagIDs := reminderData.AskTagIds([]int{})
 		if len(tagIDs) > 0 {
 			err := reminderData.UpdateNoteTags(note, tagIDs)
-			utils.PrintErrorIfPresent(err)
+			utils.PrintError(err)
 			fmt.Print(note.ExternalText(reminderData))
 		} else {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["warning"])
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Toggle main/incidental"):
 		err := reminderData.ToggleNoteMainFlag(note)
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	}
 	return "stay"

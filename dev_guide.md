@@ -44,7 +44,9 @@ cd reminder/
 # run tests without supressing printing to console
 CONSOLE_PRINT=true . ./scripts/go_test
 
-# or, using make (without print support)
+# or, using make (versbose)
+CONSOLE_PRINT=true make test
+# or, using make (don't echo commands, and print statements)
 make -s test
 ```
 

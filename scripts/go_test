@@ -3,7 +3,7 @@ run_go_test() {
   test_dir="$@"
   cur_dir=$(pwd)
   cd ${test_dir}
-  echo "Running tests under $(pwd)"
+  echo "Running tests under $(pwd):----------"
   if [[  $CONSOLE_PRINT == "true" ]]; then
     go test
   else
@@ -13,6 +13,12 @@ run_go_test() {
 }
 
 # run tests
-run_go_test "pkg/utils/"
-run_go_test "internal/model/"
-run_go_test "cmd/reminder/"
+# run_go_test "pkg/utils/"
+# run_go_test "internal/model/"
+# run_go_test "cmd/reminder/"
+
+if [[  $CONSOLE_PRINT == "true" ]]; then
+  go test -v --coverprofile=c.out ./...
+else
+  go test --coverprofile=c.out ./...
+fi

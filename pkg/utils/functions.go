@@ -141,8 +141,8 @@ func GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int {
 	return arr
 }
 
-// PrintErrorIfPresent function prints error if present.
-func PrintErrorIfPresent(err error) {
+// PrintError function prints error if present.
+func PrintError(err error) {
 	if err != nil {
 		fmt.Printf("%v %v\n", Symbols["error"], err)
 	}
@@ -179,7 +179,7 @@ func ValidateDateString() survey.Validator {
 		if str, ok := val.(string); ok {
 			// if the string is shorter than the given value
 			input := TrimString(str)
-			re := regexp.MustCompile(`^((0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[012])(-((19|20)\\d\\d))?|(nil))$`)
+			re := regexp.MustCompile(`^((0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[012])(-((19|20)\d\d))?|(nil))$`)
 			if re.MatchString(input) {
 				return nil
 			} else {
@@ -228,11 +228,23 @@ func Spinner(delay time.Duration) {
 // AssertEqual function makes assertion that `go` and `want` are nearly equal.
 func AssertEqual(t *testing.T, got interface{}, want interface{}) {
 	if reflect.DeepEqual(got, want) {
-		t.Logf("Matched value (by deep equality): %v", want)
+		t.Logf("Pass: Matched value (by deep equality): WANT %v GOT %v", want, got)
 	} else if reflect.DeepEqual(fmt.Sprintf("%v", got), fmt.Sprintf("%v", want)) {
-		t.Logf("Matched value (by string conversion): %v", want)
+		t.Logf("Pass: Matched value (by string conversion): WANT %v GOT %v", want, got)
 	} else {
-		t.Errorf("Got: %v, Want: %v", got, want)
+		var errorMsg = struct {
+			gotType string
+			gotValue interface{}
+			wantType string
+			wantValue interface{}
+		}{
+			gotValue: fmt.Sprintf("%v", got),
+			gotType: fmt.Sprintf("%T", got),
+			wantValue: fmt.Sprintf("%v", want),
+			wantType: fmt.Sprintf("%T", want),
+
+		}
+		t.Errorf("Error: %+v", errorMsg)
 	}
 }
 
