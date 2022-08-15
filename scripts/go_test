@@ -17,4 +17,8 @@ run_go_test() {
 # run_go_test "internal/model/"
 # run_go_test "cmd/reminder/"
 
-go test ./...
+if [[  $CONSOLE_PRINT == "true" ]]; then
+  go test -v --coverprofile=c.out ./...
+else
+  go test --coverprofile=c.out ./...
+fi
