@@ -13,6 +13,8 @@ run_go_test() {
 }
 
 # run tests
-run_go_test "pkg/utils/"
-run_go_test "internal/model/"
-run_go_test "cmd/reminder/"
+# run_go_test "pkg/utils/"
+# run_go_test "internal/model/"
+# run_go_test "cmd/reminder/"
+
+go test ./...
