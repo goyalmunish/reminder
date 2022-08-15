@@ -8,8 +8,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"reminder/pkg/utils"
 	"strings"
+
+	"github.com/goyalmunish/reminder/pkg/utils"
 )
 
 // appendMultiLineField prints a multi-line string with first line as its heading

@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"reminder/pkg/utils"
+	"github.com/goyalmunish/reminder/pkg/utils"
 )
 
 /*
