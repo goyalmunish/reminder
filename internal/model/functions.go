@@ -192,7 +192,7 @@ func MakeSureFileExists(dataFilePath string) error {
 			reminderData.DataFile = dataFilePath
 			return reminderData.UpdateDataFile("")
 		}
-		utils.PrintErrorIfPresent(err)
+		utils.PrintError(err)
 		return err
 	}
 	return nil
@@ -202,9 +202,9 @@ func MakeSureFileExists(dataFilePath string) error {
 func BlankReminder() *ReminderData {
 	fmt.Println("Initializing the data file. Please provide following data.")
 	name, err := utils.GeneratePrompt("user_name", "")
-	utils.PrintErrorIfPresent(err)
+	utils.PrintError(err)
 	emailID, err := utils.GeneratePrompt("user_email", "")
-	utils.PrintErrorIfPresent(err)
+	utils.PrintError(err)
 	return &ReminderData{
 		User:     &User{Name: name, EmailId: emailID},
 		Notes:    Notes{},
@@ -218,10 +218,10 @@ func ReadDataFile(dataFilePath string) *ReminderData {
 	var reminderData ReminderData
 	// read byte data from file
 	byteValue, err := ioutil.ReadFile(dataFilePath)
-	utils.PrintErrorIfPresent(err)
+	utils.PrintError(err)
 	// parse json data
 	err = json.Unmarshal(byteValue, &reminderData)
-	utils.PrintErrorIfPresent(err)
+	utils.PrintError(err)
 	// close the file
 	return &reminderData
 }

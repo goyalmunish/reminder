@@ -68,7 +68,7 @@ func flow() {
 		fmt.Println("Exiting...")
 		return
 	}
-	utils.PrintErrorIfPresent(err)
+	utils.PrintError(err)
 	flow()
 }
 

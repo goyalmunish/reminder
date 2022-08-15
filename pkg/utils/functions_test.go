@@ -111,9 +111,9 @@ func TestGetCommonMembersIntSlices(t *testing.T) {
 		[]int{})
 }
 
-func TestPrintErrorIfPresent(t *testing.T) {
+func TestPrintError(t *testing.T) {
 	err := errors.New("dummy error")
-	utils.PrintErrorIfPresent(err)
+	utils.PrintError(err)
 }
 
 func TestTrimString(t *testing.T) {
