@@ -3,7 +3,7 @@ run_go_test() {
   test_dir="$@"
   cur_dir=$(pwd)
   cd ${test_dir}
-  echo "Running tests under $(pwd)"
+  echo "Running tests under $(pwd):----------"
   if [[  $CONSOLE_PRINT == "true" ]]; then
     go test
   else
