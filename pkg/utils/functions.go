@@ -228,11 +228,23 @@ func Spinner(delay time.Duration) {
 // AssertEqual function makes assertion that `go` and `want` are nearly equal.
 func AssertEqual(t *testing.T, got interface{}, want interface{}) {
 	if reflect.DeepEqual(got, want) {
-		t.Logf("Matched value (by deep equality): %v", want)
+		t.Logf("Pass: Matched value (by deep equality): WANT %v GOT %v", want, got)
 	} else if reflect.DeepEqual(fmt.Sprintf("%v", got), fmt.Sprintf("%v", want)) {
-		t.Logf("Matched value (by string conversion): %v", want)
+		t.Logf("Pass: Matched value (by string conversion): WANT %v GOT %v", want, got)
 	} else {
-		t.Errorf("Got: %v, Want: %v", got, want)
+		var errorMsg = struct {
+			gotType string
+			gotValue interface{}
+			wantType string
+			wantValue interface{}
+		}{
+			gotValue: fmt.Sprintf("%v", got),
+			gotType: fmt.Sprintf("%T", got),
+			wantValue: fmt.Sprintf("%v", want),
+			wantType: fmt.Sprintf("%T", want),
+
+		}
+		t.Errorf("Error: %+v", errorMsg)
 	}
 }
 

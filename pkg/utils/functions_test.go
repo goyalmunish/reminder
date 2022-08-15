@@ -203,7 +203,7 @@ func TestPerformShellOperation(t *testing.T) {
 	utils.AssertEqual(t, err, nil)
 	// attempt to invoke a command that do not exist
 	_, err = utils.PerformShellOperation("command_do_not_exist")
-	utils.AssertEqual(t, err, errors.New("fork/exec : no such file or directory"))
+	utils.AssertEqual(t, err, errors.New("exec: no command"))
 	_, err = utils.PerformShellOperation("command_do_not_exist", "arg1", "arg2")
-	utils.AssertEqual(t, err, errors.New("fork/exec : no such file or directory"))
+	utils.AssertEqual(t, err, errors.New("exec: no command"))
 }
