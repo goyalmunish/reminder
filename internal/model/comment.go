@@ -2,7 +2,8 @@ package model
 
 import (
 	"html/template"
-	"reminder/pkg/utils"
+
+	"github.com/goyalmunish/reminder/pkg/utils"
 )
 
 /*

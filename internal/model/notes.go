@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"reminder/pkg/utils"
+	"github.com/goyalmunish/reminder/pkg/utils"
 )
 
 /*

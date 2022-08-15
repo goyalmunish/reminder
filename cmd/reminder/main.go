@@ -8,8 +8,8 @@ package main
 import (
 	"fmt"
 
-	"reminder/internal/model"
-	"reminder/pkg/utils"
+	"github.com/goyalmunish/reminder/internal/model"
+	"github.com/goyalmunish/reminder/pkg/utils"
 )
 
 // flow is recursive function for overall flow of interactivity
