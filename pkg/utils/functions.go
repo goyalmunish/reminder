@@ -141,7 +141,7 @@ func GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int {
 	return arr
 }
 
-// PrintError function prints error if present.
+// PrintError function ignores but prints the error (if present).
 func PrintError(err error) {
 	if err != nil {
 		fmt.Printf("%v %v\n", Symbols["error"], err)

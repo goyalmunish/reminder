@@ -14,15 +14,18 @@ import (
 
 // flow is recursive function for overall flow of interactivity
 func flow() {
+	var err error
 	// make sure DataFile exists
 	defaultDataFilePath := model.DefaultDataFile()
-	_ = model.MakeSureFileExists(defaultDataFilePath)
+	err = model.MakeSureFileExists(defaultDataFilePath)
+	utils.PrintError(err)
 	// read and parse the existing data
 	reminderData := *model.ReadDataFile(defaultDataFilePath)
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup
-	_, _ = reminderData.AutoBackup(24 * 60 * 60)
+	_, err = reminderData.AutoBackup(24 * 60 * 60)
+	utils.PrintError(err)
 	// ask the main menu
 	fmt.Println("| =========================== MAIN MENU =========================== |")
 	fmt.Println("|     Use 'Ctrl-c' to jump one level up (towards the Main Menu)     |")
@@ -35,36 +38,35 @@ func flow() {
 		But, if you are inside PromptUI's `Run()`, then it cancels the input and moves to next
 		statement in the code.
 	*/
-	var err error
 	_, result, _ := utils.AskOption([]string{
-		fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"),
-		fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
-		fmt.Sprintf("%v %v", utils.Symbols["clock"], "Approaching Due Date"),
-		fmt.Sprintf("%v %v", utils.Symbols["hat"], "Main Notes"),
-		fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"),
-		fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"),
-		fmt.Sprintf("%v %v", utils.Symbols["telescope"], "Look Ahead"),
-		fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File"),
-		fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags")}, "Select Option")
+		fmt.Sprintf("%s %s", utils.Symbols["spark"], "List Stuff"),
+		fmt.Sprintf("%s %s %s", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
+		fmt.Sprintf("%s %s", utils.Symbols["clock"], "Approaching Due Date"),
+		fmt.Sprintf("%s %s", utils.Symbols["hat"], "Main Notes"),
+		fmt.Sprintf("%s %s", utils.Symbols["search"], "Search Notes"),
+		fmt.Sprintf("%s %s", utils.Symbols["backup"], "Create Backup"),
+		fmt.Sprintf("%s %s", utils.Symbols["telescope"], "Look Ahead"),
+		fmt.Sprintf("%s %s", utils.Symbols["pad"], "Display Data File"),
+		fmt.Sprintf("%s %s", utils.Symbols["clip"], "Register Basic Tags")}, "Select Option")
 	// operate on main options
 	switch result {
-	case fmt.Sprintf("%v %v", utils.Symbols["spark"], "List Stuff"):
+	case fmt.Sprintf("%s %s", utils.Symbols["spark"], "List Stuff"):
 		err = reminderData.ListTags()
-	case fmt.Sprintf("%v %v", utils.Symbols["clip"], "Register Basic Tags"):
+	case fmt.Sprintf("%s %s", utils.Symbols["clip"], "Register Basic Tags"):
 		err = reminderData.RegisterBasicTags()
-	case fmt.Sprintf("%v %v", utils.Symbols["clock"], "Approaching Due Date"):
+	case fmt.Sprintf("%s %s", utils.Symbols["clock"], "Approaching Due Date"):
 		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", false, "default")
-	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Main Notes"):
+	case fmt.Sprintf("%s %s", utils.Symbols["hat"], "Main Notes"):
 		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", true, "default")
-	case fmt.Sprintf("%v %v", utils.Symbols["search"], "Search Notes"):
+	case fmt.Sprintf("%s %s", utils.Symbols["search"], "Search Notes"):
 		err = reminderData.SearchNotes()
-	case fmt.Sprintf("%v %v", utils.Symbols["backup"], "Create Backup"):
+	case fmt.Sprintf("%s %s", utils.Symbols["backup"], "Create Backup"):
 		_, err = reminderData.CreateBackup()
-	case fmt.Sprintf("%v %v", utils.Symbols["telescope"], "Look Ahead"):
+	case fmt.Sprintf("%s %s", utils.Symbols["telescope"], "Look Ahead"):
 		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", false, "due-date")
-	case fmt.Sprintf("%v %v", utils.Symbols["pad"], "Display Data File"):
+	case fmt.Sprintf("%s %s", utils.Symbols["pad"], "Display Data File"):
 		err = reminderData.DisplayDataFile()
-	case fmt.Sprintf("%v %v %v", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):
+	case fmt.Sprintf("%s %s %s", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):
 		fmt.Println("Exiting...")
 		return
 	}

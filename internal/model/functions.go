@@ -192,7 +192,6 @@ func MakeSureFileExists(dataFilePath string) error {
 			reminderData.DataFile = dataFilePath
 			return reminderData.UpdateDataFile("")
 		}
-		utils.PrintError(err)
 		return err
 	}
 	return nil
