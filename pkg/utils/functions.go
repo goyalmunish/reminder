@@ -141,7 +141,7 @@ func GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int {
 	return arr
 }
 
-// PrintError function prints error if present.
+// PrintError function ignores but prints the error (if present).
 func PrintError(err error) {
 	if err != nil {
 		fmt.Printf("%v %v\n", Symbols["error"], err)
@@ -233,16 +233,15 @@ func AssertEqual(t *testing.T, got interface{}, want interface{}) {
 		t.Logf("Pass: Matched value (by string conversion): WANT %v GOT %v", want, got)
 	} else {
 		var errorMsg = struct {
-			gotType string
-			gotValue interface{}
-			wantType string
+			gotType   string
+			gotValue  interface{}
+			wantType  string
 			wantValue interface{}
 		}{
-			gotValue: fmt.Sprintf("%v", got),
-			gotType: fmt.Sprintf("%T", got),
+			gotValue:  fmt.Sprintf("%v", got),
+			gotType:   fmt.Sprintf("%T", got),
 			wantValue: fmt.Sprintf("%v", want),
-			wantType: fmt.Sprintf("%T", want),
-
+			wantType:  fmt.Sprintf("%T", want),
 		}
 		t.Errorf("Error: %+v", errorMsg)
 	}
