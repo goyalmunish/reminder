@@ -1,8 +1,8 @@
 module github.com/goyalmunish/reminder
 
-go 1.18
+go 1.19
 
-require github.com/AlecAivazis/survey/v2 v2.3.5
+require github.com/AlecAivazis/survey/v2 v2.3.6
 
 require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
