@@ -22,16 +22,23 @@ type Note struct {
 	// Status can be "pending", "done", or "suspended".
 	// The "pending" status is special, and notes marked with it show up everywhere, whereas
 	// the nodes marked with other status show up only under "Search" or their dedicated menu.
-	// Status:
-	// - "pending":   tasks which are yet to be done
-	// - "suspended": tasks which are yet to be done but for now marked as suspended so as to keep them hidden at most of the places
-	// - "done":      tasks which have been completed (or not to be done)
-	Status     string `json:"status"`
-	TagIds     []int  `json:"tag_ids"`
-	IsMain     bool   `json:"is_main"`
-	CompleteBy int64  `json:"complete_by"`
+	Status     NoteStatus `json:"status"`
+	TagIds     []int      `json:"tag_ids"`
+	IsMain     bool       `json:"is_main"`
+	CompleteBy int64      `json:"complete_by"`
 	BaseStruct
 }
+
+type NoteStatus string
+
+const (
+	// "pending":   tasks which are yet to be done
+	NoteStatus_Pending NoteStatus = "pending"
+	// "suspended": tasks which are yet to be done but for now marked as suspended so as to keep them hidden at most of the places
+	NoteStatus_Suspended NoteStatus = "suspended"
+	// "done":      tasks which have been completed (or not to be done)
+	NoteStatus_Done NoteStatus = "done"
+)
 
 // Type returns type of the note: main or incidental.
 func (note *Note) Type() string {
@@ -124,7 +131,7 @@ func (note *Note) UpdateTags(tagIDs []int) error {
 
 // UpdateStatus updates note's status ("done"/"pending").
 // Status of a note tag with repeat tag cannot be mared as "done".
-func (note *Note) UpdateStatus(status string, repeatTagIDs []int) error {
+func (note *Note) UpdateStatus(status NoteStatus, repeatTagIDs []int) error {
 	noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
 	if len(noteIDsWithRepeat) != 0 {
 		return errors.New("Note is part of a \"repeat\" group")

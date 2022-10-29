@@ -56,17 +56,17 @@ func flow() {
 	case fmt.Sprintf("%s %s", utils.Symbols["clip"], "Register Basic Tags"):
 		err = reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%s %s", utils.Symbols["clock"], "Approaching Due Date"):
-		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", false, "default")
+		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, model.NoteStatus_Pending, false, "default")
 	case fmt.Sprintf("%s %s", utils.Symbols["hat"], "Main Notes"):
-		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", true, "default")
+		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, model.NoteStatus_Pending, true, "default")
 	case fmt.Sprintf("%s %s", utils.Symbols["search"], "Search Notes"):
 		err = reminderData.SearchNotes()
 	case fmt.Sprintf("%s %s", utils.Symbols["backup"], "Create Backup"):
 		_, err = reminderData.CreateBackup()
 	case fmt.Sprintf("%s %s", utils.Symbols["zzz"], "Suspended Notes"):
-		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "suspended", true, "default")
+		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, model.NoteStatus_Suspended, true, "default")
 	case fmt.Sprintf("%s %s", utils.Symbols["telescope"], "Look Ahead"):
-		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, "pending", false, "due-date")
+		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, -1, model.NoteStatus_Pending, false, "due-date")
 	case fmt.Sprintf("%s %s", utils.Symbols["pad"], "Display Data File"):
 		err = reminderData.DisplayDataFile()
 	case fmt.Sprintf("%s %s %s", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):

@@ -35,7 +35,7 @@ func (notes Notes) ExternalTexts(maxStrLen int, repeatAnnuallyTagId int, repeatM
 		}
 		noteText = fmt.Sprintf(
 			"%*v {R: %s, C:%02d, S:%v, D:%v}", -maxStrLen, noteText,
-			note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), len(note.Comments), strings.ToUpper(note.Status[0:1]), utils.UnixTimestampToShortTimeStr(note.CompleteBy))
+			note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), len(note.Comments), strings.ToUpper(string(note.Status)[0:1]), utils.UnixTimestampToShortTimeStr(note.CompleteBy))
 		allTexts = append(allTexts, noteText)
 	}
 	return allTexts
@@ -43,7 +43,7 @@ func (notes Notes) ExternalTexts(maxStrLen int, repeatAnnuallyTagId int, repeatM
 
 // WithStatus filters notes with given status (such as "pending" status).
 // It returns empty Notes if no matching Note is found (even when given status doesn't exist).
-func (notes Notes) WithStatus(status string) Notes {
+func (notes Notes) WithStatus(status NoteStatus) Notes {
 	var result Notes
 	for _, note := range notes {
 		if note.Status == status {
@@ -67,7 +67,7 @@ func (notes Notes) OnlyMain() Notes {
 
 // WithTagIdAndStatus returns all notes with given tagID and given status.
 // It returns empty Notes if no matching Note is found (even when given tagID or status doesn't exist).
-func (notes Notes) WithTagIdAndStatus(tagID int, status string) Notes {
+func (notes Notes) WithTagIdAndStatus(tagID int, status NoteStatus) Notes {
 	notesWithStatus := notes.WithStatus(status)
 	var result Notes
 	for _, note := range notesWithStatus {
