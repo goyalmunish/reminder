@@ -207,16 +207,16 @@ func TestNotesByDueDate(t *testing.T) {
 
 func TestNoteStrings(t *testing.T) {
 	utils.Location = utils.UTCLocation()
-	comments := model.Comments{&model.Comment{Text: "c1:\n- line 1\n\n- line 2\n- line 3"}, &model.Comment{Text: "c2"}, &model.Comment{Text: "c3"}}
-	note := &model.Note{Text: "dummy text", Comments: comments, Status: "pending", Summary: "summary heading:\n- line 1\n- line 2", TagIds: []int{1, 2}, CompleteBy: 1609669235}
-	want := `[  |          Text:  dummy text
+	comments := model.Comments{&model.Comment{Text: "c1:\n- line 1\n\n- line 2\n- line 3 with \" and < characters"}, &model.Comment{Text: "c2"}, &model.Comment{Text: "c3"}}
+	note := &model.Note{Text: "dummy text with \" and < characters", Comments: comments, Status: "pending", Summary: "summary heading:\n- line 1\n- line 2", TagIds: []int{1, 2}, CompleteBy: 1609669235}
+	want := `[  |          Text:  dummy text with " and < characters
    |      Comments:
-  |              :  [nil] c1:
+  |              :  nil | c1:
   |                     - line 1
   |                     - line 2
-  |                     - line 3
-  |              :  [nil] c2
-  |              :  [nil] c3
+  |                     - line 3 with " and < characters
+  |              :  nil | c2
+  |              :  nil | c3
    |       Summary:  summary heading:
   |                     - line 1
   |                     - line 2
@@ -232,19 +232,19 @@ func TestNoteStrings(t *testing.T) {
 
 func TestExternalText(t *testing.T) {
 	utils.Location = utils.UTCLocation()
-	comments := model.Comments{&model.Comment{Text: "c < 1"}, &model.Comment{Text: "c > 2"}, &model.Comment{Text: "c & 3"}}
-	note := &model.Note{Text: "dummy text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
+	comments := model.Comments{&model.Comment{Text: "c < 1"}, &model.Comment{Text: "c > 2"}, &model.Comment{Text: "c & \" 3"}}
+	note := &model.Note{Text: "dummy < > \" text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	var tags model.Tags
 	tags = append(tags, &model.Tag{Id: 0, Slug: "tag_0", Group: "tag_group1"})
 	tags = append(tags, &model.Tag{Id: 1, Slug: "tag_1", Group: "tag_group1"})
 	tags = append(tags, &model.Tag{Id: 2, Slug: "tag_2", Group: "tag_group2"})
 	reminderData := &model.ReminderData{Tags: tags}
 	want := `Note Details: -------------------------------------------------
-  |          Text:  dummy text
+  |          Text:  dummy < > " text
   |      Comments:
-  |              :  [nil] c &lt; 1
-  |              :  [nil] c &gt; 2
-  |              :  [nil] c &amp; 3
+  |              :  nil | c < 1
+  |              :  nil | c > 2
+  |              :  nil | c & " 3
   |       Summary:  
   |        Status:  pending
   |          Tags:
