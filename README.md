@@ -33,7 +33,7 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 - Each task can be associated with **multiple tags**, and so show up under all of its tags.
 - A given task:
     - can be **updated** (📝) with its text, and also can be enhanced with time-stamped **comments** (💬); so that you can track how and when the progress happened
-    - can be marked **done** (✅) or **pending** (⏰); marking it as "done" makes it disappear (soft-delete)
+    - can be marked **done** (✅), **suspended** (💤), or **pending** (⏰); marking it as "done" makes it disappear (soft-delete), and marking it as "suspended" suspendes it for now
     - can be associated with **due-date** (📅); tasks with upcoming deadlines automatically show up under the **"Approaching Due Date"** option under **Main Menu**
     - can be set as "main" or non-main (incidental); tasks marked as "main", show up under dedicated view **Main Notes**
 - **Full-text search** (🔎) among all tasks.
@@ -153,7 +153,7 @@ _Then, run the tool using `reminder` command._
 On Mac, you can just install it with `brew` as:
 
 ```sh
-brew install go@1.18
+brew install go@1.19
 ```
 
 For other platforms, check [official `go` download and install guide](https://golang.org/dl/).
