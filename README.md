@@ -18,6 +18,10 @@
 
 # Reminder
 
+![release](https://img.shields.io/github/v/release/goyalmunish/reminder)
+![go_version](https://img.shields.io/github/go-mod/go-version/goyalmunish/reminder)
+![license](https://img.shields.io/github/license/goyalmunish/reminder)
+
 ## Yet Another Reminder Tool/App. Why?
 
 _This is a simple **terminal-based fully-interactive reminder tool**. It is not for everybody, but for the folks with a software engineering background who need the **speed** of the command-line and have to manage many day-to-day to-do items (like meeting minutes, reminders about ad-hoc tasks, etc.) in an organized way._
