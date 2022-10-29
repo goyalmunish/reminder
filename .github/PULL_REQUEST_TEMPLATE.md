@@ -4,7 +4,7 @@ Put text/description explaining "Why?" of this PR and any additional info you wo
 
 ### Tasks
 
- - [ ] TODO items before it can be reviewed or merged
+ - [ ] TODO items before they can be reviewed or merged
  - [ ] Another TODO item.
 
 ### Risks

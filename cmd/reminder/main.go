@@ -17,7 +17,7 @@ func flow() {
 	var err error
 	// make sure DataFile exists
 	defaultDataFilePath := model.DefaultDataFile()
-	err = model.MakeSureFileExists(defaultDataFilePath)
+	err = model.MakeSureFileExists(defaultDataFilePath, true)
 	utils.PrintError(err)
 	// read and parse the existing data
 	reminderData := *model.ReadDataFile(defaultDataFilePath)
