@@ -175,22 +175,6 @@ func TestBasicTags(t *testing.T) {
 	utils.AssertEqual(t, slugs, want)
 }
 
-// TODO: fix me
-func TestNotes(t *testing.T) {
-	var notes []*model.Note
-	notes = append(notes, &model.Note{Text: "1", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}})
-	notes = append(notes, &model.Note{Text: "2", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}})
-	notes = append(notes, &model.Note{Text: "3", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}})
-	notes = append(notes, &model.Note{Text: "4", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}})
-	sort.Sort(model.Notes(notes))
-	var gotTexts []string
-	for _, value := range notes {
-		gotTexts = append(gotTexts, value.Text)
-	}
-	wantTexts := []string{"2", "3", "4", "1"}
-	utils.AssertEqual(t, gotTexts, wantTexts)
-}
-
 func TestNotesByDueDate(t *testing.T) {
 	var notes []*model.Note
 	notes = append(notes, &model.Note{Text: "1", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: 1800000003})
@@ -509,65 +493,6 @@ func TestToggleMainFlag(t *testing.T) {
 	utils.AssertEqual(t, originalPriority != note1.IsMain, true)
 }
 
-// TODO: fix me
-func TestMakeSureFileExists(t *testing.T) {
-	var dataFilePath = "temp_test_dir/mydata.json"
-	// make sure temporary files and dirs are removed at the end of the test
-	defer os.RemoveAll(path.Dir(dataFilePath))
-
-	// make sure file doesn't exists already
-	_, err := os.Stat(dataFilePath)
-	utils.AssertEqual(t, err != nil, true)
-	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), true)
-	// attempt to create the file and required dirs, when the file doesn't exist already
-	_ = model.MakeSureFileExists(dataFilePath)
-	// prove that the file was created
-	stats, err := os.Stat(dataFilePath)
-	utils.AssertEqual(t, err != nil, false)
-	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), false)
-
-	// make sure that the existing file is not replaced
-	modificationTime := stats.ModTime()
-	// attempt to create the file and required dirs, when the file does exist already
-	time.Sleep(10 * time.Millisecond)
-	_ = model.MakeSureFileExists(dataFilePath)
-	utils.AssertEqual(t, err != nil, false)
-	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), false)
-	stats, _ = os.Stat(dataFilePath)
-	newModificationTime := stats.ModTime()
-	utils.AssertEqual(t, newModificationTime == modificationTime, true)
-
-}
-
-// TODO: fix me
-func TestReadDataFile(t *testing.T) {
-	var dataFilePath = "temp_test_dir/mydata.json"
-	// make sure temporary files and dirs are removed at the end of the test
-	defer os.RemoveAll(path.Dir(dataFilePath))
-	// create the file and required dirs
-	_ = model.MakeSureFileExists(dataFilePath)
-	// attempt to read file and parse it
-	reminderData := model.ReadDataFile(dataFilePath)
-	utils.AssertEqual(t, reminderData.UpdatedAt > 0, true)
-}
-
-// TODO: fix me
-func TestUpdateDataFile(t *testing.T) {
-	var dataFilePath = "temp_test_dir/mydata.json"
-	// make sure temporary files and dirs are removed at the end of the test
-	defer os.RemoveAll(path.Dir(dataFilePath))
-	// create the file and required dirs
-	_ = model.MakeSureFileExists(dataFilePath)
-	reminderData := model.ReadDataFile(dataFilePath)
-	// old_updated_at := reminderData.UpdatedAt
-	testUser := model.User{Name: "Test User", EmailId: "user@test.com"}
-	reminderData.User = &testUser
-	_ = reminderData.UpdateDataFile("")
-	remiderDataRe := model.ReadDataFile(dataFilePath)
-	// utils.AssertEqual(t, remiderDataRe.UpdatedAt > old_updated_at, true)
-	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)
-}
-
 func TestSortedTagsSlug(t *testing.T) {
 	reminderData := model.ReminderData{
 		User:  &model.User{Name: "Test User", EmailId: "user@test.com"},
@@ -777,6 +702,111 @@ func TestFindNotesByTagSlug(t *testing.T) {
 	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("a", "done"), []*model.Note{})
 }
 
+func TestNewTagRegistration(t *testing.T) {
+	dataFilePath := path.Join("..", "..", "test", "test_data_file.json")
+	reminderData := model.ReadDataFile(dataFilePath)
+	utils.AssertEqual(t, len(reminderData.Tags), 5)
+}
+
+func TestNewTag(t *testing.T) {
+	dummySlug := "test_tag_slug"
+	dummyGroup := "test_tag_group"
+	tag, _ := model.NewTag(10, dummySlug, dummyGroup)
+	want := &model.Tag{
+		Id:    10,
+		Slug:  dummySlug,
+		Group: dummyGroup,
+	}
+	utils.AssertEqual(t, tag, want)
+}
+func TestNewNote(t *testing.T) {
+	tagIDs := []int{1, 3, 5}
+	dummyText := "a random note text"
+	note, _ := model.NewNote(tagIDs, dummyText)
+	want := &model.Note{
+		Text:       dummyText,
+		TagIds:     tagIDs,
+		Status:     note.Status,
+		BaseStruct: model.BaseStruct{UpdatedAt: note.UpdatedAt, CreatedAt: note.CreatedAt},
+	}
+	utils.AssertEqual(t, note, want)
+}
+
+// TODO: fix me
+func TestNotes(t *testing.T) {
+	var notes []*model.Note
+	notes = append(notes, &model.Note{Text: "1", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}})
+	notes = append(notes, &model.Note{Text: "2", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}})
+	notes = append(notes, &model.Note{Text: "3", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}})
+	notes = append(notes, &model.Note{Text: "4", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}})
+	sort.Sort(model.Notes(notes))
+	var gotTexts []string
+	for _, value := range notes {
+		gotTexts = append(gotTexts, value.Text)
+	}
+	wantTexts := []string{"2", "3", "4", "1"}
+	utils.AssertEqual(t, gotTexts, wantTexts)
+}
+
+// TODO: fix me
+func TestMakeSureFileExists(t *testing.T) {
+	var dataFilePath = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(dataFilePath))
+
+	// make sure file doesn't exists already
+	_, err := os.Stat(dataFilePath)
+	utils.AssertEqual(t, err != nil, true)
+	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), true)
+	// attempt to create the file and required dirs, when the file doesn't exist already
+	_ = model.MakeSureFileExists(dataFilePath)
+	// prove that the file was created
+	stats, err := os.Stat(dataFilePath)
+	utils.AssertEqual(t, err != nil, false)
+	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), false)
+
+	// make sure that the existing file is not replaced
+	modificationTime := stats.ModTime()
+	// attempt to create the file and required dirs, when the file does exist already
+	time.Sleep(10 * time.Millisecond)
+	_ = model.MakeSureFileExists(dataFilePath)
+	utils.AssertEqual(t, err != nil, false)
+	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), false)
+	stats, _ = os.Stat(dataFilePath)
+	newModificationTime := stats.ModTime()
+	utils.AssertEqual(t, newModificationTime == modificationTime, true)
+
+}
+
+// TODO: fix me
+func TestReadDataFile(t *testing.T) {
+	var dataFilePath = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(dataFilePath))
+	// create the file and required dirs
+	_ = model.MakeSureFileExists(dataFilePath)
+	// attempt to read file and parse it
+	reminderData := model.ReadDataFile(dataFilePath)
+	utils.AssertEqual(t, reminderData.UpdatedAt > 0, true)
+}
+
+// TODO: fix me
+func TestUpdateDataFile(t *testing.T) {
+	var dataFilePath = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(dataFilePath))
+	// create the file and required dirs
+	_ = model.MakeSureFileExists(dataFilePath)
+	reminderData := model.ReadDataFile(dataFilePath)
+	// old_updated_at := reminderData.UpdatedAt
+	testUser := model.User{Name: "Test User", EmailId: "user@test.com"}
+	reminderData.User = &testUser
+	_ = reminderData.UpdateDataFile("")
+	remiderDataRe := model.ReadDataFile(dataFilePath)
+	// utils.AssertEqual(t, remiderDataRe.UpdatedAt > old_updated_at, true)
+	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)
+}
+
 // TODO: fix me
 func TestRegisterBasicTags(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
@@ -899,34 +929,4 @@ Stats of "temp_test_dir/mydata.json"
   - Done Notes:      0
 `
 	utils.AssertEqual(t, got, want)
-}
-
-func TestNewTagRegistration(t *testing.T) {
-	dataFilePath := path.Join("..", "..", "test", "test_data_file.json")
-	reminderData := model.ReadDataFile(dataFilePath)
-	utils.AssertEqual(t, len(reminderData.Tags), 5)
-}
-
-func TestNewTag(t *testing.T) {
-	dummySlug := "test_tag_slug"
-	dummyGroup := "test_tag_group"
-	tag, _ := model.NewTag(10, dummySlug, dummyGroup)
-	want := &model.Tag{
-		Id:    10,
-		Slug:  dummySlug,
-		Group: dummyGroup,
-	}
-	utils.AssertEqual(t, tag, want)
-}
-func TestNewNote(t *testing.T) {
-	tagIDs := []int{1, 3, 5}
-	dummyText := "a random note text"
-	note, _ := model.NewNote(tagIDs, dummyText)
-	want := &model.Note{
-		Text:       dummyText,
-		TagIds:     tagIDs,
-		Status:     note.Status,
-		BaseStruct: model.BaseStruct{UpdatedAt: note.UpdatedAt, CreatedAt: note.CreatedAt},
-	}
-	utils.AssertEqual(t, note, want)
 }
