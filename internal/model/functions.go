@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
+	"net/mail"
 	"os"
 	"path"
 	"strings"
+	"unicode"
 
 	"github.com/goyalmunish/reminder/pkg/utils"
+	"github.com/rivo/tview"
 )
 
 // appendMultiLineField prints a multi-line string with first line as its heading
@@ -199,11 +202,50 @@ func MakeSureFileExists(dataFilePath string) error {
 
 // BlankReminder function creates blank ReminderData object.
 func BlankReminder() *ReminderData {
+	var name string
+	var emailID string
 	fmt.Println("Initializing the data file. Please provide following data.")
-	name, err := utils.GeneratePrompt("user_name", "")
-	utils.PrintError(err)
-	emailID, err := utils.GeneratePrompt("user_email", "")
-	utils.PrintError(err)
+	app := tview.NewApplication()
+	form := tview.NewForm().
+		AddDropDown("Title", []string{"Mr.", "Ms.", "Mrs.", "Dr.", "Prof."}, 0, nil).
+		AddInputField("Name", "", 20, func(textToCheck string, lastChar rune) bool {
+			if unicode.IsLetter(lastChar) {
+				return true
+			}
+			return false
+		}, func(text string) {
+			name = text
+		}).
+		AddInputField("Email", "", 20, func(textToCheck string, lastChar rune) bool {
+			// validation that needs to run on acceptance function
+			var symbol_at rune = '\u0040'
+			var symbol_dot rune = '\u002E'
+			if unicode.IsLetter(lastChar) || unicode.IsDigit(lastChar) || lastChar == symbol_at || lastChar == symbol_dot {
+				return true
+			}
+			return false
+		}, func(text string) {
+			emailID = text
+		})
+	form = form.
+		AddButton("Confirm", func() {
+			// run validations that can be done only on completed fields
+			// if inputs are fine, close the form
+
+			// validate emailID
+			emailField := form.GetFormItemByLabel("Email")
+			app.SetFocus(emailField)
+			_, err := mail.ParseAddress(emailID)
+			if err != nil {
+				// don't stop
+				return
+			}
+			app.Stop()
+		})
+	form.SetBorder(true).SetTitle("Enter details: ").SetTitleAlign(tview.AlignLeft)
+	if err := app.SetRoot(form, true).SetFocus(form).Run(); err != nil {
+		panic(err)
+	}
 	return &ReminderData{
 		User:     &User{Name: name, EmailId: emailID},
 		Notes:    Notes{},
