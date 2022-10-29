@@ -41,6 +41,9 @@ func (reminderData *ReminderData) UpdateDataFile(msg string) error {
 	// UTF-8, replacing invalid bytes with Unicode replacement rune. So
 	// that the JSON will be safe to embed inside HTML <script> tags, the
 	// string is encoded using HTMLEscape.
+	// For example, a text such as `comment with < and "` will be written
+	// as `"comment with \u003c and \"` but it will read back same as the
+	// original string
 	byteValue, err := json.MarshalIndent(&reminderData, "", "    ")
 	if err != nil {
 		utils.PrintError(err)

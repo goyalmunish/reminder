@@ -2,6 +2,7 @@ package model
 
 import (
 	"html/template"
+	"strings"
 
 	"github.com/goyalmunish/reminder/pkg/utils"
 )
@@ -21,9 +22,19 @@ type Comment struct {
 
 // String provides basic string representation of a commment.
 func (comment *Comment) String() string {
-	reportTemplate := `[{{.CreatedAt | mediumTimeStr}}] {{.Text}}`
-	funcMap := template.FuncMap{
-		"mediumTimeStr": utils.UnixTimestampToMediumTimeStr,
+	var escapeString bool
+	escapeString = false
+
+	// way 1
+	if escapeString {
+		reportTemplate := `[{{.CreatedAt | mediumTimeStr}}] {{.Text}}`
+		funcMap := template.FuncMap{
+			"mediumTimeStr": utils.UnixTimestampToMediumTimeStr,
+		}
+		return utils.TemplateResult(reportTemplate, funcMap, comment)
 	}
-	return utils.TemplateResult(reportTemplate, funcMap, comment)
+
+	// way 2
+	parts := []string{utils.UnixTimestampToMediumTimeStr(comment.CreatedAt), comment.Text}
+	return strings.Join(parts, " | ")
 }
