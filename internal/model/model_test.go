@@ -175,6 +175,7 @@ func TestBasicTags(t *testing.T) {
 	utils.AssertEqual(t, slugs, want)
 }
 
+// TODO: fix me
 func TestNotes(t *testing.T) {
 	var notes []*model.Note
 	notes = append(notes, &model.Note{Text: "1", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}})
@@ -263,22 +264,27 @@ func TestSearchableText(t *testing.T) {
 	comments := model.Comments{&model.Comment{Text: "c1"}}
 	note := model.Note{Text: "a beautiful cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	got := note.SearchableText()
-	utils.AssertEqual(t, got, "| incidental | pending | ├ a beautiful cat ┤  [[nil] c1]")
+	utils.AssertEqual(t, got, "| incidental | pending   | ├ a beautiful cat ┤  [nil | c1]")
 	// case 2
 	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}}
 	note = model.Note{Text: "a cute dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "| incidental | done    | ├ a cute dog ┤  [[nil] c1, [nil] foo bar, [nil] c3]")
+	utils.AssertEqual(t, got, "| incidental | done      | ├ a cute dog ┤  [nil | c1, nil | foo bar, nil | c3]")
 	// case 3
 	comments = model.Comments{}
 	note = model.Note{Text: "a cute dog", Comments: comments}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "| incidental |         | ├ a cute dog ┤  [no-comments]")
+	utils.AssertEqual(t, got, "| incidental |           | ├ a cute dog ┤  [no-comments]")
 	// case 4
 	comments = model.Comments{}
 	note = model.Note{Text: "first line\nsecondline\nthird line", Comments: comments}
 	got = note.SearchableText()
-	utils.AssertEqual(t, got, "| incidental |         | ├ first line NWL secondline NWL third line ┤  [no-comments]")
+	utils.AssertEqual(t, got, "| incidental |           | ├ first line NWL secondline NWL third line ┤  [no-comments]")
+	// case 5
+	comments = model.Comments{&model.Comment{Text: "c1"}}
+	note = model.Note{Text: "a beautiful cat", Comments: comments, Status: "suspended", TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	got = note.SearchableText()
+	utils.AssertEqual(t, got, "| incidental | suspended | ├ a beautiful cat ┤  [nil | c1]")
 }
 
 func TestExternalTexts(t *testing.T) {
@@ -290,21 +296,23 @@ func TestExternalTexts(t *testing.T) {
 	notes = append(notes, &model.Note{Text: "beautiful little cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231})
 	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}, &model.Comment{Text: "baz"}}
 	notes = append(notes, &model.Note{Text: "cute brown dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
+	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "f b"}, &model.Comment{Text: "c4"}, &model.Comment{Text: "b"}}
+	notes = append(notes, &model.Note{Text: "cbd", Comments: comments, Status: "suspended", TagIds: []int{1}, CompleteBy: 1609669235})
 	// case 2
 	got := notes.ExternalTexts(0, 0, 0)
-	want := "[beautiful little cat {R: -, C:01, S:P, D:03-Jan-21} cute brown dog {R: -, C:04, S:D, D:03-Jan-21}]"
+	want := "[beautiful little cat {R: -, C:01, S:P, D:03-Jan-21} cute brown dog {R: -, C:04, S:D, D:03-Jan-21} cbd {R: -, C:04, S:S, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 3
 	got = notes.ExternalTexts(5, 0, 0)
-	want = "[be... {R: -, C:01, S:P, D:03-Jan-21} cu... {R: -, C:04, S:D, D:03-Jan-21}]"
+	want = "[be... {R: -, C:01, S:P, D:03-Jan-21} cu... {R: -, C:04, S:D, D:03-Jan-21} cbd   {R: -, C:04, S:S, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 4
 	got = notes.ExternalTexts(15, 0, 0)
-	want = "[beautiful li... {R: -, C:01, S:P, D:03-Jan-21} cute brown dog  {R: -, C:04, S:D, D:03-Jan-21}]"
+	want = "[beautiful li... {R: -, C:01, S:P, D:03-Jan-21} cute brown dog  {R: -, C:04, S:D, D:03-Jan-21} cbd             {R: -, C:04, S:S, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 	// case 5
 	got = notes.ExternalTexts(25, 0, 0)
-	want = "[beautiful little cat      {R: -, C:01, S:P, D:03-Jan-21} cute brown dog            {R: -, C:04, S:D, D:03-Jan-21}]"
+	want = "[beautiful little cat      {R: -, C:01, S:P, D:03-Jan-21} cute brown dog            {R: -, C:04, S:D, D:03-Jan-21} cbd                       {R: -, C:04, S:S, D:03-Jan-21}]"
 	utils.AssertEqual(t, got, want)
 }
 
@@ -359,6 +367,8 @@ func TestWithTagIdAndStatus(t *testing.T) {
 	notes = append(notes, &note4)
 	note5 := model.Note{Text: "5", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000005}}
 	notes = append(notes, &note5)
+	note6 := model.Note{Text: "6", Status: "suspended", TagIds: []int{1}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000006}}
+	notes = append(notes, &note6)
 	// case 2
 	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "pending"), []*model.Note{&note2})
 	// case 3
@@ -367,6 +377,8 @@ func TestWithTagIdAndStatus(t *testing.T) {
 	utils.AssertEqual(t, notes.WithTagIdAndStatus(4, "pending"), []*model.Note{&note1, &note2})
 	// case 5
 	utils.AssertEqual(t, notes.WithTagIdAndStatus(1, "done"), []*model.Note{})
+	// case 6
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(1, "suspended"), []*model.Note{&note6})
 }
 
 func TestAddComment(t *testing.T) {
@@ -497,6 +509,7 @@ func TestToggleMainFlag(t *testing.T) {
 	utils.AssertEqual(t, originalPriority != note1.IsMain, true)
 }
 
+// TODO: fix me
 func TestMakeSureFileExists(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
@@ -526,6 +539,7 @@ func TestMakeSureFileExists(t *testing.T) {
 
 }
 
+// TODO: fix me
 func TestReadDataFile(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
@@ -537,6 +551,7 @@ func TestReadDataFile(t *testing.T) {
 	utils.AssertEqual(t, reminderData.UpdatedAt > 0, true)
 }
 
+// TODO: fix me
 func TestUpdateDataFile(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
@@ -762,6 +777,7 @@ func TestFindNotesByTagSlug(t *testing.T) {
 	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("a", "done"), []*model.Note{})
 }
 
+// TODO: fix me
 func TestRegisterBasicTags(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
@@ -774,7 +790,8 @@ func TestRegisterBasicTags(t *testing.T) {
 	utils.AssertEqual(t, len(reminderData.Tags), 7)
 }
 
-func TestNotesApprachingDueDate(t *testing.T) {
+// TODO: fix me
+func TestNotesApproachingDueDate(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
@@ -863,6 +880,7 @@ func TestNotesApprachingDueDate(t *testing.T) {
 	})
 }
 
+// TODO: fix me
 func TestPrintStats(t *testing.T) {
 	var dataFilePath = "temp_test_dir/mydata.json"
 	// make sure temporary files and dirs are removed at the end of the test
@@ -875,8 +893,10 @@ func TestPrintStats(t *testing.T) {
 	got := reminderData.Stats()
 	want := `
 Stats of "temp_test_dir/mydata.json"
-  - Number of Tags: 7
-  - Pending Notes: 0/0
+  - Number of Tags:  7
+  - Pending Notes:   0/0
+  - Suspended Notes: 0
+  - Done Notes:      0
 `
 	utils.AssertEqual(t, got, want)
 }

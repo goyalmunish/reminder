@@ -16,13 +16,20 @@ A note can be main or incidental.
 A note can be multiple tags, and a tag can be assocaited with mutiple notes.
 */
 type Note struct {
-	Text       string   `json:"text"`
-	Comments   Comments `json:"comments"`
-	Summary    string   `json:"summary"`
-	Status     string   `json:"status"`
-	TagIds     []int    `json:"tag_ids"`
-	IsMain     bool     `json:"is_main"`
-	CompleteBy int64    `json:"complete_by"`
+	Text     string   `json:"text"`
+	Comments Comments `json:"comments"`
+	Summary  string   `json:"summary"`
+	// Status can be "pending", "done", or "suspended".
+	// The "pending" status is special, and notes marked with it show up everywhere, whereas
+	// the nodes marked with other status show up only under "Search" or their dedicated menu.
+	// Status:
+	// - "pending":   tasks which are yet to be done
+	// - "suspended": tasks which are yet to be done but for now marked as suspended so as to keep them hidden at most of the places
+	// - "done":      tasks which have been completed (or not to be done)
+	Status     string `json:"status"`
+	TagIds     []int  `json:"tag_ids"`
+	IsMain     bool   `json:"is_main"`
+	CompleteBy int64  `json:"complete_by"`
 	BaseStruct
 }
 
@@ -78,7 +85,7 @@ func (note *Note) SearchableText() string {
 	}
 	commentsText = append(commentsText, "]")
 	// get filters
-	filters := fmt.Sprintf("| %-10s | %-7s |", note.Type(), note.Status)
+	filters := fmt.Sprintf("| %-10s | %-9s |", note.Type(), note.Status)
 	// get a complete searchable text array for note
 	var searchableText []string
 	searchableText = append(searchableText, filters)

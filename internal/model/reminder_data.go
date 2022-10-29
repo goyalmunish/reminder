@@ -409,12 +409,16 @@ func (reminderData *ReminderData) newNoteAppend(note *Note) error {
 func (reminderData *ReminderData) Stats() string {
 	reportTemplate := `
 Stats of "{{.DataFile}}"
-  - Number of Tags: {{.Tags | len}}
-  - Pending Notes: {{.Notes | numPending}}/{{.Notes | numAll}}
+  - Number of Tags:  {{.Tags | len}}
+  - Pending Notes:   {{.Notes | numPending}}/{{.Notes | numAll}}
+  - Suspended Notes: {{.Notes | numSuspended}}
+  - Done Notes:      {{.Notes | numDone}}
 `
 	funcMap := template.FuncMap{
-		"numPending": func(notes Notes) int { return len(notes.WithStatus("pending")) },
-		"numAll":     func(notes Notes) int { return len(notes) },
+		"numPending":   func(notes Notes) int { return len(notes.WithStatus("pending")) },
+		"numSuspended": func(notes Notes) int { return len(notes.WithStatus("suspended")) },
+		"numDone":      func(notes Notes) int { return len(notes.WithStatus("done")) },
+		"numAll":       func(notes Notes) int { return len(notes) },
 	}
 	return utils.TemplateResult(reportTemplate, funcMap, *reminderData)
 }
@@ -540,6 +544,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
 		fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
 		fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"),
+		fmt.Sprintf("%v %v", utils.Symbols["zzz"], "Mark as suspended"),
 		fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"),
 		fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"),
 		fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"),
@@ -561,6 +566,10 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
 		err := reminderData.UpdateNoteStatus(note, "done")
+		utils.PrintError(err)
+		fmt.Print(note.ExternalText(reminderData))
+	case fmt.Sprintf("%v %v", utils.Symbols["zzz"], "Mark as suspended"):
+		err := reminderData.UpdateNoteStatus(note, "suspended")
 		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"):
@@ -614,6 +623,11 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		// fetch all the done notes
 		notes = reminderData.Notes.WithStatus("done")
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(notes))
+	} else if status == "suspended" {
+		// ignore the passed notes
+		// fetch all the done notes
+		notes = reminderData.Notes.WithStatus("suspended")
+		fmt.Printf("A total of %v notes marked as 'suspended':\n", len(notes))
 	} else if status == "pending" {
 		// ignore the passed notes
 		if tagID >= 0 {
@@ -633,10 +647,12 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		} else {
 			// this is for listing all notes approaching due date
 			// fetch notes approaching due date
+			fmt.Println("Note: A note can be in 'pending', 'suspended' or 'done' status.")
+			fmt.Println("Note: Notes marked as 'pending' as special and they show up everywhere, whereas notes with other status only show up in 'Search' or under their dedicated menu.")
 			fmt.Println("Note: Following are the pending notes with due date:")
-			fmt.Println("  - within a week or already crossed (for non repeat-annually or repeat-monthly)")
-			fmt.Println("  - within 3 days for repeat-annually and a week post due date (ignoring its year)")
-			fmt.Println("  - within 1 day for repeat-monthly and 3 days post due date (ignoring its year and month)")
+			fmt.Println("      - within a week or already crossed (for non repeat-annually or repeat-monthly)")
+			fmt.Println("      - within 3 days for repeat-annually and a week post due date (ignoring its year)")
+			fmt.Println("      - within 1 day for repeat-monthly and 3 days post due date (ignoring its year and month)")
 			notes = reminderData.NotesApprachingDueDate("default")
 		}
 	} else {
