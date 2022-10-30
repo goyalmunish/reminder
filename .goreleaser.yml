@@ -38,11 +38,10 @@ brews:
       name: homebrew-reminder
       branch: main
     url_template: >-
-      https://github.com/goyalmunish/munish/releases/download/{{ .Tag }}/{{
-      .ArtifactName }}
+      https://github.com/goyalmunish/reminder/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     commit_author:
-      name: goyalmunish
-      email: munishapc@gmail.com
+      name: goreleaserbot
+      email: bot@goreleaser.com
     commit_msg_template: 'Brew formula update for {{ .ProjectName }} version {{ .Tag }}'
     folder: Formula
     caveats: How to use this binary
