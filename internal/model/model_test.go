@@ -177,10 +177,10 @@ func TestBasicTags(t *testing.T) {
 
 func TestNotesByDueDate(t *testing.T) {
 	var notes []*model.Note
-	notes = append(notes, &model.Note{Text: "1", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: 1800000003})
-	notes = append(notes, &model.Note{Text: "2", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}, CompleteBy: 1800000004})
-	notes = append(notes, &model.Note{Text: "3", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}, CompleteBy: 1800000002})
-	notes = append(notes, &model.Note{Text: "4", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}, CompleteBy: 1800000001})
+	notes = append(notes, &model.Note{Text: "1", Status: model.NoteStatus_Pending, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: 1800000003})
+	notes = append(notes, &model.Note{Text: "2", Status: model.NoteStatus_Pending, BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}, CompleteBy: 1800000004})
+	notes = append(notes, &model.Note{Text: "3", Status: model.NoteStatus_Done, BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}, CompleteBy: 1800000002})
+	notes = append(notes, &model.Note{Text: "4", Status: model.NoteStatus_Done, BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}, CompleteBy: 1800000001})
 	sort.Sort(model.NotesByDueDate(notes))
 	var gotTexts []string
 	for _, value := range notes {
@@ -193,7 +193,7 @@ func TestNotesByDueDate(t *testing.T) {
 func TestNoteStrings(t *testing.T) {
 	utils.Location = utils.UTCLocation()
 	comments := model.Comments{&model.Comment{Text: "c1:\n- line 1\n\n- line 2\n- line 3 with \" and < characters"}, &model.Comment{Text: "c2"}, &model.Comment{Text: "c3"}}
-	note := &model.Note{Text: "dummy text with \" and < characters", Comments: comments, Status: "pending", Summary: "summary heading:\n- line 1\n- line 2", TagIds: []int{1, 2}, CompleteBy: 1609669235}
+	note := &model.Note{Text: "dummy text with \" and < characters", Comments: comments, Status: model.NoteStatus_Pending, Summary: "summary heading:\n- line 1\n- line 2", TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	want := `[  |          Text:  dummy text with " and < characters
    |      Comments:
   |              :  nil | c1:
@@ -218,7 +218,7 @@ func TestNoteStrings(t *testing.T) {
 func TestExternalText(t *testing.T) {
 	utils.Location = utils.UTCLocation()
 	comments := model.Comments{&model.Comment{Text: "c < 1"}, &model.Comment{Text: "c > 2"}, &model.Comment{Text: "c & \" 3"}}
-	note := &model.Note{Text: "dummy < > \" text", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669235}
+	note := &model.Note{Text: "dummy < > \" text", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1, 2}, CompleteBy: 1609669235}
 	var tags model.Tags
 	tags = append(tags, &model.Tag{Id: 0, Slug: "tag_0", Group: "tag_group1"})
 	tags = append(tags, &model.Tag{Id: 1, Slug: "tag_1", Group: "tag_group1"})
@@ -246,12 +246,12 @@ func TestExternalText(t *testing.T) {
 func TestSearchableText(t *testing.T) {
 	// case 1
 	comments := model.Comments{&model.Comment{Text: "c1"}}
-	note := model.Note{Text: "a beautiful cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	note := model.Note{Text: "a beautiful cat", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	got := note.SearchableText()
 	utils.AssertEqual(t, got, "| incidental | pending   | ├ a beautiful cat ┤  [nil | c1]")
 	// case 2
 	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}}
-	note = model.Note{Text: "a cute dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232}
+	note = model.Note{Text: "a cute dog", Comments: comments, Status: model.NoteStatus_Done, TagIds: []int{1, 2}, CompleteBy: 1609669232}
 	got = note.SearchableText()
 	utils.AssertEqual(t, got, "| incidental | done      | ├ a cute dog ┤  [nil | c1, nil | foo bar, nil | c3]")
 	// case 3
@@ -266,7 +266,7 @@ func TestSearchableText(t *testing.T) {
 	utils.AssertEqual(t, got, "| incidental |           | ├ first line NWL secondline NWL third line ┤  [no-comments]")
 	// case 5
 	comments = model.Comments{&model.Comment{Text: "c1"}}
-	note = model.Note{Text: "a beautiful cat", Comments: comments, Status: "suspended", TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	note = model.Note{Text: "a beautiful cat", Comments: comments, Status: model.NoteStatus_Suspended, TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	got = note.SearchableText()
 	utils.AssertEqual(t, got, "| incidental | suspended | ├ a beautiful cat ┤  [nil | c1]")
 }
@@ -277,11 +277,11 @@ func TestExternalTexts(t *testing.T) {
 	utils.AssertEqual(t, "[]", "[]")
 	// add notes
 	comments := model.Comments{&model.Comment{Text: "c1"}}
-	notes = append(notes, &model.Note{Text: "beautiful little cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231})
+	notes = append(notes, &model.Note{Text: "beautiful little cat", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1, 2}, CompleteBy: 1609669231})
 	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}, &model.Comment{Text: "baz"}}
-	notes = append(notes, &model.Note{Text: "cute brown dog", Comments: comments, Status: "done", TagIds: []int{1, 2}, CompleteBy: 1609669232})
+	notes = append(notes, &model.Note{Text: "cute brown dog", Comments: comments, Status: model.NoteStatus_Done, TagIds: []int{1, 2}, CompleteBy: 1609669232})
 	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "f b"}, &model.Comment{Text: "c4"}, &model.Comment{Text: "b"}}
-	notes = append(notes, &model.Note{Text: "cbd", Comments: comments, Status: "suspended", TagIds: []int{1}, CompleteBy: 1609669235})
+	notes = append(notes, &model.Note{Text: "cbd", Comments: comments, Status: model.NoteStatus_Suspended, TagIds: []int{1}, CompleteBy: 1609669235})
 	// case 2
 	got := notes.ExternalTexts(0, 0, 0)
 	want := "[beautiful little cat {R: -, C:01, S:P, D:03-Jan-21} cute brown dog {R: -, C:04, S:D, D:03-Jan-21} cbd {R: -, C:04, S:S, D:03-Jan-21}]"
@@ -303,25 +303,25 @@ func TestExternalTexts(t *testing.T) {
 func TestWithStatus(t *testing.T) {
 	var notes model.Notes
 	// case 1 (no notes)
-	utils.AssertEqual(t, notes.WithStatus("pending"), model.Notes{})
+	utils.AssertEqual(t, notes.WithStatus(model.NoteStatus_Pending), model.Notes{})
 	// add some notes
 	comments := model.Comments{&model.Comment{Text: "c1"}}
-	note1 := model.Note{Text: "big fat cat", Comments: comments, Status: "pending", TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	note1 := model.Note{Text: "big fat cat", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1, 2}, CompleteBy: 1609669231}
 	notes = append(notes, &note1)
 	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}}
-	note2 := model.Note{Text: "cute brown dog", Comments: comments, Status: "done", TagIds: []int{1, 3}, CompleteBy: 1609669232}
+	note2 := model.Note{Text: "cute brown dog", Comments: comments, Status: model.NoteStatus_Done, TagIds: []int{1, 3}, CompleteBy: 1609669232}
 	notes = append(notes, &note2)
 	comments = model.Comments{&model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}}
-	note3 := model.Note{Text: "little hamster", Comments: comments, Status: "pending", TagIds: []int{1}, CompleteBy: 1609669233}
+	note3 := model.Note{Text: "little hamster", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1}, CompleteBy: 1609669233}
 	notes = append(notes, &note3)
 	// case 2 (with an invalid status)
 	utils.AssertEqual(t, notes.WithStatus("no-such-status"), model.Notes{})
 	// case 3 (with valid status "pending")
-	got := notes.WithStatus("pending")
+	got := notes.WithStatus(model.NoteStatus_Pending)
 	want := model.Notes{&note1, &note3}
 	utils.AssertEqual(t, got, want)
 	// case 4 (with valid status "done")
-	got = notes.WithStatus("done")
+	got = notes.WithStatus(model.NoteStatus_Done)
 	want = model.Notes{&note2}
 	utils.AssertEqual(t, got, want)
 }
@@ -330,7 +330,7 @@ func TestWithTagIdAndStatus(t *testing.T) {
 	// var tags model.Tags
 	var notes model.Notes
 	// case 1 (no notes)
-	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "pending"), model.Notes{})
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, model.NoteStatus_Pending), model.Notes{})
 	// creating tags
 	// tag1 := model.Tag{Id: 1, Slug: "a", Group: "tag_group1"}
 	// tags = append(tags, &tag1)
@@ -341,33 +341,33 @@ func TestWithTagIdAndStatus(t *testing.T) {
 	// tag4 := model.Tag{Id: 4, Slug: "b", Group: "tag_group2"}
 	// tags = append(tags, &tag4)
 	// create notes
-	note1 := model.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "1", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	notes = append(notes, &note1)
-	note2 := model.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}}
+	note2 := model.Note{Text: "2", Status: model.NoteStatus_Pending, TagIds: []int{2, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}}
 	notes = append(notes, &note2)
-	note3 := model.Note{Text: "3", Status: "done", TagIds: []int{2}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}}
+	note3 := model.Note{Text: "3", Status: model.NoteStatus_Done, TagIds: []int{2}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}}
 	notes = append(notes, &note3)
-	note4 := model.Note{Text: "4", Status: "done", TagIds: []int{}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}}
+	note4 := model.Note{Text: "4", Status: model.NoteStatus_Done, TagIds: []int{}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}}
 	notes = append(notes, &note4)
-	note5 := model.Note{Text: "5", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000005}}
+	note5 := model.Note{Text: "5", Status: model.NoteStatus_Pending, BaseStruct: model.BaseStruct{UpdatedAt: 1600000005}}
 	notes = append(notes, &note5)
-	note6 := model.Note{Text: "6", Status: "suspended", TagIds: []int{1}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000006}}
+	note6 := model.Note{Text: "6", Status: model.NoteStatus_Suspended, TagIds: []int{1}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000006}}
 	notes = append(notes, &note6)
 	// case 2
-	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "pending"), []*model.Note{&note2})
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, model.NoteStatus_Pending), []*model.Note{&note2})
 	// case 3
-	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, "done"), []*model.Note{&note3})
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(2, model.NoteStatus_Done), []*model.Note{&note3})
 	// case 4
-	utils.AssertEqual(t, notes.WithTagIdAndStatus(4, "pending"), []*model.Note{&note1, &note2})
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(4, model.NoteStatus_Pending), []*model.Note{&note1, &note2})
 	// case 5
-	utils.AssertEqual(t, notes.WithTagIdAndStatus(1, "done"), []*model.Note{})
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(1, model.NoteStatus_Done), []*model.Note{})
 	// case 6
-	utils.AssertEqual(t, notes.WithTagIdAndStatus(1, "suspended"), []*model.Note{&note6})
+	utils.AssertEqual(t, notes.WithTagIdAndStatus(1, model.NoteStatus_Suspended), []*model.Note{&note6})
 }
 
 func TestAddComment(t *testing.T) {
 	// create notes
-	note1 := model.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "1", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	// add comments
 	// case 1
 	err := note1.AddComment("test comment 1")
@@ -388,7 +388,7 @@ func TestAddComment(t *testing.T) {
 
 func TestUpdateText(t *testing.T) {
 	// create notes
-	note1 := model.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	// update text
 	// case 1
 	err := note1.UpdateText("updated text 1")
@@ -402,7 +402,7 @@ func TestUpdateText(t *testing.T) {
 
 func TestUpdateSummary(t *testing.T) {
 	// create notes
-	note1 := model.Note{Summary: "original summary", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Summary: "original summary", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	// update summary
 	// case 1
 	err := note1.UpdateSummary("updated summary 1")
@@ -416,7 +416,7 @@ func TestUpdateSummary(t *testing.T) {
 
 func TestUpdateCompleteBy(t *testing.T) {
 	// create notes
-	note1 := model.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	utils.AssertEqual(t, note1.CompleteBy, 0)
 	// update complete_by
 	// case 1
@@ -431,7 +431,7 @@ func TestUpdateCompleteBy(t *testing.T) {
 
 func TestUpdateTags(t *testing.T) {
 	// create notes
-	note1 := model.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	// update TagIds
 	// case 1
 	tagIds := []int{2, 5}
@@ -447,29 +447,29 @@ func TestUpdateTags(t *testing.T) {
 
 func TestUpdateStatus(t *testing.T) {
 	// create notes
-	note1 := model.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	// update TagIds
 	// case 1
-	err := note1.UpdateStatus("done", []int{1, 2, 3})
+	err := note1.UpdateStatus(model.NoteStatus_Done, []int{1, 2, 3})
 	utils.AssertEqual(t, err, errors.New("Note is part of a \"repeat\" group"))
-	utils.AssertEqual(t, note1.Status, "pending")
+	utils.AssertEqual(t, note1.Status, model.NoteStatus_Pending)
 	// case 2
-	err = note1.UpdateStatus("done", []int{5, 6, 7})
+	err = note1.UpdateStatus(model.NoteStatus_Done, []int{5, 6, 7})
 	utils.AssertEqual(t, err, nil)
-	utils.AssertEqual(t, note1.Status, "done")
+	utils.AssertEqual(t, note1.Status, model.NoteStatus_Done)
 	// case 3
-	err = note1.UpdateStatus("pending", []int{5, 6, 7})
+	err = note1.UpdateStatus(model.NoteStatus_Pending, []int{5, 6, 7})
 	utils.AssertEqual(t, err, nil)
-	utils.AssertEqual(t, note1.Status, "pending")
+	utils.AssertEqual(t, note1.Status, model.NoteStatus_Pending)
 }
 
 func TestRepeatType(t *testing.T) {
 	repeatAnnuallyTagId := 3
 	repeatMonthlyTagId := 4
 	// create notes
-	note1 := model.Note{Text: "original text1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note2 := model.Note{Text: "original text2", Status: "done", TagIds: []int{3, 5}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note3 := model.Note{Text: "original text3", Status: "done", TagIds: []int{2, 6}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "original text1", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note2 := model.Note{Text: "original text2", Status: model.NoteStatus_Done, TagIds: []int{3, 5}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note3 := model.Note{Text: "original text3", Status: model.NoteStatus_Done, TagIds: []int{2, 6}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	// assert repeat type
 	utils.AssertEqual(t, note1.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "M")
 	utils.AssertEqual(t, note2.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "A")
@@ -479,7 +479,7 @@ func TestRepeatType(t *testing.T) {
 
 func TestToggleMainFlag(t *testing.T) {
 	// create notes
-	note1 := model.Note{Text: "original text", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	// update TagIds
 	// case 1
 	originalPriority := note1.IsMain
@@ -639,26 +639,26 @@ func TestFindNotesByTagId(t *testing.T) {
 	reminderData.Tags = tags
 	// create notes
 	var notes model.Notes
-	note1 := model.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "1", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	notes = append(notes, &note1)
-	note2 := model.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}}
+	note2 := model.Note{Text: "2", Status: model.NoteStatus_Pending, TagIds: []int{2, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}}
 	notes = append(notes, &note2)
-	note3 := model.Note{Text: "3", Status: "done", TagIds: []int{2}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}}
+	note3 := model.Note{Text: "3", Status: model.NoteStatus_Done, TagIds: []int{2}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}}
 	notes = append(notes, &note3)
-	note4 := model.Note{Text: "4", Status: "done", TagIds: []int{}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}}
+	note4 := model.Note{Text: "4", Status: model.NoteStatus_Done, TagIds: []int{}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}}
 	notes = append(notes, &note4)
-	note5 := model.Note{Text: "5", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000005}}
+	note5 := model.Note{Text: "5", Status: model.NoteStatus_Pending, BaseStruct: model.BaseStruct{UpdatedAt: 1600000005}}
 	notes = append(notes, &note5)
 	reminderData.Notes = notes
 	// searching notes
 	// case 1
-	utils.AssertEqual(t, reminderData.FindNotesByTagId(2, "pending"), []*model.Note{&note2})
+	utils.AssertEqual(t, reminderData.FindNotesByTagId(2, model.NoteStatus_Pending), []*model.Note{&note2})
 	// case 2
-	utils.AssertEqual(t, reminderData.FindNotesByTagId(2, "done"), []*model.Note{&note3})
+	utils.AssertEqual(t, reminderData.FindNotesByTagId(2, model.NoteStatus_Done), []*model.Note{&note3})
 	// case 3
-	utils.AssertEqual(t, reminderData.FindNotesByTagId(4, "pending"), []*model.Note{&note1, &note2})
+	utils.AssertEqual(t, reminderData.FindNotesByTagId(4, model.NoteStatus_Pending), []*model.Note{&note1, &note2})
 	// case 4
-	utils.AssertEqual(t, reminderData.FindNotesByTagId(1, "done"), []*model.Note{})
+	utils.AssertEqual(t, reminderData.FindNotesByTagId(1, model.NoteStatus_Done), []*model.Note{})
 }
 
 func TestFindNotesByTagSlug(t *testing.T) {
@@ -680,26 +680,26 @@ func TestFindNotesByTagSlug(t *testing.T) {
 	reminderData.Tags = tags
 	// create notes
 	var notes model.Notes
-	note1 := model.Note{Text: "1", Status: "pending", TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
+	note1 := model.Note{Text: "1", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
 	notes = append(notes, &note1)
-	note2 := model.Note{Text: "2", Status: "pending", TagIds: []int{2, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}}
+	note2 := model.Note{Text: "2", Status: model.NoteStatus_Pending, TagIds: []int{2, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}}
 	notes = append(notes, &note2)
-	note3 := model.Note{Text: "3", Status: "done", TagIds: []int{2}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}}
+	note3 := model.Note{Text: "3", Status: model.NoteStatus_Done, TagIds: []int{2}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}}
 	notes = append(notes, &note3)
-	note4 := model.Note{Text: "4", Status: "done", TagIds: []int{}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}}
+	note4 := model.Note{Text: "4", Status: model.NoteStatus_Done, TagIds: []int{}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}}
 	notes = append(notes, &note4)
-	note5 := model.Note{Text: "5", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000005}}
+	note5 := model.Note{Text: "5", Status: model.NoteStatus_Pending, BaseStruct: model.BaseStruct{UpdatedAt: 1600000005}}
 	notes = append(notes, &note5)
 	reminderData.Notes = notes
 	// searching notes
 	// case 1
-	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("a1", "pending"), []*model.Note{&note2})
+	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("a1", model.NoteStatus_Pending), []*model.Note{&note2})
 	// case 2
-	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("a1", "done"), []*model.Note{&note3})
+	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("a1", model.NoteStatus_Done), []*model.Note{&note3})
 	// case 3
-	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("b", "pending"), []*model.Note{&note1, &note2})
+	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("b", model.NoteStatus_Pending), []*model.Note{&note1, &note2})
 	// case 4
-	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("a", "done"), []*model.Note{})
+	utils.AssertEqual(t, reminderData.FindNotesByTagSlug("a", model.NoteStatus_Done), []*model.Note{})
 }
 
 func TestNewTagRegistration(t *testing.T) {
@@ -734,10 +734,10 @@ func TestNewNote(t *testing.T) {
 
 func TestNotes(t *testing.T) {
 	var notes []*model.Note
-	notes = append(notes, &model.Note{Text: "1", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}})
-	notes = append(notes, &model.Note{Text: "2", Status: "pending", BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}})
-	notes = append(notes, &model.Note{Text: "3", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}})
-	notes = append(notes, &model.Note{Text: "4", Status: "done", BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}})
+	notes = append(notes, &model.Note{Text: "1", Status: model.NoteStatus_Pending, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}})
+	notes = append(notes, &model.Note{Text: "2", Status: model.NoteStatus_Pending, BaseStruct: model.BaseStruct{UpdatedAt: 1600000004}})
+	notes = append(notes, &model.Note{Text: "3", Status: model.NoteStatus_Done, BaseStruct: model.BaseStruct{UpdatedAt: 1600000003}})
+	notes = append(notes, &model.Note{Text: "4", Status: model.NoteStatus_Done, BaseStruct: model.BaseStruct{UpdatedAt: 1600000002}})
 	sort.Sort(model.Notes(notes))
 	var gotTexts []string
 	for _, value := range notes {
@@ -844,56 +844,56 @@ func TestNotesApproachingDueDate(t *testing.T) {
 	repeatMonthlyTagId := reminderData.TagFromSlug("repeat-monthly").Id
 	var notes model.Notes
 	// non-repeat done notes
-	notes = append(notes, &model.Note{Text: "NRD01a", Status: "done", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 8*24*3600})
-	notes = append(notes, &model.Note{Text: "NRD02a", Status: "done", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})
-	notes = append(notes, &model.Note{Text: "NRD03a", Status: "done", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600})
+	notes = append(notes, &model.Note{Text: "NRD01a", Status: model.NoteStatus_Done, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 8*24*3600})
+	notes = append(notes, &model.Note{Text: "NRD02a", Status: model.NoteStatus_Done, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})
+	notes = append(notes, &model.Note{Text: "NRD03a", Status: model.NoteStatus_Done, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600})
 	// repeat-annually done notes
-	notes = append(notes, &model.Note{Text: "RAD01a", Status: "done", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 8*24*3600})
-	notes = append(notes, &model.Note{Text: "RAD02a", Status: "done", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})
-	notes = append(notes, &model.Note{Text: "RAD03a", Status: "done", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600})
+	notes = append(notes, &model.Note{Text: "RAD01a", Status: model.NoteStatus_Done, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 8*24*3600})
+	notes = append(notes, &model.Note{Text: "RAD02a", Status: model.NoteStatus_Done, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})
+	notes = append(notes, &model.Note{Text: "RAD03a", Status: model.NoteStatus_Done, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600})
 	// repeat-monthally done notes
-	notes = append(notes, &model.Note{Text: "RMD01a", Status: "done", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 8*24*3600})
-	notes = append(notes, &model.Note{Text: "RMD02a", Status: "done", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})
-	notes = append(notes, &model.Note{Text: "RMD03a", Status: "done", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600})
+	notes = append(notes, &model.Note{Text: "RMD01a", Status: model.NoteStatus_Done, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 8*24*3600})
+	notes = append(notes, &model.Note{Text: "RMD02a", Status: model.NoteStatus_Done, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})
+	notes = append(notes, &model.Note{Text: "RMD03a", Status: model.NoteStatus_Done, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600})
 	// non-repeat pending notes
-	notes = append(notes, &model.Note{Text: "NRP01a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})        // expected
-	notes = append(notes, &model.Note{Text: "NRP02a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*24*3600 - 3600}) // expected
-	notes = append(notes, &model.Note{Text: "NRP02b", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*24*3600 + 3600}) // expected
-	notes = append(notes, &model.Note{Text: "NRP03a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})        // expected
-	notes = append(notes, &model.Note{Text: "NRP04a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 - 3600}) // expected
-	notes = append(notes, &model.Note{Text: "NRP04b", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 + 3600}) // expected
-	notes = append(notes, &model.Note{Text: "NRP05a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 3*24*3600 - 3600}) // expected
-	notes = append(notes, &model.Note{Text: "NRP05b", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 3*24*3600 + 3600}) // expected
-	notes = append(notes, &model.Note{Text: "NRP06a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600 - 3600}) // expected
-	notes = append(notes, &model.Note{Text: "NRP06b", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600 + 3600})
-	notes = append(notes, &model.Note{Text: "NRP07a", Status: "pending", TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
+	notes = append(notes, &model.Note{Text: "NRP01a", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})        // expected
+	notes = append(notes, &model.Note{Text: "NRP02a", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*24*3600 - 3600}) // expected
+	notes = append(notes, &model.Note{Text: "NRP02b", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*24*3600 + 3600}) // expected
+	notes = append(notes, &model.Note{Text: "NRP03a", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600})        // expected
+	notes = append(notes, &model.Note{Text: "NRP04a", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 - 3600}) // expected
+	notes = append(notes, &model.Note{Text: "NRP04b", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 + 3600}) // expected
+	notes = append(notes, &model.Note{Text: "NRP05a", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 3*24*3600 - 3600}) // expected
+	notes = append(notes, &model.Note{Text: "NRP05b", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 3*24*3600 + 3600}) // expected
+	notes = append(notes, &model.Note{Text: "NRP06a", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600 - 3600}) // expected
+	notes = append(notes, &model.Note{Text: "NRP06b", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600 + 3600})
+	notes = append(notes, &model.Note{Text: "NRP07a", Status: model.NoteStatus_Pending, TagIds: []int{currentTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
 	// repeat-annually pending notes
-	notes = append(notes, &model.Note{Text: "RAP01", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})
-	notes = append(notes, &model.Note{Text: "RAP02", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600}) // expected
-	notes = append(notes, &model.Note{Text: "RAP03", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime})             // expected
-	notes = append(notes, &model.Note{Text: "RAP04", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600}) // expected
-	notes = append(notes, &model.Note{Text: "RAP05", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600}) // expected
-	notes = append(notes, &model.Note{Text: "RAP06", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
-	notes = append(notes, &model.Note{Text: "RAP07", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600 - 2*365})
-	notes = append(notes, &model.Note{Text: "RAP08", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600 - 2*365}) // expected
-	notes = append(notes, &model.Note{Text: "RAP09", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*365})             // expected
-	notes = append(notes, &model.Note{Text: "RAP10", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600 - 2*365}) // expected
-	notes = append(notes, &model.Note{Text: "RAP11", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 - 2*365}) // expected
-	notes = append(notes, &model.Note{Text: "RAP12", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600 - 2*365})
-	notes = append(notes, &model.Note{Text: "RAP13", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600 + 2*365})
-	notes = append(notes, &model.Note{Text: "RAP14", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600 + 2*365}) // expected
-	notes = append(notes, &model.Note{Text: "RAP15", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*365})             // expected
-	notes = append(notes, &model.Note{Text: "RAP16", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600 + 2*365}) // expected
-	notes = append(notes, &model.Note{Text: "RAP17", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 + 2*365}) // expected
-	notes = append(notes, &model.Note{Text: "RAP18", Status: "pending", TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600 + 2*365})
+	notes = append(notes, &model.Note{Text: "RAP01", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})
+	notes = append(notes, &model.Note{Text: "RAP02", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600}) // expected
+	notes = append(notes, &model.Note{Text: "RAP03", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime})             // expected
+	notes = append(notes, &model.Note{Text: "RAP04", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600}) // expected
+	notes = append(notes, &model.Note{Text: "RAP05", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600}) // expected
+	notes = append(notes, &model.Note{Text: "RAP06", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
+	notes = append(notes, &model.Note{Text: "RAP07", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600 - 2*365})
+	notes = append(notes, &model.Note{Text: "RAP08", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600 - 2*365}) // expected
+	notes = append(notes, &model.Note{Text: "RAP09", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 2*365})             // expected
+	notes = append(notes, &model.Note{Text: "RAP10", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600 - 2*365}) // expected
+	notes = append(notes, &model.Note{Text: "RAP11", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 - 2*365}) // expected
+	notes = append(notes, &model.Note{Text: "RAP12", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600 - 2*365})
+	notes = append(notes, &model.Note{Text: "RAP13", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600 + 2*365})
+	notes = append(notes, &model.Note{Text: "RAP14", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600 + 2*365}) // expected
+	notes = append(notes, &model.Note{Text: "RAP15", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*365})             // expected
+	notes = append(notes, &model.Note{Text: "RAP16", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 1*24*3600 + 2*365}) // expected
+	notes = append(notes, &model.Note{Text: "RAP17", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600 + 2*365}) // expected
+	notes = append(notes, &model.Note{Text: "RAP18", Status: model.NoteStatus_Pending, TagIds: []int{repeatAnnuallyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600 + 2*365})
 	// repeat-monthly pending notes
-	notes = append(notes, &model.Note{Text: "RMP01", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})
-	notes = append(notes, &model.Note{Text: "RMP02", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600}) // expected
-	notes = append(notes, &model.Note{Text: "RMP03", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime})             // expected
-	notes = append(notes, &model.Note{Text: "RMP04", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600}) // expected
-	notes = append(notes, &model.Note{Text: "RMP05", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 3*24*3600}) // expected
-	notes = append(notes, &model.Note{Text: "RMP06", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600})
-	notes = append(notes, &model.Note{Text: "RMP07", Status: "pending", TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
+	notes = append(notes, &model.Note{Text: "RMP01", Status: model.NoteStatus_Pending, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 9*24*3600})
+	notes = append(notes, &model.Note{Text: "RMP02", Status: model.NoteStatus_Pending, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime - 1*24*3600}) // expected
+	notes = append(notes, &model.Note{Text: "RMP03", Status: model.NoteStatus_Pending, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime})             // expected
+	notes = append(notes, &model.Note{Text: "RMP04", Status: model.NoteStatus_Pending, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 2*24*3600}) // expected
+	notes = append(notes, &model.Note{Text: "RMP05", Status: model.NoteStatus_Pending, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 3*24*3600}) // expected
+	notes = append(notes, &model.Note{Text: "RMP06", Status: model.NoteStatus_Pending, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 7*24*3600})
+	notes = append(notes, &model.Note{Text: "RMP07", Status: model.NoteStatus_Pending, TagIds: []int{repeatMonthlyTagId}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}, CompleteBy: currentTime + 9*24*3600})
 	reminderData.Notes = notes
 	// get urgent notes
 	urgentNotes := reminderData.NotesApprachingDueDate("default")

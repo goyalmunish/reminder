@@ -72,7 +72,7 @@ func NewNote(tagIDs []int, useText string) (*Note, error) {
 	var err error
 	note := &Note{
 		Comments:   Comments{},
-		Status:     "pending",
+		Status:     NoteStatus_Pending,
 		CompleteBy: 0,
 		TagIds:     tagIDs,
 		BaseStruct: BaseStruct{

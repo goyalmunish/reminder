@@ -87,12 +87,12 @@ func (reminderData *ReminderData) TagIdsForGroup(group string) []int {
 }
 
 // FindNotesByTagId gets all notes with given tagID and given status.
-func (reminderData *ReminderData) FindNotesByTagId(tagID int, status string) Notes {
+func (reminderData *ReminderData) FindNotesByTagId(tagID int, status NoteStatus) Notes {
 	return reminderData.Notes.WithTagIdAndStatus(tagID, status)
 }
 
 // FindNotesByTagSlug gets all notes with given tagSlug and given status.
-func (reminderData *ReminderData) FindNotesByTagSlug(tagSlug string, status string) Notes {
+func (reminderData *ReminderData) FindNotesByTagSlug(tagSlug string, status NoteStatus) Notes {
 	tag := reminderData.TagFromSlug(tagSlug)
 	// return empty Notes object for nil `tag`
 	if tag == nil {
@@ -147,7 +147,7 @@ func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error
 }
 
 // UpdateNoteStatus updates note's status.
-func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status string) error {
+func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status NoteStatus) error {
 	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
 	err := note.UpdateStatus(status, repeatTagIDs)
 	if err != nil {
@@ -183,7 +183,7 @@ func (reminderData *ReminderData) ListTags() error {
 	// function to return a tag sumbol
 	// keep different tag symbol for empty tags
 	tagSymbol := func(tagSlug string) string {
-		PendingNote := reminderData.FindNotesByTagSlug(tagSlug, "pending")
+		PendingNote := reminderData.FindNotesByTagSlug(tagSlug, NoteStatus_Pending)
 		if len(PendingNote) > 0 {
 			return utils.Symbols["tag"]
 		} else {
@@ -213,7 +213,7 @@ func (reminderData *ReminderData) ListTags() error {
 	}
 	// operate on the selected a tag
 	tag := reminderData.Tags[tagIndex]
-	err = reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, "pending", false, "default")
+	err = reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, NoteStatus_Pending, false, "default")
 	if err != nil {
 		utils.PrintError(err)
 		// go back to ListTags
@@ -266,7 +266,7 @@ func (reminderData *ReminderData) SearchNotes() error {
 // It accepts view as an argument with "default" or "long" as acceptable values
 func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
 	allNotes := reminderData.Notes
-	pendingNotes := allNotes.WithStatus("pending")
+	pendingNotes := allNotes.WithStatus(NoteStatus_Pending)
 	// assuming there are at least 100 notes (on average)
 	currentNotes := make([]*Note, 0, 100)
 	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
@@ -415,9 +415,9 @@ Stats of "{{.DataFile}}"
   - Done Notes:      {{.Notes | numDone}}
 `
 	funcMap := template.FuncMap{
-		"numPending":   func(notes Notes) int { return len(notes.WithStatus("pending")) },
-		"numSuspended": func(notes Notes) int { return len(notes.WithStatus("suspended")) },
-		"numDone":      func(notes Notes) int { return len(notes.WithStatus("done")) },
+		"numPending":   func(notes Notes) int { return len(notes.WithStatus(NoteStatus_Pending)) },
+		"numSuspended": func(notes Notes) int { return len(notes.WithStatus(NoteStatus_Suspended)) },
+		"numDone":      func(notes Notes) int { return len(notes.WithStatus(NoteStatus_Done)) },
 		"numAll":       func(notes Notes) int { return len(notes) },
 	}
 	return utils.TemplateResult(reportTemplate, funcMap, *reminderData)
@@ -565,15 +565,15 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Println("No changes made")
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
-		err := reminderData.UpdateNoteStatus(note, "done")
+		err := reminderData.UpdateNoteStatus(note, NoteStatus_Done)
 		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["zzz"], "Mark as suspended"):
-		err := reminderData.UpdateNoteStatus(note, "suspended")
+		err := reminderData.UpdateNoteStatus(note, NoteStatus_Suspended)
 		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"):
-		err := reminderData.UpdateNoteStatus(note, "pending")
+		err := reminderData.UpdateNoteStatus(note, NoteStatus_Pending)
 		utils.PrintError(err)
 		fmt.Print(note.ExternalText(reminderData))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
@@ -616,19 +616,19 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // Unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake".
 // Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
 // Filter only the notes tagged as "main" if `onlyMain` is true (for given status), otherwise return all.
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status string, onlyMain bool, sortBy string) error {
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status NoteStatus, onlyMain bool, sortBy string) error {
 	// check if passed notes is to be used or to fetch latest notes
-	if status == "done" {
+	if status == NoteStatus_Done {
 		// ignore the passed notes
 		// fetch all the done notes
-		notes = reminderData.Notes.WithStatus("done")
+		notes = reminderData.Notes.WithStatus(status)
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(notes))
-	} else if status == "suspended" {
+	} else if status == NoteStatus_Suspended {
 		// ignore the passed notes
 		// fetch all the done notes
-		notes = reminderData.Notes.WithStatus("suspended")
+		notes = reminderData.Notes.WithStatus(status)
 		fmt.Printf("A total of %v notes marked as 'suspended':\n", len(notes))
-	} else if status == "pending" {
+	} else if status == NoteStatus_Pending {
 		// ignore the passed notes
 		if tagID >= 0 {
 			// this is for listing all notes associated with given tag, with asked status
