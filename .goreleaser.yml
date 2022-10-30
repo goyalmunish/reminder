@@ -37,6 +37,7 @@ brews:
       owner: goyalmunish
       name: homebrew-reminder
       branch: main
+      token: "{{ .Env.HOMEBREW_REMINDER_GITHUB_TOKEN }}"
     url_template: >-
       https://github.com/goyalmunish/reminder/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     commit_author:
