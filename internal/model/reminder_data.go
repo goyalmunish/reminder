@@ -648,7 +648,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 			// this is for listing all notes approaching due date
 			// fetch notes approaching due date
 			fmt.Println("Note: A note can be in 'pending', 'suspended' or 'done' status.")
-			fmt.Println("Note: Notes marked as 'pending' as special and they show up everywhere, whereas notes with other status only show up in 'Search' or under their dedicated menu.")
+			fmt.Println("Note: Notes marked as 'pending' are special and they show up everywhere, whereas notes with other status only show up in 'Search' or under their dedicated menu.")
 			fmt.Println("Note: Following are the pending notes with due date:")
 			fmt.Println("      - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 			fmt.Println("      - within 3 days for repeat-annually and a week post due date (ignoring its year)")
