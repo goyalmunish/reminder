@@ -3,7 +3,7 @@ Tool `reminder` is a command-line (terminal) based interactive app for organizin
 
 Just run it as `go run ./cmd/reminder`
 */
-package main
+package reminder
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 )
 
 // flow is recursive function for overall flow of interactivity
-func flow() {
+func Flow() {
 	var err error
 	// make sure DataFile exists
 	defaultDataFilePath := model.DefaultDataFile()
@@ -74,10 +74,5 @@ func flow() {
 		return
 	}
 	utils.PrintError(err)
-	flow()
-}
-
-func main() {
-	// go utils.Spinner(100 * time.Millisecond)
-	flow()
+	Flow()
 }

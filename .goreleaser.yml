@@ -1,0 +1,51 @@
+project_name: reminder
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+nfpms:
+  - maintainer: Munish Goyal (munishapc@gmail.com)
+    description: Terminal-based interactive app for organising tasks with minimal efforts.
+    homepage: 'https://github.com/goyalmunish'
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+# dockers:
+# - image_templates: ["ghcr.io/goyalmunish/reminder:{{ .Version }}"]
+#   dockerfile: Dockerfile
+#   build_flag_templates:
+#   - --label=org.opencontainers.image.title={{ .ProjectName }}
+#   - --label=org.opencontainers.image.description={{ .ProjectName }}
+#   - --label=org.opencontainers.image.url=https://github.com/goyalmunish/reminder
+#   - --label=org.opencontainers.image.source=https://github.com/goyalmunish/reminder
+#   - --label=org.opencontainers.image.version={{ .Version }}
+#   - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+#   - --label=org.opencontainers.image.revision={{ .FullCommit }}
+#   - --label=org.opencontainers.image.licenses=MIT
+brews:
+  - name: reminder
+    goarm: 6
+    tap:
+      owner: goyalmunish
+      name: homebrew-reminder
+      branch: main
+    url_template: >-
+      https://github.com/goyalmunish/munish/releases/download/{{ .Tag }}/{{
+      .ArtifactName }}
+    commit_author:
+      name: goyalmunish_bot
+      email: goyalmunishbot@gmail.com
+    commit_msg_template: 'Brew formula update for {{ .ProjectName }} version {{ .Tag }}'
+    folder: Formula
+    caveats: How to use this binary
+    homepage: 'https://github.com/goyalmunish/reminder'
+    description: Terminal-based interactive app for organising tasks with minimal efforts.
+    license: MIT
