@@ -32,6 +32,7 @@ type Note struct {
 type NoteStatus string
 
 const (
+	NoteStatus_Undefined NoteStatus = "undefined"
 	// "pending":   tasks which are yet to be done
 	NoteStatus_Pending NoteStatus = "pending"
 	// "suspended": tasks which are yet to be done but for now marked as suspended so as to keep them hidden at most of the places
