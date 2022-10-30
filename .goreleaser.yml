@@ -5,6 +5,7 @@ builds:
     goos:
       - linux
       - darwin
+      - windows
     goarch:
       - amd64
       - arm64
@@ -35,14 +36,13 @@ brews:
     tap:
       owner: goyalmunish
       name: homebrew-reminder
-      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
       branch: main
     url_template: >-
       https://github.com/goyalmunish/munish/releases/download/{{ .Tag }}/{{
       .ArtifactName }}
     commit_author:
-      name: goyalmunish_bot
-      email: goyalmunishbot@gmail.com
+      name: goyalmunish
+      email: munishapc@gmail.com
     commit_msg_template: 'Brew formula update for {{ .ProjectName }} version {{ .Tag }}'
     folder: Formula
     caveats: How to use this binary
