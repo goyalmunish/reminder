@@ -36,6 +36,7 @@ brews:
     tap:
       owner: goyalmunish
       name: homebrew-reminder
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
       branch: main
     url_template: >-
       https://github.com/goyalmunish/munish/releases/download/{{ .Tag }}/{{
