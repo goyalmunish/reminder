@@ -20,7 +20,6 @@
 
 ![release](https://img.shields.io/github/v/release/goyalmunish/reminder)
 ![go_version](https://img.shields.io/github/go-mod/go-version/goyalmunish/reminder)
-![downloads](https://img.shields.io/github/downloads/goyalmunish/reminder/total)
 ![license](https://img.shields.io/github/license/goyalmunish/reminder)
 
 ## Yet Another Reminder Tool/App. Why?
