@@ -6,6 +6,7 @@ ENV DIR_DATA /data
 WORKDIR ${DIR_DATA}
 
 # copy required files
+COPY main.go reminder/
 COPY go.mod reminder/
 COPY go.sum reminder/
 COPY cmd reminder/cmd
@@ -15,7 +16,7 @@ COPY scripts reminder/scripts
 
 # install the command
 RUN cd reminder \
-    && go install cmd/reminder/main.go
+    && go install main.go
 
 # rename the command
 RUN cp ${GOPATH}/bin/main ${GOPATH}/bin/reminder
