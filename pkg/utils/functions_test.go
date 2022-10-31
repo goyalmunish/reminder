@@ -45,6 +45,8 @@ func TestUnixTimestampToTimeStr(t *testing.T) {
 	utils.AssertEqual(t, output, "Monday, 21-Dec-20 18:26:16 UTC")
 	output = utils.UnixTimestampToTimeStr(int64(-1), "02-Jan-06")
 	utils.AssertEqual(t, output, "nil")
+	output = utils.UnixTimestampToTimeStr(int64(1698710400), time.RFC850)
+	utils.AssertEqual(t, output, "Tuesday, 31-Oct-23 00:00:00 UTC")
 }
 
 func TestUnixTimestampToLongTimeStr(t *testing.T) {

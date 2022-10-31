@@ -264,6 +264,8 @@ func (reminderData *ReminderData) SearchNotes() error {
 
 // NotesApprachingDueDate fetches all pending notes which are urgent.
 // It accepts view as an argument with "default" or "long" as acceptable values
+// Note: NotesApprachingDueDate is dangerous as it manipulates the due date (CompleteBy) date of repeating tags
+// which can cause persitence of manupulated dates, if the returned data is persisted.
 func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
 	allNotes := reminderData.Notes
 	pendingNotes := allNotes.WithStatus(NoteStatus_Pending)
@@ -653,6 +655,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 			fmt.Println("      - within a week or already crossed (for non repeat-annually or repeat-monthly)")
 			fmt.Println("      - within 3 days for repeat-annually and a week post due date (ignoring its year)")
 			fmt.Println("      - within 1 day for repeat-monthly and 3 days post due date (ignoring its year and month)")
+			fmt.Println("Note: The process may automatically adjust CompleteBy (due-date) with MM-YYYY for monthly repeating notes and YYYY for yearly repeating ones. This is done as part of search algorithm, and it does not impacts on any visibility of those notes.")
 			notes = reminderData.NotesApprachingDueDate("default")
 		}
 	} else {
