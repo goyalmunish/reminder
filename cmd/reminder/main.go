@@ -56,7 +56,7 @@ func Flow() {
 	case fmt.Sprintf("%s %s", utils.Symbols["clip"], "Register Basic Tags"):
 		err = reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%s %s", utils.Symbols["clock"], "Approaching Due Date"):
-		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, "pending_approaching_notes", -1, "default")
+		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, "pending_approaching_notes", -1, "due-date")
 	case fmt.Sprintf("%s %s", utils.Symbols["hat"], "Main Notes"):
 		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, "pending_only_main_notes", -1, "default")
 	case fmt.Sprintf("%s %s", utils.Symbols["search"], "Search Notes"):
