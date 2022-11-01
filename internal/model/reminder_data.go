@@ -625,6 +625,7 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // - "pending_only_main_notes": fetch pending notes with IsMain set as true
 // - "pending_approaching_notes": fetch pending notes with approaching due date
 // - "pending_long_view_notes": fetch long-view (52 weeks) of pending notes
+// - "passed_notes": use passed notes
 func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string, tagID int, sortBy string) error {
 	// check if passed notes is to be used or to fetch latest notes
 	switch display_mode {
@@ -663,9 +664,14 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_m
 		fmt.Println("      - within 1 day for repeat-monthly and 3 days post due date (ignoring its year and month)")
 		fmt.Println("Note: The process may automatically adjust CompleteBy (due-date) with MM-YYYY for monthly repeating notes and YYYY for yearly repeating ones. This is done as part of search algorithm, and it does not impacts on any visibility of those notes.")
 		notes = reminderData.NotesApprachingDueDate("default")
-	default:
+	case "passed_notes":
 		// use passed notes
-		fmt.Printf("Using passed notes, so the list will not be refreshed immediately.\n")
+		// this is used wthen this function is called recursively
+		// this is useful in circumstances where for example, a note's tags are updated for a note under a tag in which case
+		// otherwise the note will immediately disappear if the updated tags list doesn't include the original tag
+		fmt.Printf("Note: Using passed notes, so the list will not be refreshed immediately!\n")
+	default:
+		fmt.Printf("Error: Unreachable code")
 	}
 
 	// sort notes
@@ -704,7 +710,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_m
 		var updatedNotes Notes
 		updatedNotes = append(updatedNotes, note)
 		updatedNotes = append(updatedNotes, notes...)
-		err = reminderData.PrintNotesAndAskOptions(updatedNotes, display_mode, tagID, sortBy)
+		err = reminderData.PrintNotesAndAskOptions(updatedNotes, "passed_notes", tagID, sortBy)
 		if err != nil {
 			return err
 		}
@@ -716,7 +722,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_m
 	action := reminderData.PrintNoteAndAskOptions(note)
 	if action == "stay" {
 		// no action was selected for the note, go one step back
-		err = reminderData.PrintNotesAndAskOptions(notes, display_mode, tagID, sortBy)
+		err = reminderData.PrintNotesAndAskOptions(notes, "passed_notes", tagID, sortBy)
 		if err != nil {
 			return err
 		}
