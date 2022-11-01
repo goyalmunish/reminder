@@ -211,9 +211,9 @@ func (reminderData *ReminderData) ListTags() error {
 		}
 		return nil
 	}
-	// operate on the selected a tag
+	// operate on the selected a tag, and display both main and non-main notes
 	tag := reminderData.Tags[tagIndex]
-	err = reminderData.PrintNotesAndAskOptions(Notes{}, tag.Id, NoteStatus_Pending, false, "default")
+	err = reminderData.PrintNotesAndAskOptions(Notes{}, "pending_tag_notes", tag.Id, "default")
 	if err != nil {
 		utils.PrintError(err)
 		// go back to ListTags
@@ -264,6 +264,8 @@ func (reminderData *ReminderData) SearchNotes() error {
 
 // NotesApprachingDueDate fetches all pending notes which are urgent.
 // It accepts view as an argument with "default" or "long" as acceptable values
+// Note: NotesApprachingDueDate is dangerous as it manipulates the due date (CompleteBy) date of repeating tags
+// which can cause persitence of manupulated dates, if the returned data is persisted.
 func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
 	allNotes := reminderData.Notes
 	pendingNotes := allNotes.WithStatus(NoteStatus_Pending)
@@ -331,6 +333,7 @@ func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
 			}
 		}
 	}
+	// return unsorted list
 	return currentNotes
 }
 
@@ -615,50 +618,62 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // In some cases, updated list notes will be fetched, so blank notes can be passed in those cases.
 // Unless notes are to be fetched, the passed `status` doesn't make sense, so in such cases it can be passed as "fake".
 // Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
-// Filter only the notes tagged as "main" if `onlyMain` is true (for given status), otherwise return all.
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int, status NoteStatus, onlyMain bool, sortBy string) error {
+// It accepts following values for `display_mode`:
+// - "done_notes": fetch only done notes
+// - "suspended_notes": fetch only suspended notes
+// - "pending_tag_notes": fetch pending notes with given tagID
+// - "pending_only_main_notes": fetch pending notes with IsMain set as true
+// - "pending_approaching_notes": fetch pending notes with approaching due date
+// - "pending_long_view_notes": fetch long-view (52 weeks) of pending notes
+// - "passed_notes": use passed notes
+func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string, tagID int, sortBy string) error {
 	// check if passed notes is to be used or to fetch latest notes
-	if status == NoteStatus_Done {
+	switch display_mode {
+	case "done_notes":
 		// ignore the passed notes
 		// fetch all the done notes
-		notes = reminderData.Notes.WithStatus(status)
+		notes = reminderData.Notes.WithStatus(NoteStatus_Done)
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(notes))
-	} else if status == NoteStatus_Suspended {
+	case "suspended_notes":
 		// ignore the passed notes
 		// fetch all the done notes
-		notes = reminderData.Notes.WithStatus(status)
+		notes = reminderData.Notes.WithStatus(NoteStatus_Suspended)
 		fmt.Printf("A total of %v notes marked as 'suspended':\n", len(notes))
-	} else if status == NoteStatus_Pending {
-		// ignore the passed notes
-		if tagID >= 0 {
-			// this is for listing all notes associated with given tag, with asked status
-			// fetch pending notes with given tagID
-			notes = reminderData.FindNotesByTagId(tagID, status)
-		} else if onlyMain {
-			// this is for listing all main notes, with asked status
-			notes = reminderData.Notes.OnlyMain()
-			countAllMain := len(notes)
-			notes = notes.WithStatus(status)
-			countPendingMain := len(notes)
-			fmt.Printf("A total of %v/%v notes flagged as 'main':\n", countPendingMain, countAllMain)
-		} else if sortBy == "due-date" {
-			// look ahead a year (52 weeks)
-			notes = reminderData.NotesApprachingDueDate("long")
-		} else {
-			// this is for listing all notes approaching due date
-			// fetch notes approaching due date
-			fmt.Println("Note: A note can be in 'pending', 'suspended' or 'done' status.")
-			fmt.Println("Note: Notes marked as 'pending' are special and they show up everywhere, whereas notes with other status only show up in 'Search' or under their dedicated menu.")
-			fmt.Println("Note: Following are the pending notes with due date:")
-			fmt.Println("      - within a week or already crossed (for non repeat-annually or repeat-monthly)")
-			fmt.Println("      - within 3 days for repeat-annually and a week post due date (ignoring its year)")
-			fmt.Println("      - within 1 day for repeat-monthly and 3 days post due date (ignoring its year and month)")
-			notes = reminderData.NotesApprachingDueDate("default")
-		}
-	} else {
+	case "pending_tag_notes":
+		// this is for listing all notes associated with given tag, with asked status
+		// fetch pending notes with given tagID
+		notes = reminderData.FindNotesByTagId(tagID, NoteStatus_Pending)
+	case "pending_only_main_notes":
+		// this is for listing all main notes, with asked status
+		notes = reminderData.Notes.OnlyMain()
+		countAllMain := len(notes)
+		notes = notes.WithStatus(NoteStatus_Pending)
+		countPendingMain := len(notes)
+		fmt.Printf("A total of %v/%v notes flagged as 'main':\n", countPendingMain, countAllMain)
+	case "pending_long_view_notes":
+		// look ahead a year (52 weeks)
+		notes = reminderData.NotesApprachingDueDate("long")
+	case "pending_approaching_notes":
+		// this is for listing all notes approaching due date
+		// fetch notes approaching due date
+		fmt.Println("Note: A note can be in 'pending', 'suspended' or 'done' status.")
+		fmt.Println("Note: Notes marked as 'pending' are special and they show up everywhere, whereas notes with other status only show up in 'Search' or under their dedicated menu.")
+		fmt.Println("Note: Following are the pending notes with due date:")
+		fmt.Println("      - within a week or already crossed (for non repeat-annually or repeat-monthly)")
+		fmt.Println("      - within 3 days for repeat-annually and a week post due date (ignoring its year)")
+		fmt.Println("      - within 1 day for repeat-monthly and 3 days post due date (ignoring its year and month)")
+		fmt.Println("Note: The process may automatically adjust CompleteBy (due-date) with MM-YYYY for monthly repeating notes and YYYY for yearly repeating ones. This is done as part of search algorithm, and it does not impacts on any visibility of those notes.")
+		notes = reminderData.NotesApprachingDueDate("default")
+	case "passed_notes":
 		// use passed notes
-		fmt.Printf("Using passed notes, so the list will not be refreshed immediately.\n")
+		// this is used wthen this function is called recursively
+		// this is useful in circumstances where for example, a note's tags are updated for a note under a tag in which case
+		// otherwise the note will immediately disappear if the updated tags list doesn't include the original tag
+		fmt.Printf("Note: Using passed notes, so the list will not be refreshed immediately!\n")
+	default:
+		fmt.Printf("Error: Unreachable code")
 	}
+
 	// sort notes
 	switch sortBy {
 	case "due-date":
@@ -669,6 +684,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	repeatAnnuallyTag := reminderData.TagFromSlug("repeat-annually")
 	repeatMonthlyTag := reminderData.TagFromSlug("repeat-monthly")
 	texts := notes.ExternalTexts(utils.TerminalWidth()-50, repeatAnnuallyTag.Id, repeatMonthlyTag.Id)
+
 	// ask user to select a note
 	promptText := ""
 	if tagID >= 0 {
@@ -680,6 +696,7 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 	if (err != nil) || (noteIndex == -1) {
 		return err
 	}
+
 	// create new note
 	if noteIndex == len(texts) {
 		// add new note
@@ -693,18 +710,19 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, tagID int
 		var updatedNotes Notes
 		updatedNotes = append(updatedNotes, note)
 		updatedNotes = append(updatedNotes, notes...)
-		err = reminderData.PrintNotesAndAskOptions(updatedNotes, tagID, status, onlyMain, sortBy)
+		err = reminderData.PrintNotesAndAskOptions(updatedNotes, "passed_notes", tagID, sortBy)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
+
 	// ask options about the selected note
 	note := notes[noteIndex]
 	action := reminderData.PrintNoteAndAskOptions(note)
 	if action == "stay" {
 		// no action was selected for the note, go one step back
-		err = reminderData.PrintNotesAndAskOptions(notes, tagID, status, onlyMain, sortBy)
+		err = reminderData.PrintNotesAndAskOptions(notes, "passed_notes", tagID, sortBy)
 		if err != nil {
 			return err
 		}

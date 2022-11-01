@@ -54,13 +54,10 @@ func UnixTimestampToTime(unixTimestamp int64) time.Time {
 
 // UnixTimestampToTimeStr function converts unix timestamp to time string.
 func UnixTimestampToTimeStr(unixTimestamp int64, timeFormat string) string {
-	var timeAsStr string
 	if unixTimestamp > 0 {
-		timeAsStr = UnixTimestampToTime(unixTimestamp).Format(timeFormat)
-	} else {
-		timeAsStr = "nil"
+		return UnixTimestampToTime(unixTimestamp).Format(timeFormat)
 	}
-	return timeAsStr
+	return "nil"
 }
 
 // UnixTimestampToLongTimeStr function converts unix timestamp to long time string.
