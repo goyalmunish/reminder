@@ -4,7 +4,7 @@ name: goreleaser
 
 on:
   push:
-    branches: [ '*' ]
+    branches: [ master ]
     tags:
       - '*'
 
@@ -16,6 +16,10 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    on:
+      push:
+        branches:
+          - '*'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
