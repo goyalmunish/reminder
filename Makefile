@@ -5,17 +5,15 @@ repo_name := $(notdir ${repo_path})
 
 .PHONY: build
 build:
-	echo "Building reminder..." && \
-	go build -v -o ./bin/ ./cmd/${repo_name} && \
-	echo "done."
+	go build -v ./...
 
 .PHONY: run
 run:
-	go run ./cmd/${repo_name}
+	go run ./...
 
 .PHONY: lint
 lint:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run ./...
+	. ./scripts/go_lint
 
 .PHONY: fmt
 fmt:

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -50,7 +49,7 @@ func (reminderData *ReminderData) UpdateDataFile(msg string) error {
 		return err
 	}
 	// persist the byte data to file
-	err = ioutil.WriteFile(reminderData.DataFile, byteValue, 0755)
+	err = os.WriteFile(reminderData.DataFile, byteValue, 0755)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -436,11 +435,11 @@ func (reminderData *ReminderData) CreateBackup() (string, error) {
 	lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
 	fmt.Printf("Creating backup at %q\n", dstFile)
 	// create backup
-	byteValue, err := ioutil.ReadFile(reminderData.DataFile)
+	byteValue, err := os.ReadFile(reminderData.DataFile)
 	if err != nil {
 		return dstFile, err
 	}
-	err = ioutil.WriteFile(dstFile, byteValue, 0644)
+	err = os.WriteFile(dstFile, byteValue, 0644)
 	if err != nil {
 		return dstFile, err
 	}

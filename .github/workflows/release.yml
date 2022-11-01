@@ -1,6 +1,6 @@
 # refer: https://github.com/goreleaser/goreleaser
 # refer: https://goreleaser.com/
-name: goreleaser
+name: release
 
 on:
   push:

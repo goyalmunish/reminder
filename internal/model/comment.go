@@ -22,8 +22,7 @@ type Comment struct {
 
 // String provides basic string representation of a commment.
 func (comment *Comment) String() string {
-	var escapeString bool
-	escapeString = false
+	var escapeString bool = false
 
 	// way 1
 	if escapeString {

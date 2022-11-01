@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"net/mail"
 	"os"
 	"path"
@@ -220,10 +219,7 @@ func BlankReminder(askUserInput bool) *ReminderData {
 	form := tview.NewForm().
 		AddDropDown("Title", []string{"Mr.", "Ms.", "Mrs.", "Dr.", "Prof."}, 0, nil).
 		AddInputField("Name", "", 20, func(textToCheck string, lastChar rune) bool {
-			if unicode.IsLetter(lastChar) {
-				return true
-			}
-			return false
+			return unicode.IsLetter(lastChar)
 		}, func(text string) {
 			name = text
 		}).
@@ -265,7 +261,7 @@ func BlankReminder(askUserInput bool) *ReminderData {
 func ReadDataFile(dataFilePath string) *ReminderData {
 	var reminderData ReminderData
 	// read byte data from file
-	byteValue, err := ioutil.ReadFile(dataFilePath)
+	byteValue, err := os.ReadFile(dataFilePath)
 	utils.PrintError(err)
 	// parse json data
 	err = json.Unmarshal(byteValue, &reminderData)
