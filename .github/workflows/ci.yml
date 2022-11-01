@@ -1,6 +1,6 @@
 # refer: https://github.com/goreleaser/goreleaser
 # refer: https://goreleaser.com/
-name: goreleaser
+name: ci
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - '*'
 
 jobs:
-  ci:
+  build-lint-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
