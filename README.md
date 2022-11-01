@@ -6,7 +6,8 @@
     - [Yet Another Reminder Tool/App. Why?](#yet-another-reminder-toolapp-why)
     - [How to Use?](#how-to-use)
     - [How to Run?](#how-to-run)
-        - [Easily run the tool via Docker (recommended)](#easily-run-the-tool-via-docker-recommended)
+        - [macOS/Linux using Homebrew/Linuxbrew](#macoslinux-using-homebrewlinuxbrew)
+        - [Easily run the tool via Docker](#easily-run-the-tool-via-docker)
         - [Non-Docker Setup](#non-docker-setup)
             - [Install `go`](#install-go)
             - [Install the tool (optional)](#install-the-tool-optional)
@@ -108,7 +109,24 @@ Additionally, from the **Main Menu**:
 
 ## How to Run?
 
-### Easily run the tool via Docker (recommended)
+### macOS/Linux using Homebrew/Linuxbrew
+
+The easiest way is to utilise [**Homebrew**](https://brew.sh/) (macOS) or [**LinuxBrew**](https://docs.brew.sh/Homebrew-on-Linux) (Linux) package management system. Once installed simply issue the following command:
+
+```sh
+brew tap goyalmunish/reminder
+brew install goyalmunish/reminder/reminder
+```
+
+To update:
+
+```sh
+brew update goyalmunish/reminder/reminder
+```
+
+The brew tap is maintained at [goyalmunish/homebrew-reminder](https://github.com/goyalmunish/homebrew-reminder).
+
+### Easily run the tool via Docker
 
 _This is the easiest way to get going, if you have [Docker](https://docs.docker.com/get-docker/) installed. Just download the [`reminder` image](https://hub.docker.com/r/goyalmunish/reminder/tags) by issuing the following commands:_
 
@@ -147,6 +165,8 @@ alias reminder='docker run -it --rm --name reminder -v ~/reminder:/root/reminder
 _Then, run the tool using `reminder` command._
 
 ### Non-Docker Setup
+
+Check for available installers on [**releases**](https://github.com/goyalmunish/reminder/releases) page. Otherwise,
 
 #### Install `go`
 
