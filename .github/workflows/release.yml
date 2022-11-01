@@ -2,12 +2,6 @@
 # refer: https://goreleaser.com/
 name: goreleaser
 
-on:
-  push:
-    branches: [ master ]
-    tags:
-      - '*'
-
 permissions:
   contents: write
   packages: write
@@ -35,6 +29,11 @@ jobs:
         run: CI=true CONSOLE_PRINT=true make test
   goreleaser:
     runs-on: ubuntu-latest
+    on:
+      push:
+        branches: [ master ]
+        tags:
+          - '*'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
