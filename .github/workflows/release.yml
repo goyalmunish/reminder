@@ -4,16 +4,29 @@ name: goreleaser
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
     tags:
       - '*'
 
 permissions:
   contents: write
-  # packages: write
-  # issues: write
+  packages: write
+  issues: write
 
 jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+      - uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+            go-version: '>=1.19.2'
+      - name: Build
+        run: go build -v ./...
+      - name: Test
+        run: ./script/go_test
   goreleaser:
     runs-on: ubuntu-latest
     steps:
@@ -38,5 +51,14 @@ jobs:
           version: latest
           args: release --rm-dist
         env:
+          # Valid github token with 'repo' scope, used to deploy releases to your github repository.
+          # // Refer https://docs.github.com/en/actions/security-guides/automatic-token-authentication
+          # GITHUB_TOKEN is Github App Installation access token. You can use the installation access
+          # token to authenticate on behalf of the Github App insalled on your repositiory.
+          # This token's permissions are limited to the repository that contains your workflow
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # If you need to push the homebrew tap to another repository, you must create a custom Personal Access Token (PAT)
+          # with 'repo' permissions and add it as a secret in the reposiory.
+          # Refer https://goreleaser.com/ci/actions/
+          # Refer https://goreleaser.com/customization/homebrew/
           TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_REMINDER_GITHUB_TOKEN }}
