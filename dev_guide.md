@@ -90,3 +90,5 @@ VERSION=v1.0.0
 Refer:
 
 - [Go Quickstart](https://developers.google.com/calendar/api/quickstart/go)
+- [pkg `calendar`](https://pkg.go.dev/google.golang.org/api/calendar/v3)
+- [Calendar API Reference](https://developers.google.com/calendar/api/v3/reference)
