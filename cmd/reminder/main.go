@@ -21,9 +21,8 @@ func Flow() {
 	utils.PrintError(err)
 	// read and parse the existing data
 	reminderData := *model.ReadDataFile(defaultDataFilePath)
-	// TEMP START
+	// initialize Google Calendar
 	model.FetchCalendar()
-	// TEMP END
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup

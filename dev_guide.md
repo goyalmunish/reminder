@@ -8,6 +8,7 @@
     - [Format Files](#format-files)
     - [Linting Code](#linting-code)
     - [Build and Push the Docker Image](#build-and-push-the-docker-image)
+    - [Integrating with Google Calendar API](#integrating-with-google-calendar-api)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
