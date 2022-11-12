@@ -83,3 +83,9 @@ VERSION=v1.0.0
 # building images and pushing them
 . ./scripts/build_image.sh ${VERSION}
 ```
+
+## Integrating with Google Calendar API
+
+Refer:
+
+- [Go Quickstart](https://developers.google.com/calendar/api/quickstart/go)

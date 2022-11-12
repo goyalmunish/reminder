@@ -21,6 +21,9 @@ func Flow() {
 	utils.PrintError(err)
 	// read and parse the existing data
 	reminderData := *model.ReadDataFile(defaultDataFilePath)
+	// TEMP START
+	model.FetchCalendar()
+	// TEMP END
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup
