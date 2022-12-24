@@ -5,10 +5,10 @@ package utils
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
-	"log"
 	"os"
 	"os/exec"
 	"reflect"
@@ -17,6 +17,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/goyalmunish/reminder/pkg/logger"
 
 	"github.com/AlecAivazis/survey/v2"
 )
@@ -138,10 +140,10 @@ func GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int {
 	return arr
 }
 
-// PrintError function ignores but prints the error (if present).
-func PrintError(err error) {
+// LogError function ignores but prints the error (if present).
+func LogError(ctx context.Context, err error) {
 	if err != nil {
-		fmt.Printf("%v %v\n", Symbols["error"], err)
+		logger.Error(ctx, fmt.Sprintf("%v %v\n", Symbols["error"], err))
 	}
 }
 
@@ -272,7 +274,7 @@ func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimest
 // AskOption function asks option to the user.
 // It print error, if encountered any (so that they don't have to printed by calling function).
 // It return a tuple (chosen index, chosen string, err if any).
-func AskOption(options []string, label string) (int, string, error) {
+func AskOption(ctx context.Context, options []string, label string) (int, string, error) {
 	if len(options) == 0 {
 		err := errors.New("Empty List")
 		fmt.Printf("%v Prompt failed %v\n", Symbols["warning"], err)
@@ -294,7 +296,7 @@ func AskOption(options []string, label string) (int, string, error) {
 		fmt.Printf("%v Prompt failed %v\n", Symbols["warning"], err)
 		return -1, "", err
 	}
-	fmt.Printf("You chose %d:%q\n", selectedIndex, options[selectedIndex])
+	logger.Info(ctx, fmt.Sprintf("You chose %d:%q\n", selectedIndex, options[selectedIndex]))
 	return selectedIndex, options[selectedIndex], nil
 }
 
@@ -312,10 +314,10 @@ func PerformShellOperation(exe string, args ...string) (string, error) {
 }
 
 // TerminalSize function gets terminal size.
-func TerminalSize() (int, int) {
+func TerminalSize(ctx context.Context) (int, int) {
 	out, err := PerformShellOperation("stty", "size")
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(ctx, err)
 	}
 	output := strings.TrimSpace(string(out))
 	dims := strings.Split(output, " ")
@@ -325,8 +327,8 @@ func TerminalSize() (int, int) {
 }
 
 // TerminalWidth function gets terminal width.
-func TerminalWidth() int {
-	_, width := TerminalSize()
+func TerminalWidth(ctx context.Context) int {
+	_, width := TerminalSize(ctx)
 	return width
 }
 

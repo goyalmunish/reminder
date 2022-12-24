@@ -6,28 +6,48 @@ Just run it as `go run ./cmd/reminder`
 package reminder
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/goyalmunish/reminder/internal/model"
+	"github.com/goyalmunish/reminder/internal/settings"
+	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
 )
 
 // flow is recursive function for overall flow of interactivity
+var runID uuid.UUID
+var ctx context.Context
+var config *settings.Settings
+
+func init() {
+	var err error
+	runID := uuid.New()
+	ctx = context.Background()
+	config, err = settings.LoadConfig(ctx)
+	if err != nil {
+		panic(err)
+	}
+	ctx = context.WithValue(ctx, "run_id", runID)
+	logger.SetWithOptions(config.Log)
+}
 func Flow() {
 	var err error
 	// make sure DataFile exists
-	defaultDataFilePath := model.DefaultDataFile()
-	err = model.MakeSureFileExists(defaultDataFilePath, true)
-	utils.PrintError(err)
+	err = model.MakeSureFileExists(ctx, config.AppInfo.DataFile, true)
+	if err != nil {
+		panic(err)
+	}
 	// read and parse the existing data
-	reminderData := *model.ReadDataFile(defaultDataFilePath)
+	reminderData := *model.ReadDataFile(ctx, config.AppInfo.DataFile)
 	// initialize Google Calendar
-	model.FetchCalendar()
+	model.FetchCalendar(ctx)
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup
 	_, err = reminderData.AutoBackup(24 * 60 * 60)
-	utils.PrintError(err)
+	utils.LogError(ctx, err)
 	// ask the main menu
 	fmt.Println("| =========================== MAIN MENU =========================== |")
 	fmt.Println("|     Use 'Ctrl-c' to jump one level up (towards the Main Menu)     |")
@@ -40,7 +60,7 @@ func Flow() {
 		But, if you are inside PromptUI's `Run()`, then it cancels the input and moves to next
 		statement in the code.
 	*/
-	_, result, _ := utils.AskOption([]string{
+	_, result, _ := utils.AskOption(ctx, []string{
 		fmt.Sprintf("%s %s", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%s %s %s", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
 		fmt.Sprintf("%s %s", utils.Symbols["clock"], "Approaching Due Date"),
@@ -49,8 +69,7 @@ func Flow() {
 		fmt.Sprintf("%s %s", utils.Symbols["backup"], "Create Backup"),
 		fmt.Sprintf("%s %s", utils.Symbols["zzz"], "Suspended Notes"),
 		fmt.Sprintf("%s %s", utils.Symbols["telescope"], "Look Ahead"),
-		fmt.Sprintf("%s %s", utils.Symbols["pad"], "Display Data File"),
-		fmt.Sprintf("%s %s", utils.Symbols["clip"], "Register Basic Tags")}, "Select Option")
+		fmt.Sprintf("%s %s", utils.Symbols["pad"], "Display Data File")}, "Select Option")
 	// operate on main options
 	switch result {
 	case fmt.Sprintf("%s %s", utils.Symbols["spark"], "List Stuff"):
@@ -75,6 +94,6 @@ func Flow() {
 		fmt.Println("Exiting...")
 		return
 	}
-	utils.PrintError(err)
+	utils.LogError(ctx, err)
 	Flow()
 }

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"html/template"
 	"strings"
 
@@ -16,7 +17,8 @@ A comment belongs to a particular note,
 whereas a note can have multiple comments
 */
 type Comment struct {
-	Text string `json:"text"`
+	context context.Context
+	Text    string `json:"text"`
 	BaseStruct
 }
 

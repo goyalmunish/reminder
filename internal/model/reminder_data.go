@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
 )
 
@@ -19,6 +21,7 @@ import (
 A ReminderData represents the whole reminder data-structure.
 */
 type ReminderData struct {
+	context      context.Context
 	User         *User  `json:"user"`
 	Notes        Notes  `json:"notes"`
 	Tags         Tags   `json:"tags"`
@@ -27,13 +30,17 @@ type ReminderData struct {
 	BaseStruct
 }
 
+func (rd *ReminderData) SetContext(ctx context.Context) {
+	rd.context = ctx
+}
+
 // UpdateDataFile updates data file.
 // The msg is any additional message to be printed.
-func (reminderData *ReminderData) UpdateDataFile(msg string) error {
+func (rd *ReminderData) UpdateDataFile(msg string) error {
 	// update UpdatedAt field
 	// note that UpdatedAt of a whole ReminderData object is different
 	// from corresponding field of each note
-	reminderData.UpdatedAt = utils.CurrentUnixTimestamp()
+	rd.UpdatedAt = utils.CurrentUnixTimestamp()
 	// marshal the data
 	// Refer https://pkg.go.dev/encoding/json#MarshalIndent
 	// Note: String values encoded as JSON strings are coerced to valid
@@ -43,146 +50,146 @@ func (reminderData *ReminderData) UpdateDataFile(msg string) error {
 	// For example, a text such as `comment with < and "` will be written
 	// as `"comment with \u003c and \"` but it will read back same as the
 	// original string
-	byteValue, err := json.MarshalIndent(&reminderData, "", "    ")
+	byteValue, err := json.MarshalIndent(&rd, "", "    ")
 	if err != nil {
-		utils.PrintError(err)
+		utils.LogError(rd.context, err)
 		return err
 	}
 	// persist the byte data to file
-	err = os.WriteFile(reminderData.DataFile, byteValue, 0755)
+	err = os.WriteFile(rd.DataFile, byteValue, 0755)
 	if err != nil {
-		utils.PrintError(err)
+		utils.LogError(rd.context, err)
 		return err
 	}
 	if msg != "" {
-		fmt.Println(msg)
+		logger.Info(rd.context, msg)
 	}
-	fmt.Println("Updated the data file!")
+	logger.Info(rd.context, "Updated the data file!")
 	return nil
 }
 
 // SortedTagSlugs sorts the tags in-place and return slugs.
 // Empty Tags is returned if there are no tags.
-func (reminderData *ReminderData) SortedTagSlugs() []string {
+func (rd *ReminderData) SortedTagSlugs() []string {
 	// sort tags in place
-	sort.Sort(reminderData.Tags)
+	sort.Sort(rd.Tags)
 	// fetch slugs and return
-	return reminderData.Tags.Slugs()
+	return rd.Tags.Slugs()
 }
 
 // TagFromSlug returns tag with given slug.
-func (reminderData *ReminderData) TagFromSlug(slug string) *Tag {
-	return reminderData.Tags.FromSlug(slug)
+func (rd *ReminderData) TagFromSlug(slug string) *Tag {
+	return rd.Tags.FromSlug(slug)
 }
 
 // TagsFromIds returns tags from tagIDs.
-func (reminderData *ReminderData) TagsFromIds(tagIDs []int) Tags {
-	return reminderData.Tags.FromIds(tagIDs)
+func (rd *ReminderData) TagsFromIds(tagIDs []int) Tags {
+	return rd.Tags.FromIds(tagIDs)
 }
 
 // TagIdsForGroup gets tag ids for given group.
-func (reminderData *ReminderData) TagIdsForGroup(group string) []int {
-	return reminderData.Tags.IdsForGroup(group)
+func (rd *ReminderData) TagIdsForGroup(group string) []int {
+	return rd.Tags.IdsForGroup(group)
 }
 
 // FindNotesByTagId gets all notes with given tagID and given status.
-func (reminderData *ReminderData) FindNotesByTagId(tagID int, status NoteStatus) Notes {
-	return reminderData.Notes.WithTagIdAndStatus(tagID, status)
+func (rd *ReminderData) FindNotesByTagId(tagID int, status NoteStatus) Notes {
+	return rd.Notes.WithTagIdAndStatus(tagID, status)
 }
 
 // FindNotesByTagSlug gets all notes with given tagSlug and given status.
-func (reminderData *ReminderData) FindNotesByTagSlug(tagSlug string, status NoteStatus) Notes {
-	tag := reminderData.TagFromSlug(tagSlug)
+func (rd *ReminderData) FindNotesByTagSlug(tagSlug string, status NoteStatus) Notes {
+	tag := rd.TagFromSlug(tagSlug)
 	// return empty Notes object for nil `tag`
 	if tag == nil {
 		return Notes{}
 	}
-	return reminderData.FindNotesByTagId(tag.Id, status)
+	return rd.FindNotesByTagId(tag.Id, status)
 }
 
 // UpdateNoteText updates note's text.
-func (reminderData *ReminderData) UpdateNoteText(note *Note, text string) error {
+func (rd *ReminderData) UpdateNoteText(note *Note, text string) error {
 	err := note.UpdateText(text)
 	if err != nil {
 		return err
 	}
-	return reminderData.UpdateDataFile("")
+	return rd.UpdateDataFile("")
 }
 
 // UpdateNoteSummary updates the note's summary.
-func (reminderData *ReminderData) UpdateNoteSummary(note *Note, text string) error {
+func (rd *ReminderData) UpdateNoteSummary(note *Note, text string) error {
 	err := note.UpdateSummary(text)
 	if err != nil {
 		return err
 	}
-	return reminderData.UpdateDataFile("")
+	return rd.UpdateDataFile("")
 }
 
 // UpdateNoteCompleteBy updates the note's due date (complete by).
-func (reminderData *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
+func (rd *ReminderData) UpdateNoteCompleteBy(note *Note, text string) error {
 	err := note.UpdateCompleteBy(text)
 	if err != nil {
 		return err
 	}
-	return reminderData.UpdateDataFile("")
+	return rd.UpdateDataFile("")
 }
 
 // AddNoteComment adds note's comment.
-func (reminderData *ReminderData) AddNoteComment(note *Note, text string) error {
+func (rd *ReminderData) AddNoteComment(note *Note, text string) error {
 	err := note.AddComment(text)
 	if err != nil {
 		return err
 	}
-	return reminderData.UpdateDataFile("")
+	return rd.UpdateDataFile("")
 }
 
 // UpdateNoteTags updates note's tags.
-func (reminderData *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error {
+func (rd *ReminderData) UpdateNoteTags(note *Note, tagIDs []int) error {
 	err := note.UpdateTags(tagIDs)
 	if err != nil {
 		return err
 	}
-	return reminderData.UpdateDataFile("")
+	return rd.UpdateDataFile("")
 }
 
 // UpdateNoteStatus updates note's status.
-func (reminderData *ReminderData) UpdateNoteStatus(note *Note, status NoteStatus) error {
-	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
+func (rd *ReminderData) UpdateNoteStatus(note *Note, status NoteStatus) error {
+	repeatTagIDs := rd.TagIdsForGroup("repeat")
 	err := note.UpdateStatus(status, repeatTagIDs)
 	if err != nil {
 		return err
 	}
-	return reminderData.UpdateDataFile("")
+	return rd.UpdateDataFile("")
 }
 
 // ToggleNoteMainFlag toggles note's priority.
-func (reminderData *ReminderData) ToggleNoteMainFlag(note *Note) error {
+func (rd *ReminderData) ToggleNoteMainFlag(note *Note) error {
 	err := note.ToggleMainFlag()
 	if err != nil {
 		return err
 	}
-	return reminderData.UpdateDataFile("")
+	return rd.UpdateDataFile("")
 }
 
 // RegisterBasicTags registers basic tags.
-func (reminderData *ReminderData) RegisterBasicTags() error {
-	if len(reminderData.Tags) != 0 {
+func (rd *ReminderData) RegisterBasicTags() error {
+	if len(rd.Tags) != 0 {
 		msg := fmt.Sprintf("%v Skipped registering basic tags as tag list is not empty\n", utils.Symbols["warning"])
 		return errors.New(msg)
 	}
 	basicTags := BasicTags()
-	reminderData.Tags = basicTags
-	msg := fmt.Sprintf("Added basic tags: %+v\n", reminderData.Tags)
-	return reminderData.UpdateDataFile(msg)
+	rd.Tags = basicTags
+	msg := fmt.Sprintf("Added basic tags: %+v\n", rd.Tags)
+	return rd.UpdateDataFile(msg)
 }
 
 // ListTags prompts a list of all tags (and their notes underneath).
 // Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
-func (reminderData *ReminderData) ListTags() error {
+func (rd *ReminderData) ListTags() error {
 	// function to return a tag sumbol
 	// keep different tag symbol for empty tags
 	tagSymbol := func(tagSlug string) string {
-		PendingNote := reminderData.FindNotesByTagSlug(tagSlug, NoteStatus_Pending)
+		PendingNote := rd.FindNotesByTagSlug(tagSlug, NoteStatus_Pending)
 		if len(PendingNote) > 0 {
 			return utils.Symbols["tag"]
 		} else {
@@ -192,31 +199,31 @@ func (reminderData *ReminderData) ListTags() error {
 	// get list of tags with their emojis
 	// assuming there are at least 20 tags (on average)
 	allTagSlugsWithEmoji := make([]string, 0, 20)
-	for _, tagSlug := range reminderData.SortedTagSlugs() {
+	for _, tagSlug := range rd.SortedTagSlugs() {
 		allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", tagSymbol(tagSlug), tagSlug))
 	}
 	// ask user to select a tag
-	tagIndex, _, err := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+	tagIndex, _, err := utils.AskOption(rd.context, append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag: ")
 	if (err != nil) || (tagIndex == -1) {
 		// do nothing, just exit
 		return err
 	}
 	// check if user wants to add a new tag
-	if tagIndex == len(reminderData.SortedTagSlugs()) {
+	if tagIndex == len(rd.SortedTagSlugs()) {
 		// add new tag
-		_, err = reminderData.NewTagRegistration()
+		_, err = rd.NewTagRegistration()
 		if err != nil {
 			return err
 		}
 		return nil
 	}
 	// operate on the selected a tag, and display both main and non-main notes
-	tag := reminderData.Tags[tagIndex]
-	err = reminderData.PrintNotesAndAskOptions(Notes{}, "pending_tag_notes", tag.Id, "default")
+	tag := rd.Tags[tagIndex]
+	err = rd.PrintNotesAndAskOptions(Notes{}, "pending_tag_notes", tag.Id, "default")
 	if err != nil {
-		utils.PrintError(err)
+		utils.LogError(rd.context, err)
 		// go back to ListTags
-		err = reminderData.ListTags()
+		err = rd.ListTags()
 		if err != nil {
 			return err
 		}
@@ -226,10 +233,10 @@ func (reminderData *ReminderData) ListTags() error {
 
 // SearchNotes searches throught all notes.
 // Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
-func (reminderData *ReminderData) SearchNotes() error {
+func (rd *ReminderData) SearchNotes() error {
 	// get texts of all notes
-	sort.Sort(reminderData.Notes)
-	allNotes := reminderData.Notes
+	sort.Sort(rd.Notes)
+	allNotes := rd.Notes
 	// assuming the search shows 25 items in general
 	allTexts := make([]string, 0, 25)
 	for _, note := range allNotes {
@@ -243,16 +250,16 @@ func (reminderData *ReminderData) SearchNotes() error {
 	}
 	// display prompt
 	fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
-	index, err := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
+	index, err := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth(rd.context)-10), searchNotes)
 	if err != nil {
 		return err
 	}
 	if index >= 0 {
 		note := allNotes[index]
-		action := reminderData.PrintNoteAndAskOptions(note)
+		action := rd.PrintNoteAndAskOptions(note)
 		if action == "stay" {
 			// no action was selected for the note, go one step back
-			err := reminderData.SearchNotes()
+			err := rd.SearchNotes()
 			if err != nil {
 				return err
 			}
@@ -265,12 +272,12 @@ func (reminderData *ReminderData) SearchNotes() error {
 // It accepts view as an argument with "default" or "long" as acceptable values
 // Note: NotesApprachingDueDate is dangerous as it manipulates the due date (CompleteBy) date of repeating tags
 // which can cause persitence of manupulated dates, if the returned data is persisted.
-func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
-	allNotes := reminderData.Notes
+func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
+	allNotes := rd.Notes
 	pendingNotes := allNotes.WithStatus(NoteStatus_Pending)
 	// assuming there are at least 100 notes (on average)
 	currentNotes := make([]*Note, 0, 100)
-	repeatTagIDs := reminderData.TagIdsForGroup("repeat")
+	repeatTagIDs := rd.TagIdsForGroup("repeat")
 	// populating currentNotes
 	for _, note := range pendingNotes {
 		noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
@@ -293,8 +300,8 @@ func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
 			// note: for the CompletedBy date of the note, we accept only date
 			// so, even if there is a time element recorded the the timestamp,
 			// we ignore it
-			repeatAnnuallyTag := reminderData.TagFromSlug("repeat-annually")
-			repeatMonthlyTag := reminderData.TagFromSlug("repeat-monthly")
+			repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
+			repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
 			if (repeatAnnuallyTag != nil) && utils.IntPresentInSlice(repeatAnnuallyTag.Id, note.TagIds) {
 				_, noteMonth, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
 				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYear(int(noteMonth), noteDay)
@@ -337,78 +344,77 @@ func (reminderData *ReminderData) NotesApprachingDueDate(view string) Notes {
 }
 
 // NewTagRegistration registers a new tag.
-func (reminderData *ReminderData) NewTagRegistration() (int, error) {
+func (rd *ReminderData) NewTagRegistration() (int, error) {
 	// collect and ask info about the tag
-	tagID := reminderData.nextPossibleTagId()
+	tagID := rd.nextPossibleTagId()
 
-	tag, err := NewTag(tagID, "", "")
+	tag, err := NewTag(rd.context, tagID, "", "")
 
 	// validate and save data
 	if err != nil {
-		utils.PrintError(err)
+		utils.LogError(rd.context, err)
 		return 0, err
 	} else {
-		err, _ = reminderData.newTagAppend(tag), tagID
+		err, _ = rd.newTagAppend(tag), tagID
 	}
 	return tagID, err
 }
 
 // nextPossibleTagId gets next possible tagID.
-func (reminderData *ReminderData) nextPossibleTagId() int {
-	allTags := reminderData.Tags
+func (rd *ReminderData) nextPossibleTagId() int {
+	allTags := rd.Tags
 	allTagsLen := len(allTags)
 	return allTagsLen
 }
 
 // newTagAppend appends a new tag.
-func (reminderData *ReminderData) newTagAppend(tag *Tag) error {
+func (rd *ReminderData) newTagAppend(tag *Tag) error {
 	// check if tag's slug is already present
 	isNewSlug := true
-	for _, existingTag := range reminderData.Tags {
+	for _, existingTag := range rd.Tags {
 		if existingTag.Slug == tag.Slug {
 			isNewSlug = false
 		}
 	}
 	if !isNewSlug {
-		fmt.Printf("%v The tag already exists!\n", utils.Symbols["error"])
 		return errors.New("Tag Already Exists")
 	}
 	// go ahead and append
-	fmt.Printf("Added Tag: %v\n", *tag)
-	reminderData.Tags = append(reminderData.Tags, tag)
-	return reminderData.UpdateDataFile("")
+	logger.Info(rd.context, fmt.Sprintf("Added Tag: %v\n", *tag))
+	rd.Tags = append(rd.Tags, tag)
+	return rd.UpdateDataFile("")
 }
 
 // NewNoteRegistration registers new note.
-func (reminderData *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
+func (rd *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
 	// collect info about the note
 	if tagIDs == nil {
 		// assuming each note with have on average 2 tags
 		tagIDs = make([]int, 0, 2)
 	}
-	note, err := NewNote(tagIDs, "")
+	note, err := NewNote(rd.context, tagIDs, "")
 	// validate and save data
 	if err != nil {
-		utils.PrintError(err)
+		utils.LogError(rd.context, err)
 		return note, err
 	}
-	err = reminderData.newNoteAppend(note)
+	err = rd.newNoteAppend(note)
 	if err != nil {
-		utils.PrintError(err)
+		utils.LogError(rd.context, err)
 		return note, err
 	}
 	return note, nil
 }
 
 // newNoteAppend appends a new note.
-func (reminderData *ReminderData) newNoteAppend(note *Note) error {
-	fmt.Printf("Added Note: %+v\n", *note)
-	reminderData.Notes = append(reminderData.Notes, note)
-	return reminderData.UpdateDataFile("")
+func (rd *ReminderData) newNoteAppend(note *Note) error {
+	logger.Info(rd.context, fmt.Sprintf("Added Note: %+v\n", *note))
+	rd.Notes = append(rd.Notes, note)
+	return rd.UpdateDataFile("")
 }
 
 // Stats returns current status.
-func (reminderData *ReminderData) Stats() string {
+func (rd *ReminderData) Stats() string {
 	reportTemplate := `
 Stats of "{{.DataFile}}"
   - Number of Tags:  {{.Tags | len}}
@@ -422,20 +428,20 @@ Stats of "{{.DataFile}}"
 		"numDone":      func(notes Notes) int { return len(notes.WithStatus(NoteStatus_Done)) },
 		"numAll":       func(notes Notes) int { return len(notes) },
 	}
-	return utils.TemplateResult(reportTemplate, funcMap, *reminderData)
+	return utils.TemplateResult(reportTemplate, funcMap, *rd)
 }
 
 // CreateBackup creates timestamped backup.
 // It returns path of the data file.
 // Like utils.AskOptions, it prints any encountered error, but doesn't return the error.
-func (reminderData *ReminderData) CreateBackup() (string, error) {
+func (rd *ReminderData) CreateBackup() (string, error) {
 	// get backup file name
-	ext := path.Ext(reminderData.DataFile)
-	dstFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_" + strconv.FormatInt(int64(utils.CurrentUnixTimestamp()), 10) + ext
-	lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
-	fmt.Printf("Creating backup at %q\n", dstFile)
+	ext := path.Ext(rd.DataFile)
+	dstFile := rd.DataFile[:len(rd.DataFile)-len(ext)] + "_backup_" + strconv.FormatInt(int64(utils.CurrentUnixTimestamp()), 10) + ext
+	lnFile := rd.DataFile[:len(rd.DataFile)-len(ext)] + "_backup_latest" + ext
+	logger.Info(rd.context, fmt.Sprintf("Creating backup at %q\n", dstFile))
 	// create backup
-	byteValue, err := os.ReadFile(reminderData.DataFile)
+	byteValue, err := os.ReadFile(rd.DataFile)
 	if err != nil {
 		return dstFile, err
 	}
@@ -444,7 +450,7 @@ func (reminderData *ReminderData) CreateBackup() (string, error) {
 		return dstFile, err
 	}
 	// create alias of latest backup
-	fmt.Printf("Creating symlink at %q\n", lnFile)
+	logger.Info(rd.context, fmt.Sprintf("Creating symlink at %q\n", lnFile))
 	executable, _ := exec.LookPath("ln")
 	cmd := &exec.Cmd{
 		Path:   executable,
@@ -461,59 +467,59 @@ func (reminderData *ReminderData) CreateBackup() (string, error) {
 
 // DisplayDataFile displays the data file.
 // Like utils.AskOptions, it prints any encountered error, and returns that error just for information.
-func (reminderData *ReminderData) DisplayDataFile() error {
-	fmt.Printf("Printing contents (and if possible, its difference since last backup) of %q:\n", reminderData.DataFile)
-	ext := path.Ext(reminderData.DataFile)
-	lnFile := reminderData.DataFile[:len(reminderData.DataFile)-len(ext)] + "_backup_latest" + ext
+func (rd *ReminderData) DisplayDataFile() error {
+	fmt.Printf("Printing contents (and if possible, its difference since last backup) of %q:\n", rd.DataFile)
+	ext := path.Ext(rd.DataFile)
+	lnFile := rd.DataFile[:len(rd.DataFile)-len(ext)] + "_backup_latest" + ext
 	err := utils.PerformWhich("wdiff")
 	if err != nil {
 		fmt.Printf("%v Warning: `wdiff` command is not available\n", utils.Symbols["error"])
-		err = utils.PerformCat(reminderData.DataFile)
+		err = utils.PerformCat(rd.DataFile)
 	} else {
 		err = utils.PerformFilePresence(lnFile)
 		if err != nil {
 			fmt.Printf("Warning: `%v` file is not available yet\n", lnFile)
-			err = utils.PerformCat(reminderData.DataFile)
+			err = utils.PerformCat(rd.DataFile)
 		} else {
-			err = utils.PerformCwdiff(lnFile, reminderData.DataFile)
+			err = utils.PerformCwdiff(lnFile, rd.DataFile)
 		}
 	}
 	return err
 }
 
 // AutoBackup does auto backup.
-func (reminderData *ReminderData) AutoBackup(gapSecs int64) (string, error) {
+func (rd *ReminderData) AutoBackup(gapSecs int64) (string, error) {
 	var dstFile string
 	currentTime := utils.CurrentUnixTimestamp()
-	lastBackup := reminderData.LastBackupAt
+	lastBackup := rd.LastBackupAt
 	gap := currentTime - lastBackup
-	fmt.Printf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs)
+	logger.Info(rd.context, fmt.Sprintf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs))
 	if gap < gapSecs {
-		fmt.Printf("Skipping automatic backup\n")
+		logger.Info(rd.context, fmt.Sprintf("Skipping automatic backup\n"))
 		return dstFile, nil
 	}
-	dstFile, _ = reminderData.CreateBackup()
-	reminderData.LastBackupAt = currentTime
-	return dstFile, reminderData.UpdateDataFile("")
+	dstFile, _ = rd.CreateBackup()
+	rd.LastBackupAt = currentTime
+	return dstFile, rd.UpdateDataFile("")
 }
 
 // AskTagIds (recursive) ask tagIDs that are to be associated with a note..
 // It also registers tags for you, if user asks.
-func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
+func (rd *ReminderData) AskTagIds(tagIDs []int) []int {
 	var err error
 	var tagID int
 	// ask user to select tag
-	optionIndex, _, _ := utils.AskOption(append(reminderData.SortedTagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag")
+	optionIndex, _, _ := utils.AskOption(rd.context, append(rd.SortedTagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag: ")
 	if optionIndex == -1 {
 		return []int{}
 	}
 	// get tagID
-	if optionIndex == len(reminderData.SortedTagSlugs()) {
+	if optionIndex == len(rd.SortedTagSlugs()) {
 		// add new tag
-		tagID, err = reminderData.NewTagRegistration()
+		tagID, err = rd.NewTagRegistration()
 	} else {
 		// existing tag selected
-		tagID = reminderData.Tags[optionIndex].Id
+		tagID = rd.Tags[optionIndex].Id
 		err = nil
 	}
 	// update tagIDs
@@ -522,7 +528,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 	}
 	// check with user if another tag is to be added
 	promptText, err := utils.GeneratePrompt("tag_another", "")
-	utils.PrintError(err)
+	utils.LogError(rd.context, err)
 	promptText = strings.ToLower(promptText)
 	nextTag := false
 	for _, yes := range []string{"yes", "y"} {
@@ -531,7 +537,7 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 		}
 	}
 	if nextTag {
-		return reminderData.AskTagIds(tagIDs)
+		return rd.AskTagIds(tagIDs)
 	}
 	return tagIDs
 }
@@ -539,9 +545,9 @@ func (reminderData *ReminderData) AskTagIds(tagIDs []int) []int {
 // PrintNoteAndAskOptions prints note and display options.
 // Like utils.AskOptions, it prints any encountered error, but doesn't returns that error just for information.
 // It return string representing workflow direction.
-func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
-	fmt.Print(note.ExternalText(reminderData))
-	_, noteOption, _ := utils.AskOption([]string{
+func (rd *ReminderData) PrintNoteAndAskOptions(note *Note) string {
+	fmt.Print(note.ExternalText(rd))
+	_, noteOption, _ := utils.AskOption(rd.context, []string{
 		fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"),
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
 		fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
@@ -553,62 +559,62 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"),
 		fmt.Sprintf("%v %v", utils.Symbols["glossary"], "Update summary"),
 		fmt.Sprintf("%v %v", utils.Symbols["hat"], "Toggle main/incidental")},
-		"Select Action")
+		"Select Action: ")
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
 		promptText, err := utils.GeneratePrompt("note_comment", "")
-		utils.PrintError(err)
-		err = reminderData.AddNoteComment(note, promptText)
-		utils.PrintError(err)
-		fmt.Print(note.ExternalText(reminderData))
+		utils.LogError(rd.context, err)
+		err = rd.AddNoteComment(note, promptText)
+		utils.LogError(rd.context, err)
+		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
 		return "main-menu"
 	case fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"):
 		fmt.Println("No changes made")
-		fmt.Print(note.ExternalText(reminderData))
+		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
-		err := reminderData.UpdateNoteStatus(note, NoteStatus_Done)
-		utils.PrintError(err)
-		fmt.Print(note.ExternalText(reminderData))
+		err := rd.UpdateNoteStatus(note, NoteStatus_Done)
+		utils.LogError(rd.context, err)
+		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["zzz"], "Mark as suspended"):
-		err := reminderData.UpdateNoteStatus(note, NoteStatus_Suspended)
-		utils.PrintError(err)
-		fmt.Print(note.ExternalText(reminderData))
+		err := rd.UpdateNoteStatus(note, NoteStatus_Suspended)
+		utils.LogError(rd.context, err)
+		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"):
-		err := reminderData.UpdateNoteStatus(note, NoteStatus_Pending)
-		utils.PrintError(err)
-		fmt.Print(note.ExternalText(reminderData))
+		err := rd.UpdateNoteStatus(note, NoteStatus_Pending)
+		utils.LogError(rd.context, err)
+		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
 		promptText, err := utils.GeneratePrompt("note_completed_by", "")
-		utils.PrintError(err)
-		err = reminderData.UpdateNoteCompleteBy(note, promptText)
-		utils.PrintError(err)
-		fmt.Print(note.ExternalText(reminderData))
+		utils.LogError(rd.context, err)
+		err = rd.UpdateNoteCompleteBy(note, promptText)
+		utils.LogError(rd.context, err)
+		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
 		promptText, err := utils.GeneratePrompt("note_text", note.Text)
-		utils.PrintError(err)
-		err = reminderData.UpdateNoteText(note, promptText)
-		utils.PrintError(err)
-		fmt.Print(note.ExternalText(reminderData))
+		utils.LogError(rd.context, err)
+		err = rd.UpdateNoteText(note, promptText)
+		utils.LogError(rd.context, err)
+		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["glossary"], "Update summary"):
 		promptText, err := utils.GeneratePrompt("note_summary", note.Summary)
-		utils.PrintError(err)
-		err = reminderData.UpdateNoteSummary(note, promptText)
-		utils.PrintError(err)
-		fmt.Print(note.ExternalText(reminderData))
+		utils.LogError(rd.context, err)
+		err = rd.UpdateNoteSummary(note, promptText)
+		utils.LogError(rd.context, err)
+		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"):
-		tagIDs := reminderData.AskTagIds([]int{})
+		tagIDs := rd.AskTagIds([]int{})
 		if len(tagIDs) > 0 {
-			err := reminderData.UpdateNoteTags(note, tagIDs)
-			utils.PrintError(err)
-			fmt.Print(note.ExternalText(reminderData))
+			err := rd.UpdateNoteTags(note, tagIDs)
+			utils.LogError(rd.context, err)
+			fmt.Print(note.ExternalText(rd))
 		} else {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["warning"])
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Toggle main/incidental"):
-		err := reminderData.ToggleNoteMainFlag(note)
-		utils.PrintError(err)
-		fmt.Print(note.ExternalText(reminderData))
+		err := rd.ToggleNoteMainFlag(note)
+		utils.LogError(rd.context, err)
+		fmt.Print(note.ExternalText(rd))
 	}
 	return "stay"
 }
@@ -625,33 +631,33 @@ func (reminderData *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 // - "pending_approaching_notes": fetch pending notes with approaching due date
 // - "pending_long_view_notes": fetch long-view (52 weeks) of pending notes
 // - "passed_notes": use passed notes
-func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string, tagID int, sortBy string) error {
+func (rd *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string, tagID int, sortBy string) error {
 	// check if passed notes is to be used or to fetch latest notes
 	switch display_mode {
 	case "done_notes":
 		// ignore the passed notes
 		// fetch all the done notes
-		notes = reminderData.Notes.WithStatus(NoteStatus_Done)
+		notes = rd.Notes.WithStatus(NoteStatus_Done)
 		fmt.Printf("A total of %v notes marked as 'done':\n", len(notes))
 	case "suspended_notes":
 		// ignore the passed notes
 		// fetch all the done notes
-		notes = reminderData.Notes.WithStatus(NoteStatus_Suspended)
+		notes = rd.Notes.WithStatus(NoteStatus_Suspended)
 		fmt.Printf("A total of %v notes marked as 'suspended':\n", len(notes))
 	case "pending_tag_notes":
 		// this is for listing all notes associated with given tag, with asked status
 		// fetch pending notes with given tagID
-		notes = reminderData.FindNotesByTagId(tagID, NoteStatus_Pending)
+		notes = rd.FindNotesByTagId(tagID, NoteStatus_Pending)
 	case "pending_only_main_notes":
 		// this is for listing all main notes, with asked status
-		notes = reminderData.Notes.OnlyMain()
+		notes = rd.Notes.OnlyMain()
 		countAllMain := len(notes)
 		notes = notes.WithStatus(NoteStatus_Pending)
 		countPendingMain := len(notes)
 		fmt.Printf("A total of %v/%v notes flagged as 'main':\n", countPendingMain, countAllMain)
 	case "pending_long_view_notes":
 		// look ahead a year (52 weeks)
-		notes = reminderData.NotesApprachingDueDate("long")
+		notes = rd.NotesApprachingDueDate("long")
 	case "pending_approaching_notes":
 		// this is for listing all notes approaching due date
 		// fetch notes approaching due date
@@ -662,13 +668,13 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_m
 		fmt.Println("      - within 3 days for repeat-annually and a week post due date (ignoring its year)")
 		fmt.Println("      - within 1 day for repeat-monthly and 3 days post due date (ignoring its year and month)")
 		fmt.Println("Note: The process may automatically adjust CompleteBy (due-date) with MM-YYYY for monthly repeating notes and YYYY for yearly repeating ones. This is done as part of search algorithm, and it does not impacts on any visibility of those notes.")
-		notes = reminderData.NotesApprachingDueDate("default")
+		notes = rd.NotesApprachingDueDate("default")
 	case "passed_notes":
 		// use passed notes
 		// this is used wthen this function is called recursively
 		// this is useful in circumstances where for example, a note's tags are updated for a note under a tag in which case
 		// otherwise the note will immediately disappear if the updated tags list doesn't include the original tag
-		fmt.Printf("Note: Using passed notes, so the list will not be refreshed immediately!\n")
+		fmt.Printf("Note: Using passed notes; the list will not be refreshed immediately!\n")
 	default:
 		fmt.Printf("Error: Unreachable code")
 	}
@@ -680,18 +686,18 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_m
 	case "default":
 		sort.Sort(Notes(notes))
 	}
-	repeatAnnuallyTag := reminderData.TagFromSlug("repeat-annually")
-	repeatMonthlyTag := reminderData.TagFromSlug("repeat-monthly")
-	texts := notes.ExternalTexts(utils.TerminalWidth()-50, repeatAnnuallyTag.Id, repeatMonthlyTag.Id)
+	repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
+	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
+	texts := notes.ExternalTexts(utils.TerminalWidth(rd.context)-50, repeatAnnuallyTag.Id, repeatMonthlyTag.Id)
 
 	// ask user to select a note
 	promptText := ""
 	if tagID >= 0 {
-		promptText = fmt.Sprintf("Select Note (for the tag %v %v)", utils.Symbols["tag"], reminderData.TagsFromIds([]int{tagID})[0].Slug)
+		promptText = fmt.Sprintf("Select Note (for the tag %v %v): ", utils.Symbols["tag"], rd.TagsFromIds([]int{tagID})[0].Slug)
 	} else {
-		promptText = "Select Note"
+		promptText = "Select Note: "
 	}
-	noteIndex, _, err := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
+	noteIndex, _, err := utils.AskOption(rd.context, append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
 	if (err != nil) || (noteIndex == -1) {
 		return err
 	}
@@ -702,14 +708,14 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_m
 		if tagID < 0 {
 			return errors.New("The passed tagID is invalid!")
 		}
-		note, err := reminderData.NewNoteRegistration([]int{tagID})
+		note, err := rd.NewNoteRegistration([]int{tagID})
 		if err != nil {
 			return err
 		}
 		var updatedNotes Notes
 		updatedNotes = append(updatedNotes, note)
 		updatedNotes = append(updatedNotes, notes...)
-		err = reminderData.PrintNotesAndAskOptions(updatedNotes, "passed_notes", tagID, sortBy)
+		err = rd.PrintNotesAndAskOptions(updatedNotes, "passed_notes", tagID, sortBy)
 		if err != nil {
 			return err
 		}
@@ -718,10 +724,10 @@ func (reminderData *ReminderData) PrintNotesAndAskOptions(notes Notes, display_m
 
 	// ask options about the selected note
 	note := notes[noteIndex]
-	action := reminderData.PrintNoteAndAskOptions(note)
+	action := rd.PrintNoteAndAskOptions(note)
 	if action == "stay" {
 		// no action was selected for the note, go one step back
-		err = reminderData.PrintNotesAndAskOptions(notes, "passed_notes", tagID, sortBy)
+		err = rd.PrintNotesAndAskOptions(notes, "passed_notes", tagID, sortBy)
 		if err != nil {
 			return err
 		}

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
 	"github.com/rivo/tview"
 )
@@ -66,7 +68,7 @@ func printNoteField(fieldName string, fieldValue interface{}) string {
 }
 
 // NewNote function provides prompt to register a new Note, and returns its answer.
-func NewNote(tagIDs []int, useText string) (*Note, error) {
+func NewNote(ctx context.Context, tagIDs []int, useText string) (*Note, error) {
 	var noteText string
 	var err error
 	note := &Note{
@@ -79,6 +81,7 @@ func NewNote(tagIDs []int, useText string) (*Note, error) {
 			UpdatedAt: utils.CurrentUnixTimestamp()},
 		// Text:       noteText,
 	}
+	note.SetContext(ctx)
 	if useText == "" {
 		noteText, err = utils.GeneratePrompt("note_text", "")
 		if err != nil {
@@ -130,7 +133,7 @@ func BasicTags() Tags {
 
 // NewTag funciton provides prompt for creating new Tag.
 // Pass useSlug and/or useGroup to use given values instead of prompting user.
-func NewTag(tagID int, useSlug string, useGroup string) (*Tag, error) {
+func NewTag(ctx context.Context, tagID int, useSlug string, useGroup string) (*Tag, error) {
 	var err error
 	var tagSlug string
 	var tagGroup string
@@ -142,6 +145,7 @@ func NewTag(tagID int, useSlug string, useGroup string) (*Tag, error) {
 		// Slug:      tagSlug,
 		// Group:     tagGroup,
 	}
+	tag.SetContext(ctx)
 	// ask for tag slug
 	if useSlug == "" {
 		tagSlug, err = utils.GeneratePrompt("tag_slug", "")
@@ -174,24 +178,21 @@ func NewTag(tagID int, useSlug string, useGroup string) (*Tag, error) {
 	return tag, nil
 }
 
-// DefaultDataFile function returns default data file path.
-func DefaultDataFile() string {
-	return path.Join(os.Getenv("HOME"), "reminder", "data.json")
-}
-
 // MakeSureFileExists function makes sure that the dataFilePath exists.
-func MakeSureFileExists(dataFilePath string, askUserInput bool) error {
+func MakeSureFileExists(ctx context.Context, dataFilePath string, askUserInput bool) error {
 	_, err := os.Stat(dataFilePath)
 	if err != nil {
-		fmt.Printf("Error finding existing data file: %v\n", err)
+		logger.Warn(ctx, fmt.Sprintf("Error finding existing data file: %v\n", err))
 		if errors.Is(err, fs.ErrNotExist) {
-			fmt.Printf("Try generating new data file %v.\n", dataFilePath)
+			logger.Info(ctx, fmt.Sprintf("Trying generating new data file %q.\n", dataFilePath))
 			err := os.MkdirAll(path.Dir(dataFilePath), 0751)
 			if err != nil {
 				return err
 			}
-			reminderData := *BlankReminder(askUserInput)
+			reminderData := *BlankReminder(askUserInput, dataFilePath)
 			reminderData.DataFile = dataFilePath
+			reminderData.SetContext(ctx)
+			reminderData.RegisterBasicTags()
 			return reminderData.UpdateDataFile("")
 		}
 		return err
@@ -200,16 +201,16 @@ func MakeSureFileExists(dataFilePath string, askUserInput bool) error {
 }
 
 // BlankReminder function creates blank ReminderData object.
-func BlankReminder(askUserInput bool) *ReminderData {
+func BlankReminder(askUserInput bool, dataFilePath string) *ReminderData {
 	var name string
 	var emailID string
-	fmt.Println("Initializing the data file. Please provide following data.")
+	fmt.Println("Initializing the data file. Please provide following data:")
 	app := tview.NewApplication()
 	reminderData := &ReminderData{
 		User:     &User{Name: name, EmailId: emailID},
 		Notes:    Notes{},
 		Tags:     Tags{},
-		DataFile: DefaultDataFile(),
+		DataFile: dataFilePath,
 	}
 
 	if !askUserInput {
@@ -257,15 +258,23 @@ func BlankReminder(askUserInput bool) *ReminderData {
 	return reminderData
 }
 
-// ReadDataFile function reads data file.
-func ReadDataFile(dataFilePath string) *ReminderData {
+// ReadDataFile function reads data file as instance of `ReminderData`
+func ReadDataFile(ctx context.Context, dataFilePath string) *ReminderData {
 	var reminderData ReminderData
 	// read byte data from file
 	byteValue, err := os.ReadFile(dataFilePath)
-	utils.PrintError(err)
+	utils.LogError(ctx, err)
 	// parse json data
 	err = json.Unmarshal(byteValue, &reminderData)
-	utils.PrintError(err)
+	utils.LogError(ctx, err)
+	// set context
+	reminderData.SetContext(ctx)
+	for _, note := range reminderData.Notes {
+		note.SetContext(ctx)
+	}
+	for _, tag := range reminderData.Tags {
+		tag.SetContext(ctx)
+	}
 	// close the file
 	return &reminderData
 }
