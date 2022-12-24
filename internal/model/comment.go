@@ -39,3 +39,7 @@ func (comment *Comment) String() string {
 	parts := []string{utils.UnixTimestampToMediumTimeStr(comment.CreatedAt), comment.Text}
 	return strings.Join(parts, " | ")
 }
+
+func (comment *Comment) SetContext(ctx context.Context) {
+	comment.context = ctx
+}

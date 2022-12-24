@@ -495,7 +495,7 @@ func (rd *ReminderData) AutoBackup(gapSecs int64) (string, error) {
 	gap := currentTime - lastBackup
 	logger.Info(rd.context, fmt.Sprintf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs))
 	if gap < gapSecs {
-		logger.Info(rd.context, fmt.Sprintf("Skipping automatic backup\n"))
+		logger.Info(rd.context, fmt.Sprintln("Skipping automatic backup"))
 		return dstFile, nil
 	}
 	dstFile, _ = rd.CreateBackup()

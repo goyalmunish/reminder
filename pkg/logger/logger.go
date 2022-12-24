@@ -2,16 +2,20 @@ package logger
 
 import (
 	"context"
-	"io"
 
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	_log    *logrus.Logger = logrus.New()
-	level   logrus.Level
-	_stdOut io.Writer
+	_log *logrus.Logger = logrus.New()
+	// level   logrus.Level
+	// _stdOut io.Writer
 )
+
+/*
+Key type is used for keys of context.Context
+*/
+type Key string
 
 func SetWithOptions(options *Options) {
 	_log.SetLevel(logrus.Level(options.Level))
@@ -20,7 +24,7 @@ func SetWithOptions(options *Options) {
 
 func loggerWithContext(ctx context.Context) *logrus.Entry {
 	logEntry := _log.WithFields(logrus.Fields{"app": "reminder"})
-	if v := ctx.Value("run_id"); v != nil {
+	if v := ctx.Value(Key("run_id")); v != nil {
 		logEntry = logEntry.WithFields(logrus.Fields{"run_id": v})
 	}
 	return logEntry

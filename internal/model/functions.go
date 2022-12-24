@@ -192,7 +192,10 @@ func MakeSureFileExists(ctx context.Context, dataFilePath string, askUserInput b
 			reminderData := *BlankReminder(askUserInput, dataFilePath)
 			reminderData.DataFile = dataFilePath
 			reminderData.SetContext(ctx)
-			reminderData.RegisterBasicTags()
+			err = reminderData.RegisterBasicTags()
+			if err != nil {
+				return err
+			}
 			return reminderData.UpdateDataFile("")
 		}
 		return err
