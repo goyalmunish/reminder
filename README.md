@@ -6,7 +6,7 @@
     - [Yet Another Reminder Tool/App. Why?](#yet-another-reminder-toolapp-why)
     - [How to Use?](#how-to-use)
     - [How to Run?](#how-to-run)
-        - [macOS/Linux using Homebrew/Linuxbrew](#macoslinux-using-homebrewlinuxbrew)
+        - [macOS/Linux using Homebrew/Linuxbrew (recommend)](#macoslinux-using-homebrewlinuxbrew-recommend)
         - [Easily run the tool via Docker](#easily-run-the-tool-via-docker)
         - [Non-Docker Setup](#non-docker-setup)
             - [Install `go`](#install-go)
@@ -109,7 +109,7 @@ Additionally, from the **Main Menu**:
 
 ## How to Run?
 
-### macOS/Linux using Homebrew/Linuxbrew
+### macOS/Linux using Homebrew/Linuxbrew (recommend)
 
 The easiest way is to utilise [**Homebrew**](https://brew.sh/) (macOS) or [**LinuxBrew**](https://docs.brew.sh/Homebrew-on-Linux) (Linux) package management system. Once installed simply issue the following command:
 
