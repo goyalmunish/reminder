@@ -28,7 +28,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	ctx = context.WithValue(ctx, logger.Key("run_id"), runID)
+	ctx = context.WithValue(ctx, "run_id", runID)
 	logger.SetWithOptions(config.Log)
 }
 func Flow() {

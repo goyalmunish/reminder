@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"html/template"
 	"strings"
 
@@ -16,7 +17,8 @@ A comment belongs to a particular note,
 whereas a note can have multiple comments
 */
 type Comment struct {
-	Text string `json:"text"`
+	context context.Context
+	Text    string `json:"text"`
 	BaseStruct
 }
 
@@ -36,4 +38,8 @@ func (comment *Comment) String() string {
 	// way 2
 	parts := []string{utils.UnixTimestampToMediumTimeStr(comment.CreatedAt), comment.Text}
 	return strings.Join(parts, " | ")
+}
+
+func (comment *Comment) SetContext(ctx context.Context) {
+	comment.context = ctx
 }
