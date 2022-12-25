@@ -1,0 +1,9 @@
+appinfo:
+  # datafile: /Users/goyalmunish/reminder/data.json
+log:
+  level: 5
+  lookup_fields:
+  - app
+  - run_id
+calendar:
+  credentialfile: ~/credentials.json
