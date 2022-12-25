@@ -36,14 +36,16 @@ func LoadConfig(ctx context.Context) (*Settings, error) {
 	settings := DefaultSettings()
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile(appConfigPath)
+	logger.Info(ctx, fmt.Sprintf("Attempt to read the app config %q (on top of default values).", appConfigPath))
 	if err := viper.ReadInConfig(); err != nil {
+		// Just log the error, and fall back to default settings.
 		utils.LogError(ctx, err)
-		return nil, err
 	}
+	// If config file is found, unmarshal those values ontop of default settings struct.
+	// Otherwise, do nothing.
 	if err := viper.Unmarshal(settings); err != nil {
 		utils.LogError(ctx, err)
 		return nil, err
 	}
-	logger.Info(ctx, fmt.Sprintf("Read the app config %q (on top of default values).", appConfigPath))
 	return settings, nil
 }
