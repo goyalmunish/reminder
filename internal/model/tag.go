@@ -23,6 +23,7 @@ func (t Tag) String() string {
 	return fmt.Sprintf("%v#%v#%v", t.Group, t.Slug, t.Id)
 }
 
+// SetContext sets given context to the receiver.
 func (tag *Tag) SetContext(ctx context.Context) {
 	tag.context = ctx
 }

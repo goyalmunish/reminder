@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/goyalmunish/reminder/internal/model"
 	"github.com/goyalmunish/reminder/internal/settings"
+	"github.com/goyalmunish/reminder/pkg/calendar"
 	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
 )
@@ -42,7 +43,7 @@ func Flow() {
 	// read and parse the existing data
 	reminderData := *model.ReadDataFile(ctx, config.AppInfo.DataFile)
 	// initialize Google Calendar
-	model.FetchCalendar(ctx)
+	calendar.FetchCalendar(ctx)
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup

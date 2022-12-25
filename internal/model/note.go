@@ -52,6 +52,7 @@ func (note *Note) Type() string {
 	return "incidental"
 }
 
+// SetContext sets given context to the receiver.
 func (note *Note) SetContext(ctx context.Context) {
 	note.context = ctx
 }

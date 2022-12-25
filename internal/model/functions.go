@@ -265,10 +265,11 @@ func BlankReminder(askUserInput bool, dataFilePath string) *ReminderData {
 func ReadDataFile(ctx context.Context, dataFilePath string) *ReminderData {
 	var reminderData ReminderData
 	// read byte data from file
-	byteValue, err := os.ReadFile(dataFilePath)
+	byteValue, err := os.ReadFile(utils.TryConvertTildaBasedPath(dataFilePath))
 	utils.LogError(ctx, err)
 	// parse json data
 	err = json.Unmarshal(byteValue, &reminderData)
+	logger.Info(ctx, fmt.Sprintf("Read contents of %q into ReminderData", dataFilePath))
 	utils.LogError(ctx, err)
 	// set context
 	reminderData.SetContext(ctx)

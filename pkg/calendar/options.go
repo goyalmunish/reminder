@@ -1,20 +1,11 @@
 package calendar
 
-import (
-	"os"
-	"path"
-)
-
 type Options struct {
-	CredentialFile string
+	CredentialFile string `json:"credential_file" yaml:"credential_file" mapstructure:"credential_file"`
 }
 
 func DefaultOptions() *Options {
-	homePath := os.Getenv("HOME")
-	if homePath != "" {
-		homePath = "~"
-	}
 	return &Options{
-		CredentialFile: path.Join(homePath, "credentials.json"),
+		CredentialFile: "~/calendar_credentials.json",
 	}
 }

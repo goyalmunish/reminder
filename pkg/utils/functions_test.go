@@ -210,3 +210,10 @@ func TestPerformShellOperation(t *testing.T) {
 	_, err = utils.PerformShellOperation("command_do_not_exist", "arg1", "arg2")
 	utils.AssertEqual(t, err, errors.New("exec: no command"))
 }
+
+func TestHomeDir(t *testing.T) {
+	got := utils.HomeDir()
+	if len(got) == 0 {
+		t.Errorf("HomeDir function returns blank path")
+	}
+}

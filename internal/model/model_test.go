@@ -51,7 +51,7 @@ func skipCI(t *testing.T) {
 
 func TestDataFile(t *testing.T) {
 	defaultDataFilePath := settings.DefaultSettings().AppInfo.DataFile
-	utils.AssertEqual(t, strings.HasPrefix(defaultDataFilePath, "/"), true)
+	utils.AssertEqual(t, strings.HasPrefix(defaultDataFilePath, "/") || strings.HasPrefix(defaultDataFilePath, "~/"), true)
 	utils.AssertEqual(t, strings.HasSuffix(defaultDataFilePath, ".json"), true)
 }
 

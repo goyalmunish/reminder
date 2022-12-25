@@ -1,20 +1,11 @@
 package appinfo
 
-import (
-	"os"
-	"path"
-)
-
 type Options struct {
-	DataFile string
+	DataFile string `json:"data_file" yaml:"data_file" mapstructure:"data_file"`
 }
 
 func DefaultOptions() *Options {
-	homePath := os.Getenv("HOME")
-	if homePath == "" {
-		homePath = "~"
-	}
-	dataFilePath := path.Join(homePath, "reminder", "data.json")
+	dataFilePath := "~/reminder/data.json"
 	return &Options{
 		DataFile: dataFilePath,
 	}

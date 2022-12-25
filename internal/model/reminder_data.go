@@ -30,6 +30,7 @@ type ReminderData struct {
 	BaseStruct
 }
 
+// SetContext sets given context to the receiver.
 func (rd *ReminderData) SetContext(ctx context.Context) {
 	rd.context = ctx
 }
