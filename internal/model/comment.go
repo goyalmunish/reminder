@@ -40,6 +40,7 @@ func (comment *Comment) String() string {
 	return strings.Join(parts, " | ")
 }
 
+// SetContext sets given context to the receiver.
 func (comment *Comment) SetContext(ctx context.Context) {
 	comment.context = ctx
 }

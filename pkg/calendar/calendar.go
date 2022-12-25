@@ -1,4 +1,4 @@
-package model
+package calendar
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/goyalmunish/reminder/pkg/logger"
+	"github.com/goyalmunish/reminder/pkg/utils"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -17,15 +18,13 @@ import (
 	"google.golang.org/api/option"
 )
 
-var HomeDir string = os.Getenv("HOME")
-
 const EnableCalendar bool = false
 
 // Retrieve a token, saves the token, then returns the generated client.
 func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
 	// The file calendar_token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first time.
-	tokenFile := fmt.Sprintf("%s/%s", HomeDir, "calendar_token.json")
+	tokenFile := fmt.Sprintf("%s/%s", utils.HomeDir(), "calendar_token.json")
 	tok, err := tokenFromFile(ctx, tokenFile)
 	if err != nil {
 		tok = getTokenFromWeb(ctx, config)
@@ -79,8 +78,8 @@ func saveToken(ctx context.Context, path string, token *oauth2.Token) {
 
 // Get Calendar Service.
 func getCalendarService(ctx context.Context) (*calendar.Service, error) {
-	credFile := fmt.Sprintf("%s/%s", HomeDir, "calendar_credentials.json")
-	b, err := os.ReadFile(credFile)
+	credFile := "~/calendar_credentials.json"
+	b, err := os.ReadFile(utils.TryConvertTildaBasedPath(credFile))
 	if err != nil {
 		logger.Fatal(ctx, fmt.Sprintf("Unable to read client secret file: %v", err))
 	}

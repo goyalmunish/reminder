@@ -11,6 +11,8 @@ import (
 	"html/template"
 	"os"
 	"os/exec"
+	"os/user"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -445,4 +447,25 @@ func GenerateNoteSearchSelect(items []string, searchFunc func(filter string, val
 	}
 	err := survey.AskOne(prompt, &selectedIndex)
 	return selectedIndex, err
+}
+
+// HomeDir return the home directory path for current user.
+func HomeDir() string {
+	usr, _ := user.Current()
+	dir := usr.HomeDir
+	return dir
+}
+
+// TryConvertTildaBasedPath converts tilda (~) based path to complete path.
+// For a non-tilda based path, return as it is.
+func TryConvertTildaBasedPath(path string) string {
+	homeDir := HomeDir()
+	if path == "~" {
+		path = homeDir
+	} else if strings.HasPrefix(path, "~/") {
+		// Use strings.HasPrefix so we don't match paths like
+		// "/something/~/something/"
+		path = filepath.Join(homeDir, path[2:])
+	}
+	return path
 }

@@ -22,6 +22,7 @@ func (u User) String() string {
 	return fmt.Sprintf("{Name: %v, EmailId: %v}", u.Name, u.EmailId)
 }
 
+// SetContext sets given context to the receiver.
 func (u *User) SetContext(ctx context.Context) {
 	u.context = ctx
 }
