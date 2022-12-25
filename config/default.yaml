@@ -6,4 +6,4 @@ log:
   - app
   - run_id
 calendar:
-  credential_file: ~/credentials.json
+  credential_file: ~/calendar_credentials.json
