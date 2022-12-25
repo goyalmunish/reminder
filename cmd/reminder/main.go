@@ -28,6 +28,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	ctx = context.WithValue(ctx, logger.Key("app"), "reminder")
 	ctx = context.WithValue(ctx, logger.Key("run_id"), runID)
 	logger.SetWithOptions(config.Log)
 }
@@ -73,8 +74,6 @@ func Flow() {
 	switch result {
 	case fmt.Sprintf("%s %s", utils.Symbols["spark"], "List Stuff"):
 		err = reminderData.ListTags()
-	case fmt.Sprintf("%s %s", utils.Symbols["clip"], "Register Basic Tags"):
-		err = reminderData.RegisterBasicTags()
 	case fmt.Sprintf("%s %s", utils.Symbols["clock"], "Approaching Due Date"):
 		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, "pending_approaching_notes", -1, "due-date")
 	case fmt.Sprintf("%s %s", utils.Symbols["hat"], "Main Notes"):

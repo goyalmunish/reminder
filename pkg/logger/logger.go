@@ -7,25 +7,39 @@ import (
 )
 
 var (
-	_log *logrus.Logger = logrus.New()
+	_log     *logrus.Logger = logrus.New()
+	_options *Options
 	// level   logrus.Level
 	// _stdOut io.Writer
 )
 
 /*
-Key type is used for keys of context.Context
+Key type is used for keys of context.Context.
 */
 type Key string
 
+// SetWithOptions setsup the logger based on the passed options.
 func SetWithOptions(options *Options) {
+	_options = options
 	_log.SetLevel(logrus.Level(options.Level))
 	_log.SetFormatter(&logrus.TextFormatter{})
 }
 
+// loggerWithContext enhances the log entry with context and with additional fields.
 func loggerWithContext(ctx context.Context) *logrus.Entry {
-	logEntry := _log.WithFields(logrus.Fields{"app": "reminder"})
-	if v := ctx.Value(Key("run_id")); v != nil {
-		logEntry = logEntry.WithFields(logrus.Fields{"run_id": v})
+	// add context (for hooks)
+	logEntry := _log.WithContext(ctx)
+	// add log fields (if they are available)
+	// LookupFields can be nil while logger is being setup, make it blank
+	// to mitigate log issues for such cases.
+	if _options == nil || _options.LookupFields == nil {
+		_options = DefaultOptions()
+		_options.LookupFields = []string{}
+	}
+	for _, field := range _options.LookupFields {
+		if v := ctx.Value(Key(field)); v != nil {
+			logEntry = logEntry.WithFields(logrus.Fields{field: v})
+		}
 	}
 	return logEntry
 }
