@@ -12,11 +12,15 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/goyalmunish/reminder/pkg/calendar"
 	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
 	gc "google.golang.org/api/calendar/v3"
 )
+
+const EnableCalendar bool = true
 
 /*
 A ReminderData represents the whole reminder data-structure.
@@ -36,8 +40,76 @@ func (rd *ReminderData) SetContext(ctx context.Context) {
 	rd.context = ctx
 }
 
+// SyncCalendar syncs pending notes to Cloud Calendar.
+func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
+	ctx := rd.context
+	if !EnableCalendar {
+		logger.Warn(ctx, "Google Calendar is disabled.")
+		return
+	}
+
+	// Get calendar service
+	srv, err := calendar.GetCalendarService(ctx, calOptions)
+	if err != nil {
+		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve Calendar client: %v", err))
+	}
+
+	// Get list of all events of next 2 years, with recurring events as a
+	// unit (and not as separate single events).
+	currentTime := time.Now()
+	tStart := currentTime.Format(time.RFC3339)
+	tStop := currentTime.AddDate(2, 0, 0).Format(time.RFC3339)
+	existingEvents, err := srv.Events.List("primary").
+		ShowDeleted(false).
+		SingleEvents(false).
+		TimeMin(tStart).
+		TimeMax(tStop).
+		Do()
+	if err != nil {
+		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve the events: %v", err))
+	}
+
+	// Get Cloud Calendar details
+	fmt.Println(calendar.EventDetails(ctx, existingEvents))
+
+	// Iterating through the Cloud Calendar Events and delete the ones related to reminder
+	fmt.Printf("Upcoming events:")
+	if len(existingEvents.Items) == 0 {
+		logger.Warn(ctx, "No upcoming events found.")
+	} else {
+		logger.Info(ctx, fmt.Sprintf("A total of %v events.", len(existingEvents.Items)))
+		for _, item := range existingEvents.Items {
+			if item.Summary == "" {
+				continue
+			}
+			owned := false
+			if strings.HasPrefix(item.Summary, calendar.TitlePrefix) {
+				owned = true
+			}
+			fmt.Printf("  - %v | %v | owned=%v\n", item.Summary, item.Recurrence, owned)
+			if owned {
+				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
+					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete Calendar event %q | %q | %v", item.Id, item.Summary, err))
+				}
+				logger.Info(ctx, fmt.Sprintf("Deleted the Calendar event %q | %q", item.Id, item.Summary))
+			}
+		}
+	}
+
+	// Add events to Cloud Calendar
+	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone)
+	logger.Info(ctx, fmt.Sprintf("A total of %v events.", len(newEvents)))
+	for _, event := range newEvents[0:3] {
+		_, err = srv.Events.Insert("primary", event).Do()
+		if err != nil {
+			logger.Error(ctx, err)
+		}
+		logger.Info(ctx, fmt.Sprintf("Synced the event %q | %q", event.Summary, event.Start))
+	}
+}
+
 // GoogleCalendarEvents returns list of Google Calendar Events.
-func (rd *ReminderData) GoogleCalendarEvents(ctx context.Context, timezoneIANA string) []*gc.Event {
+func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string) []*gc.Event {
 	// get all pending notes
 	allNotes := rd.Notes
 	pendingNotes := allNotes.WithStatus(NoteStatus_Pending)

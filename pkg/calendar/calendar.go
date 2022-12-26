@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"strings"
 
 	"net/http"
 	"os"
@@ -19,8 +18,6 @@ import (
 	gc "google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
 )
-
-const EnableCalendar bool = true
 
 const TitlePrefix string = "Reminder | "
 
@@ -64,69 +61,6 @@ func ConstructEvent(title string, description string, start time.Time, timezoneI
 	return event, nil
 }
 
-// Fetch upcoming calendar events.
-func SyncCalendar(ctx context.Context, options *Options) {
-	if !EnableCalendar {
-		logger.Warn(ctx, "Google Calendar is disabled.")
-		return
-	}
-
-	// Get calendar service
-	srv, err := getCalendarService(ctx, options)
-	if err != nil {
-		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve Calendar client: %v", err))
-	}
-
-	// Get list of all events of next 2 years, with recurring events as a
-	// unit (and not as separate single events).
-	currentTime := time.Now()
-	tStart := currentTime.Format(time.RFC3339)
-	tStop := currentTime.AddDate(2, 0, 0).Format(time.RFC3339)
-	events, err := srv.Events.List("primary").ShowDeleted(false).
-		SingleEvents(false).TimeMin(tStart).TimeMax(tStop).Do()
-	if err != nil {
-		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve next ten of the user's events: %v", err))
-	}
-
-	// Get Cloud Calendar details
-	fmt.Println(EventDetails(ctx, events))
-
-	// Iterating through the Cloud Calendar Events and delete the ones related to reminder
-	fmt.Printf("Upcoming events:")
-	if len(events.Items) == 0 {
-		fmt.Println("No upcoming events found.")
-	} else {
-		for _, item := range events.Items {
-			if item.Summary == "" {
-				continue
-			}
-			owned := false
-			if strings.HasPrefix(item.Summary, TitlePrefix) {
-				owned = true
-			}
-			fmt.Printf("  - %v | %v | owned=%v\n", item.Summary, item.Recurrence, owned)
-			if owned {
-				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
-					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete Calendar event %q | %q | %v", item.Id, item.Summary, err))
-				}
-				logger.Info(ctx, fmt.Sprintf("Deleted the Calendar event %q | %q", item.Id, item.Summary))
-			}
-		}
-	}
-
-	// Add events to Cloud Calendar
-
-	event, err := ConstructEvent("test", "some line desc", time.Now(), events.TimeZone)
-	if err != nil {
-		fmt.Println(err)
-	}
-	_, err = srv.Events.Insert("primary", event).Do()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(event)
-}
-
 // EventDetails returns overall event details.
 func EventDetails(ctx context.Context, events *gc.Events) string {
 	localTime := func(events gc.Events) string {
@@ -149,7 +83,7 @@ Calendar details:
 }
 
 // Get Calendar Service.
-func getCalendarService(ctx context.Context, options *Options) (*gc.Service, error) {
+func GetCalendarService(ctx context.Context, options *Options) (*gc.Service, error) {
 	credFile := options.CredentialFile
 	b, err := os.ReadFile(utils.TryConvertTildaBasedPath(credFile))
 	if err != nil {
