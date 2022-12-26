@@ -119,6 +119,28 @@ func YearForDueDateDDMM(dateMonth string) (int, error) {
 	return year, nil
 }
 
+// StrToTime converts RFC3339 time sting to time.Time, and sets location to
+// given timezone. If location is blank, then it returns the time as it is.
+func StrToTime(tString string, timezone string) (time.Time, error) {
+	t, err := time.Parse(time.RFC3339, tString)
+	if err != nil {
+		return t, fmt.Errorf("Unable to parse the time %v: %v", tString, err)
+	}
+	if timezone == "" {
+		return t, nil
+	}
+	location, err := time.LoadLocation(timezone)
+	if err != nil {
+		return t, fmt.Errorf("Unable to parse the timezone %v: %v", timezone, err)
+	}
+	return t.In(location), nil
+}
+
+// TimeToStr converts time.Time to RFC3339 time string.
+func TimeToStr(t time.Time) string {
+	return t.Format(time.RFC3339)
+}
+
 // IntPresentInSlice function performs membership test for integer based array.
 func IntPresentInSlice(a int, list []int) bool {
 	for _, b := range list {

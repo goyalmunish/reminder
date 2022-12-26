@@ -89,6 +89,7 @@ VERSION=v1.0.0
 
 Refer:
 
+- [Setup Your Environment](https://developers.google.com/calendar/api/quickstart/go#set_up_your_environment)
 - [Go Quickstart](https://developers.google.com/calendar/api/quickstart/go)
 - [pkg `calendar`](https://pkg.go.dev/google.golang.org/api/calendar/v3)
 - [Calendar API Reference](https://developers.google.com/calendar/api/v3/reference)

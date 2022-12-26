@@ -7,8 +7,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goyalmunish/reminder/pkg/calendar"
 	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
+	gc "google.golang.org/api/calendar/v3"
 )
 
 /*
@@ -240,4 +242,63 @@ func (note *Note) ToggleMainFlag() error {
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
+}
+
+// GoogleCalendarEvent converts a note to Google Calendar Event.
+func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagId int, timezoneIANA string) *gc.Event {
+	// basic information
+	title := note.Text
+	description := ""                                                    // don't expose comments for data privacy
+	start := utils.UnixTimestampToTime(note.CompleteBy + int64(9*60*60)) // register events for 9 AM of the day
+	repeatType := note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId)
+
+	// lego the information
+	var recurrence []string
+	title = fmt.Sprintf("%s%s", calendar.TitlePrefix, title)
+	startRFC3339 := &gc.EventDateTime{
+		DateTime: start.Format(time.RFC3339),
+		TimeZone: timezoneIANA,
+	}
+	endRFC3339 := &gc.EventDateTime{
+		DateTime: start.Add(time.Duration(0.5 * 60 * 60 * time.Second)).Format(time.RFC3339),
+		TimeZone: timezoneIANA,
+	}
+	source := &gc.EventSource{
+		Title: "reminder",
+		Url:   "https://github.com/goyalmunish/reminder",
+	}
+	rem := &gc.EventReminders{
+		Overrides:  []*gc.EventReminder{},
+		UseDefault: true,
+	}
+	// Refer https://developers.google.com/calendar/api/concepts/events-calendars
+	switch repeatType {
+	case "-":
+		recurrence = []string{}
+	case "A":
+		recurrence = []string{"RRULE:FREQ=YEARLY"}
+	case "M":
+		recurrence = []string{"RRULE:FREQ=MONTHLY"}
+	}
+
+	// construct the event
+	event := &gc.Event{
+		// ICalUID
+		// Id
+		// Created
+		// Updated
+		Summary:      title,
+		Description:  description,
+		Start:        startRFC3339,
+		End:          endRFC3339,
+		Recurrence:   recurrence,
+		ColorId:      "10", // "Basil" color
+		Reminders:    rem,
+		EventType:    "default",
+		Source:       source,
+		Status:       "confirmed",
+		Transparency: "transparent",
+		Visibility:   "default",
+	}
+	return event
 }

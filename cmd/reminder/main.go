@@ -12,7 +12,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/goyalmunish/reminder/internal/model"
 	"github.com/goyalmunish/reminder/internal/settings"
-	"github.com/goyalmunish/reminder/pkg/calendar"
 	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
 )
@@ -42,8 +41,6 @@ func Flow() {
 	}
 	// read and parse the existing data
 	reminderData := *model.ReadDataFile(ctx, config.AppInfo.DataFile)
-	// initialize Google Calendar
-	calendar.FetchCalendar(ctx)
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup
@@ -70,6 +67,7 @@ func Flow() {
 		fmt.Sprintf("%s %s", utils.Symbols["backup"], "Create Backup"),
 		fmt.Sprintf("%s %s", utils.Symbols["zzz"], "Suspended Notes"),
 		fmt.Sprintf("%s %s", utils.Symbols["telescope"], "Look Ahead"),
+		fmt.Sprintf("%s %s", utils.Symbols["refresh"], "Google Cloud Sync"),
 		fmt.Sprintf("%s %s", utils.Symbols["pad"], "Display Data File")}, "Select Option")
 	// operate on main options
 	switch result {
@@ -87,6 +85,8 @@ func Flow() {
 		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, "suspended_notes", -1, "default")
 	case fmt.Sprintf("%s %s", utils.Symbols["telescope"], "Look Ahead"):
 		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, "pending_long_view_notes", -1, "due-date")
+	case fmt.Sprintf("%s %s", utils.Symbols["refresh"], "Google Cloud Sync"):
+		reminderData.SyncCalendar(config.Calendar)
 	case fmt.Sprintf("%s %s", utils.Symbols["pad"], "Display Data File"):
 		err = reminderData.DisplayDataFile()
 	case fmt.Sprintf("%s %s %s", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):
