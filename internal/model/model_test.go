@@ -942,7 +942,7 @@ func TestPrintStats(t *testing.T) {
 	_ = reminderData.RegisterBasicTags()
 	got := reminderData.Stats()
 	want := `
-Stats of "temp_test_dir/mydata.json"
+Stats of "temp_test_dir/mydata.json":
   - Number of Tags:  7
   - Pending Notes:   0/0
   - Suspended Notes: 0

@@ -58,12 +58,13 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	// unit (and not as separate single events).
 	currentTime := time.Now()
 	tStart := currentTime.Format(time.RFC3339)
-	tStop := currentTime.AddDate(2, 0, 0).Format(time.RFC3339)
+	// tStop := currentTime.AddDate(2, 0, 0).Format(time.RFC3339)
 	existingEvents, err := srv.Events.List("primary").
 		ShowDeleted(false).
 		SingleEvents(false).
 		TimeMin(tStart).
-		TimeMax(tStop).
+		// TimeMax(tStop).
+		MaxResults(250). // 250 is default and maximum value; if there are more than 250 events, then we'll have to paginate
 		Do()
 	if err != nil {
 		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve the events: %v", err))
@@ -73,11 +74,10 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	fmt.Println(calendar.EventDetails(ctx, existingEvents))
 
 	// Iterating through the Cloud Calendar Events and delete the ones related to reminder
-	fmt.Printf("Upcoming events:")
+	fmt.Printf("Upcoming events %v:\n", len(existingEvents.Items))
 	if len(existingEvents.Items) == 0 {
 		logger.Warn(ctx, "No upcoming events found.")
 	} else {
-		logger.Info(ctx, fmt.Sprintf("A total of %v events.", len(existingEvents.Items)))
 		for _, item := range existingEvents.Items {
 			if item.Summary == "" {
 				continue
@@ -91,15 +91,15 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
 					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete Calendar event %q | %q | %v", item.Id, item.Summary, err))
 				}
-				logger.Info(ctx, fmt.Sprintf("Deleted the Calendar event %q | %q", item.Id, item.Summary))
+				fmt.Println(fmt.Sprintf("    - Deleted the Calendar event %q | %q", item.Id, item.Summary))
 			}
 		}
 	}
 
 	// Add events to Cloud Calendar
 	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone)
-	logger.Info(ctx, fmt.Sprintf("A total of %v events.", len(newEvents)))
-	for _, event := range newEvents[0:3] {
+	fmt.Println(fmt.Sprintf("\nA total of %v events.", len(newEvents)))
+	for _, event := range newEvents {
 		_, err = srv.Events.Insert("primary", event).Do()
 		if err != nil {
 			logger.Error(ctx, err)
@@ -113,6 +113,7 @@ func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string) []*gc.Event {
 	// get all pending notes
 	allNotes := rd.Notes
 	pendingNotes := allNotes.WithStatus(NoteStatus_Pending)
+	// construct Cloud Events
 	repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
 	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
 	var events []*gc.Event
@@ -505,7 +506,7 @@ func (rd *ReminderData) newNoteAppend(note *Note) error {
 // Stats returns current status.
 func (rd *ReminderData) Stats() string {
 	reportTemplate := `
-Stats of "{{.DataFile}}:"
+Stats of "{{.DataFile}}":
   - Number of Tags:  {{.Tags | len}}
   - Pending Notes:   {{.Notes | numPending}}/{{.Notes | numAll}}
   - Suspended Notes: {{.Notes | numSuspended}}
