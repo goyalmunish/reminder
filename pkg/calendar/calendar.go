@@ -87,34 +87,41 @@ func GetCalendarService(ctx context.Context, options *Options) (*gc.Service, err
 	credFile := options.CredentialFile
 	b, err := os.ReadFile(utils.TryConvertTildaBasedPath(credFile))
 	if err != nil {
-		logger.Error(ctx, fmt.Sprintf("Couldn't read the client secret file %q; Refer instructions on https://github.com/goyalmunish/reminder#setting-up-the-environment-for-google-calendar-sync; Underneath error: %v", credFile, err))
+		return nil, fmt.Errorf("Couldn't read the client secret file %q; Refer instructions on https://github.com/goyalmunish/reminder#setting-up-the-environment-for-google-calendar-sync; Underneath error: %v", credFile, err)
 	}
 	logger.Info(ctx, fmt.Sprintf("Read client secret file %q.", credFile))
 
 	// If modifying these scopes, delete your previously saved token file.
 	config, err := google.ConfigFromJSON(b, gc.CalendarEventsScope)
 	if err != nil {
-		logger.Error(ctx, fmt.Sprintf("Unable to parse client secret file to config; If you changed the scope, then deleted your current %q token file and try again; Underneath error: %v", options.TokenFile, err))
+		return nil, fmt.Errorf("Unable to parse client secret file to config; If you changed the scope, then deleted your current %q token file and try again; Underneath error: %v", options.TokenFile, err)
 	}
-	client := getClient(ctx, config, options)
+
+	client, err := getClient(ctx, config, options)
+	if err != nil {
+		return nil, err
+	}
 
 	srv, err := gc.NewService(ctx, option.WithHTTPClient(client))
 	return srv, err
 }
 
 // Retrieve a token, saves the token, then returns the generated client.
-func getClient(ctx context.Context, config *oauth2.Config, options *Options) *http.Client {
+func getClient(ctx context.Context, config *oauth2.Config, options *Options) (*http.Client, error) {
 	// The file calendar_token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first time.
 	tokenFile := options.TokenFile
 	tok, err := tokenFromFile(ctx, utils.TryConvertTildaBasedPath(tokenFile))
 	if err != nil {
 		logger.Warn(ctx, fmt.Sprintf("Token file doesn't exist; envoking the authentication process to generate one at %q.", tokenFile))
-		tok = getTokenFromWeb(ctx, config)
+		tok, err := getTokenFromWeb(ctx, config)
+		if err != nil {
+			return nil, err
+		}
 		saveToken(ctx, tokenFile, tok)
 		logger.Info(ctx, fmt.Sprintf("Saved the token file %q.", tokenFile))
 	}
-	return config.Client(context.Background(), tok)
+	return config.Client(context.Background(), tok), nil
 }
 
 // Retrieves a token from a local file.
@@ -130,20 +137,20 @@ func tokenFromFile(ctx context.Context, file string) (*oauth2.Token, error) {
 }
 
 // Request a token from the web, then returns the retrieved token.
-func getTokenFromWeb(ctx context.Context, config *oauth2.Config) *oauth2.Token {
+func getTokenFromWeb(ctx context.Context, config *oauth2.Config) (*oauth2.Token, error) {
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	fmt.Printf("Go to the following link in your browser, find the authorization code in the URL and type it here and hit ENTER: \n%v\n", authURL)
 
 	var authCode string
 	if _, err := fmt.Scan(&authCode); err != nil {
-		logger.Fatal(ctx, fmt.Sprintf("Unable to read authorization code: %v", err))
+		return nil, fmt.Errorf("Unable to read authorization code: %v", err)
 	}
 
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
-		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve token from web: %v", err))
+		return nil, fmt.Errorf("Unable to retrieve token from web: %v", err)
 	}
-	return tok
+	return tok, nil
 }
 
 // Saves a token to a file path.
