@@ -41,12 +41,24 @@ func (notes Notes) ExternalTexts(maxStrLen int, repeatAnnuallyTagId int, repeatM
 	return allTexts
 }
 
-// WithStatus filters notes with given status (such as "pending" status).
+// WithStatus filters-in notes with given status (such as "pending" status).
 // It returns empty Notes if no matching Note is found (even when given status doesn't exist).
 func (notes Notes) WithStatus(status NoteStatus) Notes {
 	var result Notes
 	for _, note := range notes {
 		if note.Status == status {
+			result = append(result, note)
+		}
+	}
+	return result
+}
+
+// WithCompleteBy filters-in only notes with non-nil CompleteBy filed of the notes.
+// It returns empty Notes if no matching Note is found (even when given status doesn't exist).
+func (notes Notes) WithCompleteBy() Notes {
+	var result Notes
+	for _, note := range notes {
+		if note.CompleteBy > 0 {
 			result = append(result, note)
 		}
 	}

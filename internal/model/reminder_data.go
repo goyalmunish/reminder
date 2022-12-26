@@ -100,9 +100,9 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 
 	// Add events to Cloud Calendar
 	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone)
-	fmt.Printf("\nSyncing %v events to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for 10s.\n", len(newEvents))
-	time.Sleep(10 * time.Second)
-	fmt.Println("Starting the syncing process...")
+	fmt.Printf("\nSyncing %v events (pending and with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for 30s...\n", len(newEvents))
+	time.Sleep(30 * time.Second)
+	fmt.Println("Starting the syncing process.")
 	for _, event := range newEvents {
 		_, err = srv.Events.Insert("primary", event).Do()
 		if err != nil {
@@ -110,18 +110,19 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 		}
 		logger.Info(ctx, fmt.Sprintf("Synced the event %q | %q.\n", event.Summary, event.Start))
 	}
+	fmt.Println("Done with syncing process.")
 }
 
 // GoogleCalendarEvents returns list of Google Calendar Events.
 func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string) []*gc.Event {
 	// get all pending notes
 	allNotes := rd.Notes
-	pendingNotes := allNotes.WithStatus(NoteStatus_Pending)
+	relevantNotes := allNotes.WithStatus(NoteStatus_Pending).WithCompleteBy()
 	// construct Cloud Events
 	repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
 	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
 	var events []*gc.Event
-	for _, note := range pendingNotes {
+	for _, note := range relevantNotes {
 		event := note.GoogleCalendarEvent(repeatAnnuallyTag.Id, repeatMonthlyTag.Id, timezoneIANA)
 		events = append(events, event)
 	}
@@ -391,7 +392,7 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 		// don't show such notes after their due date is past by 2 day
 		if (len(noteIDsWithRepeat) > 0) && (note.CompleteBy != 0) {
 			// check for repeat-annually tag
-			// note: for the CompletedBy date of the note, we accept only date
+			// note: for the CompleteBy date of the note, we accept only date
 			// so, even if there is a time element recorded the the timestamp,
 			// we ignore it
 			repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
