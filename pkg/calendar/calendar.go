@@ -19,7 +19,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-const TitlePrefix string = "Reminder | "
+const TitlePrefix string = "[reminder] "
 
 func ConstructEvent(title string, description string, start time.Time, timezoneIANA string) (*gc.Event, error) {
 	title = fmt.Sprintf("%s%s", TitlePrefix, title)
@@ -89,7 +89,7 @@ func GetCalendarService(ctx context.Context, options *Options) (*gc.Service, err
 	if err != nil {
 		logger.Fatal(ctx, fmt.Sprintf("Unable to read client secret file %q: %v", credFile, err))
 	}
-	logger.Info(ctx, fmt.Sprintf("Read client secret file %q", err))
+	logger.Info(ctx, fmt.Sprintf("Read client secret file %q", credFile))
 
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, gc.CalendarEventsScope)

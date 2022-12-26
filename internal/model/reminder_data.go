@@ -91,14 +91,14 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
 					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete Calendar event %q | %q | %v", item.Id, item.Summary, err))
 				}
-				fmt.Printf("    - Deleted the Calendar event %q | %q", item.Id, item.Summary)
+				fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, item.Summary)
 			}
 		}
 	}
 
 	// Add events to Cloud Calendar
 	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone)
-	fmt.Printf("\nA total of %v events.", len(newEvents))
+	fmt.Printf("\nSyncing %v events to Google Calendar.\n", len(newEvents))
 	for _, event := range newEvents {
 		_, err = srv.Events.Insert("primary", event).Do()
 		if err != nil {
