@@ -249,7 +249,7 @@ func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagI
 	// basic information
 	title := note.Text
 	description := ""                                                    // don't expose comments for data privacy
-	start := utils.UnixTimestampToTime(note.CompleteBy + int64(9*60*60)) // register events for 9 AM of the day
+	start := utils.UnixTimestampToTime(note.CompleteBy - int64(20*60*60)) // workaround to adjust for current day (later, need to take into account timezone in CompleteBy)
 	repeatType := note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId)
 
 	// lego the information
