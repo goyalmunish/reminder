@@ -43,7 +43,7 @@ func Flow() {
 	// read and parse the existing data
 	reminderData := *model.ReadDataFile(ctx, config.AppInfo.DataFile)
 	// initialize Google Calendar
-	calendar.FetchCalendar(ctx)
+	calendar.SyncCalendar(ctx, config.Calendar)
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup

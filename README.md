@@ -176,7 +176,7 @@ On Mac, you can just install it with `brew` as:
 brew install go@1.19
 ```
 
-For other platforms, check [official `go` download and install guide](https://golang.org/dl/).
+_For other platforms, check [official `go` download and install guide](https://go.dev/dl/)._
 
 Check installed version:
 

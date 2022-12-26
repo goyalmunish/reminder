@@ -15,6 +15,7 @@ import (
 
 	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
+	gc "google.golang.org/api/calendar/v3"
 )
 
 /*
@@ -33,6 +34,21 @@ type ReminderData struct {
 // SetContext sets given context to the receiver.
 func (rd *ReminderData) SetContext(ctx context.Context) {
 	rd.context = ctx
+}
+
+// GoogleCalendarEvents returns list of Google Calendar Events.
+func (rd *ReminderData) GoogleCalendarEvents(ctx context.Context, timezoneIANA string) []*gc.Event {
+	// get all pending notes
+	allNotes := rd.Notes
+	pendingNotes := allNotes.WithStatus(NoteStatus_Pending)
+	repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
+	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
+	var events []*gc.Event
+	for _, note := range pendingNotes {
+		event := note.GoogleCalendarEvent(repeatAnnuallyTag.Id, repeatMonthlyTag.Id, timezoneIANA)
+		events = append(events, event)
+	}
+	return events
 }
 
 // UpdateDataFile updates data file.
@@ -417,7 +433,7 @@ func (rd *ReminderData) newNoteAppend(note *Note) error {
 // Stats returns current status.
 func (rd *ReminderData) Stats() string {
 	reportTemplate := `
-Stats of "{{.DataFile}}"
+Stats of "{{.DataFile}}:"
   - Number of Tags:  {{.Tags | len}}
   - Pending Notes:   {{.Notes | numPending}}/{{.Notes | numAll}}
   - Suspended Notes: {{.Notes | numSuspended}}
