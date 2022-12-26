@@ -248,7 +248,7 @@ func (note *Note) ToggleMainFlag() error {
 func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagId int, timezoneIANA string) *gc.Event {
 	// basic information
 	title := note.Text
-	description := ""                                                    // don't expose comments for data privacy
+	description := ""                                                     // don't expose comments for data privacy
 	start := utils.UnixTimestampToTime(note.CompleteBy - int64(20*60*60)) // workaround to adjust for current day (later, need to take into account timezone in CompleteBy)
 	repeatType := note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId)
 
