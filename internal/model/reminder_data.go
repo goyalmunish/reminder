@@ -49,12 +49,14 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	}
 
 	// Get calendar service
+	logger.Info(ctx, "Retrieve the Cloud Calendar Service.")
 	srv, err := calendar.GetCalendarService(ctx, calOptions)
 	if err != nil {
 		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve Calendar client: %v", err))
 	}
 
-	// Get list of all events of next 2 years, with recurring events as a
+	logger.Info(ctx, "Fetch the list of all upcoming Calendar Events with each type of recurring event as single unit.")
+	// Get list of all upcomming events, with recurring events as a
 	// unit (and not as separate single events).
 	currentTime := time.Now()
 	tStart := currentTime.Format(time.RFC3339)
@@ -89,7 +91,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 			fmt.Printf("  - %v | %v | owned=%v\n", item.Summary, item.Recurrence, owned)
 			if owned {
 				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
-					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete Calendar event %q | %q | %v", item.Id, item.Summary, err))
+					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err))
 				}
 				fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, item.Summary)
 			}
@@ -98,26 +100,29 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 
 	// Add events to Cloud Calendar
 	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone)
-	fmt.Printf("\nSyncing %v events to Google Calendar.\n", len(newEvents))
+	fmt.Printf("\nSyncing %v events (pending and with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for 30s...\n", len(newEvents))
+	time.Sleep(30 * time.Second)
+	fmt.Println("Starting the syncing process.")
 	for _, event := range newEvents {
 		_, err = srv.Events.Insert("primary", event).Do()
 		if err != nil {
 			logger.Error(ctx, err)
 		}
-		logger.Info(ctx, fmt.Sprintf("Synced the event %q | %q", event.Summary, event.Start))
+		logger.Info(ctx, fmt.Sprintf("Synced the event %q | %q.\n", event.Summary, event.Start))
 	}
+	fmt.Println("Done with syncing process.")
 }
 
 // GoogleCalendarEvents returns list of Google Calendar Events.
 func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string) []*gc.Event {
 	// get all pending notes
 	allNotes := rd.Notes
-	pendingNotes := allNotes.WithStatus(NoteStatus_Pending)
+	relevantNotes := allNotes.WithStatus(NoteStatus_Pending).WithCompleteBy()
 	// construct Cloud Events
 	repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
 	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
 	var events []*gc.Event
-	for _, note := range pendingNotes {
+	for _, note := range relevantNotes {
 		event := note.GoogleCalendarEvent(repeatAnnuallyTag.Id, repeatMonthlyTag.Id, timezoneIANA)
 		events = append(events, event)
 	}
@@ -387,7 +392,7 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 		// don't show such notes after their due date is past by 2 day
 		if (len(noteIDsWithRepeat) > 0) && (note.CompleteBy != 0) {
 			// check for repeat-annually tag
-			// note: for the CompletedBy date of the note, we accept only date
+			// note: for the CompleteBy date of the note, we accept only date
 			// so, even if there is a time element recorded the the timestamp,
 			// we ignore it
 			repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
@@ -529,7 +534,7 @@ func (rd *ReminderData) CreateBackup() (string, error) {
 	ext := path.Ext(rd.DataFile)
 	dstFile := rd.DataFile[:len(rd.DataFile)-len(ext)] + "_backup_" + strconv.FormatInt(int64(utils.CurrentUnixTimestamp()), 10) + ext
 	lnFile := rd.DataFile[:len(rd.DataFile)-len(ext)] + "_backup_latest" + ext
-	logger.Info(rd.context, fmt.Sprintf("Creating backup at %q\n", dstFile))
+	logger.Info(rd.context, fmt.Sprintf("Creating backup at %q.\n", dstFile))
 	// create backup
 	byteValue, err := os.ReadFile(rd.DataFile)
 	if err != nil {
@@ -540,7 +545,7 @@ func (rd *ReminderData) CreateBackup() (string, error) {
 		return dstFile, err
 	}
 	// create alias of latest backup
-	logger.Info(rd.context, fmt.Sprintf("Creating symlink at %q\n", lnFile))
+	logger.Info(rd.context, fmt.Sprintf("Creating symlink at %q.\n", lnFile))
 	executable, _ := exec.LookPath("ln")
 	cmd := &exec.Cmd{
 		Path:   executable,
@@ -585,7 +590,7 @@ func (rd *ReminderData) AutoBackup(gapSecs int64) (string, error) {
 	gap := currentTime - lastBackup
 	logger.Info(rd.context, fmt.Sprintf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs))
 	if gap < gapSecs {
-		logger.Info(rd.context, fmt.Sprintln("Skipping automatic backup"))
+		logger.Info(rd.context, fmt.Sprintln("Skipping automatic backup."))
 		return dstFile, nil
 	}
 	dstFile, _ = rd.CreateBackup()

@@ -269,7 +269,7 @@ func ReadDataFile(ctx context.Context, dataFilePath string) *ReminderData {
 	utils.LogError(ctx, err)
 	// parse json data
 	err = json.Unmarshal(byteValue, &reminderData)
-	logger.Info(ctx, fmt.Sprintf("Read contents of %q into ReminderData", dataFilePath))
+	logger.Info(ctx, fmt.Sprintf("Read contents of %q into ReminderData.", dataFilePath))
 	utils.LogError(ctx, err)
 	// set context
 	reminderData.SetContext(ctx)

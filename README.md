@@ -12,6 +12,7 @@
             - [Install `go`](#install-go)
             - [Install the tool (optional)](#install-the-tool-optional)
             - [Run the tool](#run-the-tool)
+    - [Setting up the environment for Google Calendar Sync](#setting-up-the-environment-for-google-calendar-sync)
     - [Features/Issues to be worked upon](#featuresissues-to-be-worked-upon)
     - [Contributing towards development](#contributing-towards-development)
 
@@ -119,10 +120,10 @@ brew tap goyalmunish/reminder
 brew install goyalmunish/reminder/reminder
 ```
 
-To update:
+To upgrade to latest `reminder` version:
 
 ```sh
-brew update goyalmunish/reminder/reminder
+brew upgrade goyalmunish/reminder/reminder
 ```
 
 The brew tap is maintained at [goyalmunish/homebrew-reminder](https://github.com/goyalmunish/homebrew-reminder).
@@ -228,6 +229,13 @@ make run
 # or as
 go run ./cmd/reminder
 ```
+
+## Setting up the environment for Google Calendar Sync
+
+As you are owner and also the end user, you would need to follow instructions on Google's official doc of [Set up your environment](https://developers.google.com/calendar/api/quickstart/go#set_up_your_environment) to:
+
+- [Enable the API](https://console.cloud.google.com/flows/enableapi?apiid=calendar-json.googleapis.com)
+- Save [credentials](https://console.cloud.google.com/apis/credentials) to **`~/calendar_credentials.json`** file.
 
 ## Features/Issues to be worked upon
 

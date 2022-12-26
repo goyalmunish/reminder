@@ -334,6 +334,26 @@ func TestWithStatus(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
+func TestWithCompleteBy(t *testing.T) {
+	var notes model.Notes
+	// case 1 (no notes)
+	utils.AssertEqual(t, notes.WithCompleteBy(), model.Notes{})
+	// add some notes
+	comments := model.Comments{&model.Comment{Text: "c1"}}
+	note1 := model.Note{Text: "big fat cat", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	notes = append(notes, &note1)
+	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}}
+	note2 := model.Note{Text: "cute brown dog", Comments: comments, Status: model.NoteStatus_Done, TagIds: []int{1, 3}, CompleteBy: 1609669232}
+	notes = append(notes, &note2)
+	comments = model.Comments{&model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}}
+	note3 := model.Note{Text: "little hamster", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1}}
+	notes = append(notes, &note3)
+	// case 3 (with only few notes to be filtered in)
+	got := notes.WithCompleteBy()
+	want := model.Notes{&note1, &note2}
+	utils.AssertEqual(t, got, want)
+}
+
 func TestWithTagIdAndStatus(t *testing.T) {
 	// var tags model.Tags
 	var notes model.Notes
