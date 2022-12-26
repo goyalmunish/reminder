@@ -45,6 +45,7 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 - Allows your to **Look Ahead** whole year in advance.
 - Easily take **time-stamped backups** (💾).
 - Provides you a way to easily add/remove tags to any of the existing tasks.
+- Sync to Google Calendar
 
 Nothing is hidden (except your data)! The tool is Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
 
