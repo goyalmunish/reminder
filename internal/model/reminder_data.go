@@ -76,7 +76,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	fmt.Println(calendar.EventDetails(ctx, existingEvents))
 
 	// Iterating through the Cloud Calendar Events and delete the ones related to reminder
-	fmt.Printf("Listing upcoming calendar events (%v) and deleting the ones earlier registered by reminder app::\n", len(existingEvents.Items))
+	fmt.Printf("Listing upcoming calendar events (%v) and deleting the ones earlier registered by the reminder app:\n", len(existingEvents.Items))
 	fmt.Println("Note: It may time some time for Google Calendar read API to pick up the recently added events.")
 	if len(existingEvents.Items) == 0 {
 		logger.Warn(ctx, "No upcoming events found.")
@@ -101,7 +101,9 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 
 	// Add events to Cloud Calendar
 	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone)
-	fmt.Printf("\nSyncing %v events (pending and with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for 30s...\n", len(newEvents))
+	waitFor := 30 * time.Second
+	fmt.Printf("\nSyncing %v events (pending onces with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for %v...\n", len(newEvents), waitFor)
+	fmt.Printf("waiting for %v...\n", waitFor)
 	time.Sleep(30 * time.Second)
 	fmt.Println("Starting the syncing process.")
 	for _, event := range newEvents {
