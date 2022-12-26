@@ -60,13 +60,13 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	// unit (and not as separate single events).
 	currentTime := time.Now()
 	tStart := currentTime.Format(time.RFC3339)
-	// tStop := currentTime.AddDate(2, 0, 0).Format(time.RFC3339)
+	tStop := currentTime.AddDate(5, 0, 0).Format(time.RFC3339) // 5 years from now
 	existingEvents, err := srv.Events.List("primary").
 		ShowDeleted(false).
 		SingleEvents(false).
 		TimeMin(tStart).
-		// TimeMax(tStop).
-		MaxResults(250). // 250 is default and maximum value; if there are more than 250 events, then we'll have to paginate
+		TimeMax(tStop).
+		MaxResults(250). // 250 is default and is maximum value; if there are more than 250 events, then we'll have to paginate
 		Do()
 	if err != nil {
 		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve the events: %v", err))
@@ -76,7 +76,8 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	fmt.Println(calendar.EventDetails(ctx, existingEvents))
 
 	// Iterating through the Cloud Calendar Events and delete the ones related to reminder
-	fmt.Printf("Upcoming events %v:\n", len(existingEvents.Items))
+	fmt.Printf("Listing upcoming calendar events (%v) and deleting the ones earlier registered by reminder app::\n", len(existingEvents.Items))
+	fmt.Println("Note: It may time some time for Google Calendar read API to pick up the recently added events.")
 	if len(existingEvents.Items) == 0 {
 		logger.Warn(ctx, "No upcoming events found.")
 	} else {
