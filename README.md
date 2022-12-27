@@ -26,7 +26,7 @@
 
 ## Yet Another Reminder Tool/App. Why?
 
-_This is a simple **terminal-based fully-interactive reminder tool**. It is not for everybody, but for the folks with a software engineering background who need the **speed** of the command-line and have to manage many day-to-day to-do items (like meeting minutes, reminders about ad-hoc tasks, etc.) in an organized way._
+_It's a simple **terminal-based fully-interactive reminder tool**. It is not for everybody, but for the folks with a software engineering background who have to manage many day-to-day to-do items (like meeting minutes, 1:1 updates with their team-members, reminders about ad-hoc tasks, etc.) and want the **speed** of the command-line to organize all this in an efficient way._
 
 _Apart from being **fully-interactive** and **terminal-based**, the other major features it comes with are:_
 
@@ -46,9 +46,9 @@ _Apart from being **fully-interactive** and **terminal-based**, the other major 
 - Allows your to **Look Ahead** whole year in advance.
 - Easily take **time-stamped backups** (💾).
 - Provides you a way to easily add/remove tags to any of the existing tasks.
-- Sync to Google Calendar
+- **Sync** to Google Calendar.
 
-Nothing is hidden (except your data)! The tool is Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
+Nothing is hidden (except your data from rest of the world)! The tool is Open Source. You are welcome to use, recommend features, raise bugs, and enhance it further.
 
 ## How to Use?
 

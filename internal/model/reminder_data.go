@@ -77,7 +77,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 
 	// Iterating through the Cloud Calendar Events and delete the ones related to reminder
 	fmt.Printf("Listing upcoming calendar events (%v) and deleting the ones earlier registered by the reminder app:\n", len(existingEvents.Items))
-	fmt.Println("Note: It may time some time for Google Calendar read API to pick up the recently added events.")
+	fmt.Println("Note: It may take some time for Google Calendar read API to pick up the recently added events.")
 	if len(existingEvents.Items) == 0 {
 		logger.Warn(ctx, "No upcoming events found.")
 	} else {
