@@ -24,6 +24,7 @@ func init() {
 	var err error
 	var runID = uuid.New()
 	ctx = context.Background()
+	// note: setting are loaded before logger is being setup; it will assume only default logrus settings
 	config, err = settings.LoadConfig(ctx)
 	if err != nil {
 		panic(err)

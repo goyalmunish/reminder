@@ -13,6 +13,10 @@ var (
 	// _stdOut io.Writer
 )
 
+// to inspect the logger settings, you can expose this instance as following
+// to the outside world, temporarily.
+// var Instance = _log
+
 /*
 Key type is used for keys of context.Context.
 */
