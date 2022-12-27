@@ -7,3 +7,5 @@ log:
   - run_id
 calendar:
   credential_file: ~/calendar_credentials.json
+  token_file: ~/calendar_token.json
+  dry_mode: false

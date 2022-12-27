@@ -9,7 +9,7 @@ import (
 	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Settings struct {
@@ -34,6 +34,7 @@ func (s *Settings) String() string {
 func LoadConfig(ctx context.Context) (*Settings, error) {
 	appConfigPath := "./config/default.yaml"
 	settings := DefaultSettings()
+	logger.Debug(ctx, fmt.Sprintf("Default Settings: %q", settings))
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile(appConfigPath)
 	logger.Info(ctx, fmt.Sprintf("Attempt to read the app config %q (on top of default values).", appConfigPath))
@@ -47,5 +48,6 @@ func LoadConfig(ctx context.Context) (*Settings, error) {
 		utils.LogError(ctx, err)
 		return nil, err
 	}
+	logger.Info(ctx, fmt.Sprintf("Final Settings:\n%v", settings))
 	return settings, nil
 }

@@ -77,7 +77,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 
 	// Iterating through the Cloud Calendar Events
 	fmt.Printf("Listing upcoming calendar events (%v):\n", len(existingEvents.Items))
-	fmt.Println("Note: It may take some time for Google Calendar read API to pick up the recently added events.")
+	fmt.Println("Note: It may take some time for Google Calendar read API to pick up the recently added events, or Calendar trash https://calendar.google.com/calendar/u/0/r/trash can also cause issues.")
 	if len(existingEvents.Items) == 0 {
 		logger.Warn(ctx, "No upcoming events found.")
 	} else {
@@ -94,11 +94,15 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	}
 	fmt.Println()
 
+	// Note: Your might like to check your Calendar trash
+	// https://calendar.google.com/calendar/u/0/r/trash and clear it from
+	// time to time. Otherwise, this obstructs with visibility of newly
+	// added event in the API call.
 	logger.Info(ctx, "Fetch all the events (max 250) registered by reminder app (and some other mathching the query).")
 	reminderEvents, err := srv.Events.List("primary").
-		ShowDeleted(false).
+		ShowDeleted(true).
 		SingleEvents(false).
-		Q(calendar.TitlePrefix).
+		Q("reminder").
 		Do()
 	if err != nil {
 		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve the events: %v", err))
@@ -107,32 +111,45 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	if len(reminderEvents.Items) == 0 {
 		logger.Warn(ctx, "No registered events found.")
 	} else {
+		deletionCount := 0
 		for _, item := range reminderEvents.Items {
 			owned := false
 			if strings.HasPrefix(item.Summary, calendar.TitlePrefix) {
 				owned = true
 			}
 			fmt.Printf("  - %v | %v | owned=%v\n", item.Summary, item.Recurrence, owned)
-			// Note: While in development, you might like to comment
-			// out the below block to prevent actual deletion of
-			// the events.
 			if owned {
+				if calOptions.DryMode {
+					logger.Warn(ctx, "Dry mode is enabled; skipping deletion of the event.")
+					// continue with next iteration
+					continue
+				}
 				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
 					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err))
+				} else {
+					deletionCount += 1
+					fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, item.Summary)
 				}
-				fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, item.Summary)
 			}
+		}
+		if deletionCount > 0 {
+			fmt.Printf("\nWaring! Deletion count is %v; you might like to clear your trash manually by visiting https://calendar.google.com/calendar/u/0/r/trash\n", deletionCount)
 		}
 	}
 
 	// Add events to Cloud Calendar
 	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone)
-	waitFor := 30 * time.Second
+	waitFor := 10 * time.Second
 	fmt.Printf("\nSyncing %v events (pending onces with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for %v.\n", len(newEvents), waitFor)
 	fmt.Printf("waiting for %v...\n", waitFor)
-	time.Sleep(30 * time.Second)
+	time.Sleep(waitFor)
 	fmt.Println("Starting the syncing process.")
 	for _, event := range newEvents {
+		if calOptions.DryMode {
+			logger.Warn(ctx, fmt.Sprintf("Dry mode is enabled; skipping insertion of event %q | %q.", event.Summary, event.Start))
+			// continue with next iteration
+			continue
+		}
 		_, err = srv.Events.Insert("primary", event).Do()
 		if err != nil {
 			logger.Error(ctx, err)
