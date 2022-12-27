@@ -75,8 +75,8 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	// Get Cloud Calendar details
 	fmt.Println(calendar.EventDetails(ctx, existingEvents))
 
-	// Iterating through the Cloud Calendar Events and delete the ones related to reminder
-	fmt.Printf("Listing upcoming calendar events (%v) and deleting the ones earlier registered by the reminder app:\n", len(existingEvents.Items))
+	// Iterating through the Cloud Calendar Events
+	fmt.Printf("Listing upcoming calendar events (%v):\n", len(existingEvents.Items))
 	fmt.Println("Note: It may take some time for Google Calendar read API to pick up the recently added events.")
 	if len(existingEvents.Items) == 0 {
 		logger.Warn(ctx, "No upcoming events found.")
@@ -85,6 +85,29 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 			if item.Summary == "" {
 				continue
 			}
+			owned := false
+			if strings.HasPrefix(item.Summary, calendar.TitlePrefix) {
+				owned = true
+			}
+			fmt.Printf("  - %v | %v | owned=%v\n", item.Summary, item.Recurrence, owned)
+		}
+	}
+	fmt.Println()
+
+	logger.Info(ctx, "Fetch all the events (max 250) registered by reminder app (and some other mathching the query).")
+	reminderEvents, err := srv.Events.List("primary").
+		ShowDeleted(false).
+		SingleEvents(false).
+		Q(calendar.TitlePrefix).
+		Do()
+	if err != nil {
+		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve the events: %v", err))
+	}
+	fmt.Printf("Listing matching events (%v) and deleting the ones registered by reminder app:\n", len(reminderEvents.Items))
+	if len(reminderEvents.Items) == 0 {
+		logger.Warn(ctx, "No registered events found.")
+	} else {
+		for _, item := range reminderEvents.Items {
 			owned := false
 			if strings.HasPrefix(item.Summary, calendar.TitlePrefix) {
 				owned = true
@@ -102,7 +125,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	// Add events to Cloud Calendar
 	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone)
 	waitFor := 30 * time.Second
-	fmt.Printf("\nSyncing %v events (pending onces with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for %v...\n", len(newEvents), waitFor)
+	fmt.Printf("\nSyncing %v events (pending onces with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for %v.\n", len(newEvents), waitFor)
 	fmt.Printf("waiting for %v...\n", waitFor)
 	time.Sleep(30 * time.Second)
 	fmt.Println("Starting the syncing process.")
