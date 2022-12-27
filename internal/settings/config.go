@@ -12,6 +12,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const currentConfigPath = "./config/current.yaml" // used for current operational values
+// const defaultConfigPath = "./config/default.yaml" // just a representation of current default values
+
 type Settings struct {
 	AppInfo  *appinfo.Options
 	Log      *logger.Options
@@ -32,12 +35,14 @@ func (s *Settings) String() string {
 }
 
 func LoadConfig(ctx context.Context) (*Settings, error) {
-	appConfigPath := "./config/default.yaml"
+	// set default settings
 	settings := DefaultSettings()
 	logger.Debug(ctx, fmt.Sprintf("Default Settings: %q", settings))
 	viper.SetConfigType("yaml")
-	viper.SetConfigFile(appConfigPath)
-	logger.Info(ctx, fmt.Sprintf("Attempt to read the app config %q (on top of default values).", appConfigPath))
+	viper.SetConfigFile(currentConfigPath)
+
+	// override with current settings
+	logger.Info(ctx, fmt.Sprintf("Attempt to read the app config %q (on top of default values).", currentConfigPath))
 	if err := viper.ReadInConfig(); err != nil {
 		// Just log the error, and fall back to default settings.
 		utils.LogError(ctx, err)

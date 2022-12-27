@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"strings"
 
 	"net/http"
 	"os"
@@ -20,8 +21,8 @@ import (
 
 const TitlePrefix string = "[reminder] "
 
-// EventDetails returns overall event details.
-func EventDetails(ctx context.Context, events *gc.Events) string {
+// EventsDetails returns overall event details.
+func EventsDetails(ctx context.Context, events *gc.Events) string {
 	localTime := func(events gc.Events) string {
 		value, err := utils.StrToTime(events.Updated, events.TimeZone)
 		if err != nil {
@@ -39,6 +40,14 @@ Calendar details:
 		"timeInLocation": localTime,
 	}
 	return utils.TemplateResult(reportTemplate, funcMap, *events)
+}
+
+func EventString(event *gc.Event) string {
+	details := []string{}
+	details = append(details, event.Summary)
+	details = append(details, event.Start.DateTime)
+	details = append(details, event.Recurrence...)
+	return strings.Join(details, " | ")
 }
 
 // Get Calendar Service.

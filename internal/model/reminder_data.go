@@ -73,7 +73,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	}
 
 	// Get Cloud Calendar details
-	fmt.Println(calendar.EventDetails(ctx, existingEvents))
+	fmt.Println(calendar.EventsDetails(ctx, existingEvents))
 
 	// Iterating through the Cloud Calendar Events
 	fmt.Printf("Listing upcoming calendar events (%v):\n", len(existingEvents.Items))
@@ -98,11 +98,11 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	// https://calendar.google.com/calendar/u/0/r/trash and clear it from
 	// time to time. Otherwise, this obstructs with visibility of newly
 	// added event in the API call.
-	logger.Info(ctx, "Fetch all the events (max 250) registered by reminder app (and some other mathching the query).")
+	logger.Info(ctx, "Fetch all the events (max 250) registered by reminder app (and some other matching the query).")
 	reminderEvents, err := srv.Events.List("primary").
-		ShowDeleted(true).
+		ShowDeleted(false).
 		SingleEvents(false).
-		Q("reminder").
+		Q(calendar.TitlePrefix).
 		Do()
 	if err != nil {
 		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve the events: %v", err))
@@ -117,10 +117,10 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 			if strings.HasPrefix(item.Summary, calendar.TitlePrefix) {
 				owned = true
 			}
-			fmt.Printf("  - %v | %v | owned=%v\n", item.Summary, item.Recurrence, owned)
+			fmt.Printf("  - %q -- %q (owned=%v)\n", calendar.EventString(item), item.Id, owned)
 			if owned {
 				if calOptions.DryMode {
-					logger.Warn(ctx, "Dry mode is enabled; skipping deletion of the event.")
+					logger.Warn(ctx, fmt.Sprintf("Dry mode is enabled; skipping deletion of the event %q.", item.Id))
 					// continue with next iteration
 					continue
 				}
@@ -128,7 +128,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err))
 				} else {
 					deletionCount += 1
-					fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, item.Summary)
+					fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, calendar.EventString(item))
 				}
 			}
 		}
@@ -146,7 +146,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	fmt.Println("Starting the syncing process.")
 	for _, event := range newEvents {
 		if calOptions.DryMode {
-			logger.Warn(ctx, fmt.Sprintf("Dry mode is enabled; skipping insertion of event %q | %q.", event.Summary, event.Start))
+			logger.Warn(ctx, fmt.Sprintf("Dry mode is enabled; skipping insertion of event %q.\n", calendar.EventString(event)))
 			// continue with next iteration
 			continue
 		}
@@ -154,7 +154,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 		if err != nil {
 			logger.Error(ctx, err)
 		}
-		logger.Info(ctx, fmt.Sprintf("Synced the event %q | %q.\n", event.Summary, event.Start))
+		logger.Info(ctx, fmt.Sprintf("Synced the event %q.\n", calendar.EventString(event)))
 	}
 	fmt.Println("Done with syncing process.")
 }
@@ -817,7 +817,7 @@ func (rd *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string
 		// otherwise the note will immediately disappear if the updated tags list doesn't include the original tag
 		fmt.Printf("Note: Using passed notes; the list will not be refreshed immediately!\n")
 	default:
-		fmt.Printf("Error: Unreachable code")
+		logger.Error(rd.context, "Error: Unreachable code")
 	}
 
 	// sort notes

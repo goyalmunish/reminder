@@ -1,3 +1,8 @@
+# The `default.yaml` is just representation of default settings. It is not used
+# in the code.
+# For desired settings, create `current.yaml` file and use if for keeping
+# the current operational values.
+
 appinfo:
   data_file: ~/reminder/data.json
 log:

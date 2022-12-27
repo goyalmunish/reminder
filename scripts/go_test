@@ -1,16 +1,16 @@
 # run go tests for passed directory with relative path
-run_go_test() {
-  test_dir="$@"
-  cur_dir=$(pwd)
-  cd ${test_dir}
-  echo "Running tests under $(pwd):----------"
-  if [  "$CONSOLE_PRINT" = "true" ]; then
-    go test
-  else
-    go test .
-  fi
-  cd ${cur_dir}
-}
+# run_go_test() {
+#   test_dir="$@"
+#   cur_dir=$(pwd)
+#   cd ${test_dir}
+#   echo "Running tests under $(pwd):----------"
+#   if [  "$CONSOLE_PRINT" = "true" ]; then
+#     go test
+#   else
+#     go test .
+#   fi
+#   cd ${cur_dir}
+# }
 
 # run tests
 # run_go_test "pkg/utils/"
@@ -18,7 +18,7 @@ run_go_test() {
 # run_go_test "cmd/reminder/"
 
 if [  "$CONSOLE_PRINT" = "true" ]; then
-  go test -count=1 -v --coverprofile=c.out ./...
+  go test -count=1 -cover  -v ./...
 else
-  go test -count=1 --coverprofile=c.out ./...
+  go test -count=1 -cover  ./...
 fi

@@ -192,6 +192,7 @@ func (note *Note) UpdateSummary(text string) error {
 }
 
 // UpdateCompleteBy updates note's due date.
+// The input is of the form DD-MM-YYYY or just DD-MM (with implicity value for year; either current or next).
 // If input is "nil", the existing due date is cleared.
 func (note *Note) UpdateCompleteBy(text string) error {
 	// handle edge-case of empty text
@@ -214,6 +215,7 @@ func (note *Note) UpdateCompleteBy(text string) error {
 			text = fmt.Sprintf("%s-%d", text, year)
 		}
 		// parse and set the date
+		// note: this time value that date/month/year in 00:00:00 GMT+0000
 		timeValue, _ := time.Parse(format, text)
 		note.CompleteBy = int64(timeValue.Unix())
 		defer logger.Info(note.context, fmt.Sprintln("Updated the note with new due date."))
@@ -248,8 +250,14 @@ func (note *Note) ToggleMainFlag() error {
 func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagId int, timezoneIANA string) *gc.Event {
 	// basic information
 	title := note.Text
-	description := ""                                                     // don't expose comments for data privacy
-	start := utils.UnixTimestampToTime(note.CompleteBy - int64(20*60*60)) // workaround to adjust for current day (later, need to take into account timezone in CompleteBy)
+	description := ""                                   // don't expose comments for data privacy
+	start := utils.UnixTimestampToTime(note.CompleteBy) // this is the original time in 00:00:00 GMT+0000
+	offset, err := utils.GetZoneFromLocation(timezoneIANA)
+	if err != nil {
+		logger.Fatal(note.context, fmt.Sprintf("Couldn't calculate offset for timezone %q", timezoneIANA))
+	}
+	start = start.Add(offset)         // adjusting the start to local time for notification purpose
+	start = start.Add(10 * time.Hour) // set notification for 10 AM of given timezoneIANA
 	repeatType := note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId)
 
 	// lego the information
@@ -260,7 +268,7 @@ func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagI
 		TimeZone: timezoneIANA,
 	}
 	endRFC3339 := &gc.EventDateTime{
-		DateTime: start.Add(time.Duration(0.5 * 60 * 60 * time.Second)).Format(time.RFC3339),
+		DateTime: start.Add(time.Duration(30 * time.Minute)).Format(time.RFC3339), // keeping the event for duration of only 30 mins
 		TimeZone: timezoneIANA,
 	}
 	source := &gc.EventSource{

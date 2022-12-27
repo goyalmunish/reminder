@@ -454,8 +454,12 @@ func TestUpdateCompleteBy(t *testing.T) {
 	// case 1
 	err := note1.UpdateCompleteBy("15-12-2021")
 	utils.AssertEqual(t, err, nil)
-	utils.AssertEqual(t, note1.CompleteBy, 1639526400)
+	utils.AssertEqual(t, note1.CompleteBy, 1639526400) // Wed Dec 15 2021 00:00:00 GMT+0000
 	// case 2
+	err = note1.UpdateCompleteBy("31-12-2022")
+	utils.AssertEqual(t, err, nil)
+	utils.AssertEqual(t, note1.CompleteBy, 1672444800) // Sat Dec 31 2022 00:00:00 GMT+0000
+	// case 3
 	err = note1.UpdateCompleteBy("nil")
 	utils.AssertEqual(t, err, nil)
 	utils.AssertEqual(t, note1.CompleteBy, 0)

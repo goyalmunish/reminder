@@ -84,6 +84,49 @@ func TestUnixTimestampForCorrespondingCurrentYearMonth(t *testing.T) {
 	utils.AssertEqual(t, got, 2332800)
 }
 
+func TestStrToTime(t *testing.T) {
+	// note: refer this format to quickly write table based tests
+	var tests = []struct {
+		name      string
+		input     string // RFC3339 string
+		want      int64  // Unix64 time value
+		wantedErr bool   // whether an error was expected
+	}{
+		{name: "time in GMT", input: "2022-12-28T00:18:18.929Z", want: 1672186698},
+		{name: "time in Melbourne/Australia", input: "2022-12-28T11:18:18.929+11:00", want: 1672186698},
+	}
+	for position, subtest := range tests {
+		got, err := utils.StrToTime(subtest.input, "")
+		if (err != nil) != subtest.wantedErr {
+			t.Fatalf("StrToTime case %q (position=%d) failed for input %q with error %q", subtest.name, position, subtest.input, err)
+		}
+		if got.Unix() != subtest.want {
+			t.Errorf("StrToTime case %q (position=%d) failed for input %q; returns <%+v>; wants <%+v>", subtest.name, position, subtest.input, got.Unix(), subtest.want)
+		}
+	}
+}
+
+func TestTimeToStr(t *testing.T) {
+	var tests = []struct {
+		name  string
+		input string // RFC3339 string
+		want  string // RFC3339 string
+	}{
+		{name: "time in GMT", input: "2022-12-28T00:18:18.929Z", want: "2022-12-28T00:18:18Z"},
+		{name: "time in Melbourne/Australia", input: "2022-12-28T11:18:18.929+11:00", want: "2022-12-28T11:18:18+11:00"},
+	}
+	for position, subtest := range tests {
+		tm, err := time.Parse(time.RFC3339, subtest.input)
+		if err != nil {
+			t.Fatalf("Test input %q is incorrect", subtest.input)
+		}
+		got := utils.TimeToStr(tm)
+		if got != subtest.want {
+			t.Errorf("TimeToStr case %q (position=%d) failed for input %q; returns <%+v>; wants <%+v>", subtest.name, position, tm, got, subtest.want)
+		}
+	}
+}
+
 func TestIntPresentInSlice(t *testing.T) {
 	utils.AssertEqual(t, utils.IntPresentInSlice(100, []int{-100, 0, 100}), true)
 	utils.AssertEqual(t, utils.IntPresentInSlice(-100, []int{-100, 0, 100}), true)

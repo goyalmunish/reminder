@@ -48,6 +48,9 @@ func UTCLocation() *time.Location {
 // UnixTimestampToTime function converts unix timestamp to time.
 // It serves as central place to switch between UTC and local time.
 // by default use local time, but behavior can be changed via `Location`.
+// In either case, the value of the time (in seconds) remains same, the
+// use of the Location just changes how time is displayed.
+// For example, 5:30 PM in SGT is equivalent to 12 Noon in India.
 func UnixTimestampToTime(unixTimestamp int64) time.Time {
 	t := time.Unix(unixTimestamp, 0)
 	if Location == nil {
@@ -139,6 +142,25 @@ func StrToTime(tString string, timezone string) (time.Time, error) {
 // TimeToStr converts time.Time to RFC3339 time string.
 func TimeToStr(t time.Time) string {
 	return t.Format(time.RFC3339)
+}
+
+// GetLocalZone returns the local timezone abbreviation and offset (in time.Duration).
+func GetLocalZone() (string, time.Duration) {
+	abbr, seconds := time.Now().Local().Zone()
+	dur := time.Duration(seconds * int(time.Second))
+	return abbr, dur
+}
+
+// GetZoneFromLocation returns zone offset (in time.Duration) for given location string like "Melbourne/Australia".
+func GetZoneFromLocation(loc string) (time.Duration, error) {
+	location, err := time.LoadLocation(loc)
+	if err != nil {
+		return time.Duration(0 * time.Second), err
+	}
+	_, seconds := time.Now().In(location).Zone()
+	dur := time.Duration(seconds * int(time.Second))
+
+	return dur, nil
 }
 
 // IntPresentInSlice function performs membership test for integer based array.
