@@ -8,7 +8,6 @@ import (
 
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/goyalmunish/reminder/pkg/logger"
 	"github.com/goyalmunish/reminder/pkg/utils"
@@ -20,46 +19,6 @@ import (
 )
 
 const TitlePrefix string = "[reminder] "
-
-func ConstructEvent(title string, description string, start time.Time, timezoneIANA string) (*gc.Event, error) {
-	title = fmt.Sprintf("%s%s", TitlePrefix, title)
-	startRFC3339 := &gc.EventDateTime{
-		DateTime: start.Format(time.RFC3339),
-		TimeZone: timezoneIANA,
-	}
-	endRFC3339 := &gc.EventDateTime{
-		DateTime: start.Add(time.Duration(1 * 60 * 60 * time.Second)).Format(time.RFC3339),
-		TimeZone: timezoneIANA,
-	}
-	source := &gc.EventSource{
-		Title: "reminder",
-		Url:   "https://github.com/goyalmunish/reminder",
-	}
-	rem := &gc.EventReminders{
-		Overrides:  []*gc.EventReminder{},
-		UseDefault: true,
-	}
-	recurrence := []string{"RRULE:FREQ=YEARLY"}
-	event := &gc.Event{
-		// ICalUID
-		// Id
-		// Created
-		// Updated
-		Summary:      title,
-		Description:  description,
-		Start:        startRFC3339,
-		End:          endRFC3339,
-		Recurrence:   recurrence,
-		ColorId:      "10", // "Basil" color
-		Reminders:    rem,
-		EventType:    "default",
-		Source:       source,
-		Status:       "confirmed",
-		Transparency: "transparent",
-		Visibility:   "default",
-	}
-	return event, nil
-}
 
 // EventDetails returns overall event details.
 func EventDetails(ctx context.Context, events *gc.Events) string {
