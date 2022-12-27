@@ -235,7 +235,7 @@ go run ./cmd/reminder
 As you are owner and also the end user, you would need to follow instructions on Google's official doc of [Set up your environment](https://developers.google.com/calendar/api/quickstart/go#set_up_your_environment) to:
 
 - [Enable the API](https://console.cloud.google.com/flows/enableapi?apiid=calendar-json.googleapis.com)
-- Save [credentials](https://console.cloud.google.com/apis/credentials) to **`~/calendar_credentials.json`** file.
+- Save [credentials](https://console.cloud.google.com/apis/credentials) to **`~/calendar_credentials.json`** file
 
 ## Features/Issues to be worked upon
 

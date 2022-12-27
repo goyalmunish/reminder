@@ -113,6 +113,9 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 				owned = true
 			}
 			fmt.Printf("  - %v | %v | owned=%v\n", item.Summary, item.Recurrence, owned)
+			// Note: While in development, you might like to comment
+			// out the below block to prevent actual deletion of
+			// the events.
 			if owned {
 				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
 					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err))
