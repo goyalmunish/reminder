@@ -93,6 +93,7 @@ func (note *Note) ExternalText(reminderData *ReminderData) string {
 // This is used as final external reprensentation for display of a single note to external services like Google Calendar.
 func (note *Note) SafeExtText(reminderData *ReminderData) string {
 	strs := note.externalText(reminderData)
+	// leaving out the comments, as they may contain sensitive information
 	commentIndex := 2
 	strs = append(strs[:commentIndex], strs[commentIndex+1:]...)
 	return strings.Join(strs, "")
@@ -263,8 +264,8 @@ func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagI
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Couldn't calculate offset for timezone %q", timezoneIANA))
 	}
-	start = start.Add(offset)         // adjusting the start to local time for notification purpose
-	start = start.Add(10 * time.Hour) // set notification for 10 AM of given timezoneIANA
+	start = start.Add(offset)          // adjusting the start to local time for notification purpose
+	start = start.Add(-14 * time.Hour) // set notification for 10 AM of given timezoneIANA
 	repeatType := note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId)
 	description := note.SafeExtText(reminderData)
 
