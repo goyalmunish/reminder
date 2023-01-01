@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/goyalmunish/reminder/internal/appinfo"
@@ -34,25 +33,25 @@ func (s *Settings) String() string {
 	return string(value)
 }
 
-func LoadConfig(ctx context.Context) (*Settings, error) {
+func LoadConfig() (*Settings, error) {
 	// set default settings
 	settings := DefaultSettings()
-	logger.Debug(ctx, fmt.Sprintf("Default Settings: %q", settings))
+	logger.Debug(fmt.Sprintf("Default Settings: %q", settings))
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile(currentConfigPath)
 
 	// override with current settings
-	logger.Info(ctx, fmt.Sprintf("Attempt to read the app config %q (on top of default values).", currentConfigPath))
+	logger.Info(fmt.Sprintf("Attempt to read the app config %q (on top of default values).", currentConfigPath))
 	if err := viper.ReadInConfig(); err != nil {
 		// Just log the error, and fall back to default settings.
-		utils.LogError(ctx, err)
+		utils.LogError(err)
 	}
 	// If config file is found, unmarshal those values ontop of default settings struct.
 	// Otherwise, do nothing.
 	if err := viper.Unmarshal(settings); err != nil {
-		utils.LogError(ctx, err)
+		utils.LogError(err)
 		return nil, err
 	}
-	logger.Info(ctx, fmt.Sprintf("Final Settings:\n%v", settings))
+	logger.Info(fmt.Sprintf("Final Settings:\n%v", settings))
 	return settings, nil
 }

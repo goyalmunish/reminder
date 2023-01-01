@@ -6,7 +6,6 @@ Just run it as `go run ./cmd/reminder`
 package reminder
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -17,36 +16,36 @@ import (
 )
 
 // flow is recursive function for overall flow of interactivity
-var ctx context.Context
 var config *settings.Settings
 
 func init() {
 	var err error
 	var runID = uuid.New()
-	ctx = context.Background()
 	// note: setting are loaded before logger is being setup; it will assume only default logrus settings
-	config, err = settings.LoadConfig(ctx)
+	config, err = settings.LoadConfig()
 	if err != nil {
 		panic(err)
 	}
-	ctx = context.WithValue(ctx, logger.Key("app"), "reminder")
-	ctx = context.WithValue(ctx, logger.Key("run_id"), runID)
 	logger.SetWithOptions(config.Log)
+	logger.SetGlobalFields(map[string]interface{}{
+		"app":    "reminder",
+		"run_id": runID,
+	})
 }
 func Flow() {
 	var err error
 	// make sure DataFile exists
-	err = model.MakeSureFileExists(ctx, config.AppInfo.DataFile, true)
+	err = model.MakeSureFileExists(config.AppInfo.DataFile, true)
 	if err != nil {
 		panic(err)
 	}
 	// read and parse the existing data
-	reminderData := *model.ReadDataFile(ctx, config.AppInfo.DataFile)
+	reminderData := *model.ReadDataFile(config.AppInfo.DataFile)
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup
 	_, err = reminderData.AutoBackup(24 * 60 * 60)
-	utils.LogError(ctx, err)
+	utils.LogError(err)
 	// ask the main menu
 	fmt.Println("| =========================== MAIN MENU =========================== |")
 	fmt.Println("|     Use 'Ctrl-c' to jump one level up (towards the Main Menu)     |")
@@ -59,7 +58,7 @@ func Flow() {
 		But, if you are inside PromptUI's `Run()`, then it cancels the input and moves to next
 		statement in the code.
 	*/
-	_, result, _ := utils.AskOption(ctx, []string{
+	_, result, _ := utils.AskOption([]string{
 		fmt.Sprintf("%s %s", utils.Symbols["spark"], "List Stuff"),
 		fmt.Sprintf("%s %s %s", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]),
 		fmt.Sprintf("%s %s", utils.Symbols["clock"], "Approaching Due Date"),
@@ -94,6 +93,6 @@ func Flow() {
 		fmt.Println("Exiting...")
 		return
 	}
-	utils.LogError(ctx, err)
+	utils.LogError(err)
 	Flow()
 }

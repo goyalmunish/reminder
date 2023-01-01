@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,7 +25,6 @@ const EnableCalendar bool = true
 A ReminderData represents the whole reminder data-structure.
 */
 type ReminderData struct {
-	context      context.Context
 	User         *User  `json:"user"`
 	Notes        Notes  `json:"notes"`
 	Tags         Tags   `json:"tags"`
@@ -35,27 +33,21 @@ type ReminderData struct {
 	BaseStruct
 }
 
-// SetContext sets given context to the receiver.
-func (rd *ReminderData) SetContext(ctx context.Context) {
-	rd.context = ctx
-}
-
 // SyncCalendar syncs pending notes to Cloud Calendar.
 func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
-	ctx := rd.context
 	if !EnableCalendar {
-		logger.Warn(ctx, "Google Calendar is disabled.")
+		logger.Warn("Google Calendar is disabled.")
 		return
 	}
 
 	// Get calendar service
-	logger.Info(ctx, "Retrieve the Cloud Calendar Service.")
-	srv, err := calendar.GetCalendarService(ctx, calOptions)
+	logger.Info("Retrieve the Cloud Calendar Service.")
+	srv, err := calendar.GetCalendarService(calOptions)
 	if err != nil {
-		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve Calendar client: %v", err))
+		logger.Fatal(fmt.Sprintf("Unable to retrieve Calendar client: %v", err))
 	}
 
-	logger.Info(ctx, "Fetch the list of all upcoming Calendar Events with each type of recurring event as single unit.")
+	logger.Info("Fetch the list of all upcoming Calendar Events with each type of recurring event as single unit.")
 	// Get list of all upcomming events, with recurring events as a
 	// unit (and not as separate single events).
 	currentTime := time.Now()
@@ -69,17 +61,17 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 		MaxResults(250). // 250 is default and is maximum value; if there are more than 250 events, then we'll have to paginate
 		Do()
 	if err != nil {
-		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve the events: %v", err))
+		logger.Fatal(fmt.Sprintf("Unable to retrieve the events: %v", err))
 	}
 
 	// Get Cloud Calendar details
-	fmt.Println(calendar.EventsDetails(ctx, existingEvents))
+	fmt.Println(calendar.EventsDetails(existingEvents))
 
 	// Iterating through the Cloud Calendar Events
 	fmt.Printf("Listing upcoming calendar events (%v):\n", len(existingEvents.Items))
 	fmt.Println("Note: It may take some time for Google Calendar read API to pick up the recently added events, or Calendar trash https://calendar.google.com/calendar/u/0/r/trash can also cause issues.")
 	if len(existingEvents.Items) == 0 {
-		logger.Warn(ctx, "No upcoming events found.")
+		logger.Warn("No upcoming events found.")
 	} else {
 		for _, item := range existingEvents.Items {
 			if item.Summary == "" {
@@ -98,18 +90,18 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	// https://calendar.google.com/calendar/u/0/r/trash and clear it from
 	// time to time. Otherwise, this obstructs with visibility of newly
 	// added event in the API call.
-	logger.Info(ctx, "Fetch all the events (max 250) registered by reminder app (and some other matching the query).")
+	logger.Info("Fetch all the events (max 250) registered by reminder app (and some other matching the query).")
 	reminderEvents, err := srv.Events.List("primary").
 		ShowDeleted(false).
 		SingleEvents(false).
 		Q(calendar.TitlePrefix).
 		Do()
 	if err != nil {
-		logger.Fatal(ctx, fmt.Sprintf("Unable to retrieve the events: %v", err))
+		logger.Fatal(fmt.Sprintf("Unable to retrieve the events: %v", err))
 	}
 	fmt.Printf("Listing matching events (%v) and deleting the ones registered by reminder app:\n", len(reminderEvents.Items))
 	if len(reminderEvents.Items) == 0 {
-		logger.Warn(ctx, "No registered events found.")
+		logger.Warn("No registered events found.")
 	} else {
 		deletionCount := 0
 		for _, item := range reminderEvents.Items {
@@ -120,12 +112,12 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 			fmt.Printf("  - %q -- %q (owned=%v)\n", calendar.EventString(item), item.Id, owned)
 			if owned {
 				if calOptions.DryMode {
-					logger.Warn(ctx, fmt.Sprintf("Dry mode is enabled; skipping deletion of the event %q.", item.Id))
+					logger.Warn(fmt.Sprintf("Dry mode is enabled; skipping deletion of the event %q.", item.Id))
 					// continue with next iteration
 					continue
 				}
 				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
-					logger.Fatal(ctx, fmt.Sprintf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err))
+					logger.Fatal(fmt.Sprintf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err))
 				} else {
 					deletionCount += 1
 					fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, calendar.EventString(item))
@@ -146,15 +138,15 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	fmt.Println("Starting the syncing process.")
 	for _, event := range newEvents {
 		if calOptions.DryMode {
-			logger.Warn(ctx, fmt.Sprintf("Dry mode is enabled; skipping insertion of event %q.\n", calendar.EventString(event)))
+			logger.Warn(fmt.Sprintf("Dry mode is enabled; skipping insertion of event %q.\n", calendar.EventString(event)))
 			// continue with next iteration
 			continue
 		}
 		_, err = srv.Events.Insert("primary", event).Do()
 		if err != nil {
-			logger.Error(ctx, err)
+			logger.Error(err)
 		}
-		logger.Info(ctx, fmt.Sprintf("Synced the event %q.\n", calendar.EventString(event)))
+		logger.Info(fmt.Sprintf("Synced the event %q.\n", calendar.EventString(event)))
 	}
 	fmt.Println("Done with syncing process.")
 }
@@ -193,19 +185,19 @@ func (rd *ReminderData) UpdateDataFile(msg string) error {
 	// original string
 	byteValue, err := json.MarshalIndent(&rd, "", "    ")
 	if err != nil {
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		return err
 	}
 	// persist the byte data to file
 	err = os.WriteFile(rd.DataFile, byteValue, 0755)
 	if err != nil {
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		return err
 	}
 	if msg != "" {
-		logger.Info(rd.context, msg)
+		logger.Info(msg)
 	}
-	logger.Info(rd.context, "Updated the data file!")
+	logger.Info("Updated the data file!")
 	return nil
 }
 
@@ -344,7 +336,7 @@ func (rd *ReminderData) ListTags() error {
 		allTagSlugsWithEmoji = append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", tagSymbol(tagSlug), tagSlug))
 	}
 	// ask user to select a tag
-	tagIndex, _, err := utils.AskOption(rd.context, append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag: ")
+	tagIndex, _, err := utils.AskOption(append(allTagSlugsWithEmoji, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag: ")
 	if (err != nil) || (tagIndex == -1) {
 		// do nothing, just exit
 		return err
@@ -362,7 +354,7 @@ func (rd *ReminderData) ListTags() error {
 	tag := rd.Tags[tagIndex]
 	err = rd.PrintNotesAndAskOptions(Notes{}, "pending_tag_notes", tag.Id, "default")
 	if err != nil {
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		// go back to ListTags
 		err = rd.ListTags()
 		if err != nil {
@@ -391,7 +383,7 @@ func (rd *ReminderData) SearchNotes() error {
 	}
 	// display prompt
 	fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
-	index, err := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth(rd.context)-10), searchNotes)
+	index, err := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
 	if err != nil {
 		return err
 	}
@@ -489,11 +481,11 @@ func (rd *ReminderData) NewTagRegistration() (int, error) {
 	// collect and ask info about the tag
 	tagID := rd.nextPossibleTagId()
 
-	tag, err := NewTag(rd.context, tagID, "", "")
+	tag, err := NewTag(tagID, "", "")
 
 	// validate and save data
 	if err != nil {
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		return 0, err
 	} else {
 		err, _ = rd.newTagAppend(tag), tagID
@@ -521,7 +513,7 @@ func (rd *ReminderData) newTagAppend(tag *Tag) error {
 		return errors.New("Tag Already Exists")
 	}
 	// go ahead and append
-	logger.Info(rd.context, fmt.Sprintf("Added Tag: %v\n", *tag))
+	logger.Info(fmt.Sprintf("Added Tag: %v\n", *tag))
 	rd.Tags = append(rd.Tags, tag)
 	return rd.UpdateDataFile("")
 }
@@ -533,15 +525,15 @@ func (rd *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
 		// assuming each note with have on average 2 tags
 		tagIDs = make([]int, 0, 2)
 	}
-	note, err := NewNote(rd.context, tagIDs, "")
+	note, err := NewNote(tagIDs, "")
 	// validate and save data
 	if err != nil {
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		return note, err
 	}
 	err = rd.newNoteAppend(note)
 	if err != nil {
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		return note, err
 	}
 	return note, nil
@@ -549,7 +541,7 @@ func (rd *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
 
 // newNoteAppend appends a new note.
 func (rd *ReminderData) newNoteAppend(note *Note) error {
-	logger.Info(rd.context, fmt.Sprintf("Added Note: %+v\n", *note))
+	logger.Info(fmt.Sprintf("Added Note: %+v\n", *note))
 	rd.Notes = append(rd.Notes, note)
 	return rd.UpdateDataFile("")
 }
@@ -580,7 +572,7 @@ func (rd *ReminderData) CreateBackup() (string, error) {
 	ext := path.Ext(rd.DataFile)
 	dstFile := rd.DataFile[:len(rd.DataFile)-len(ext)] + "_backup_" + strconv.FormatInt(int64(utils.CurrentUnixTimestamp()), 10) + ext
 	lnFile := rd.DataFile[:len(rd.DataFile)-len(ext)] + "_backup_latest" + ext
-	logger.Info(rd.context, fmt.Sprintf("Creating backup at %q.\n", dstFile))
+	logger.Info(fmt.Sprintf("Creating backup at %q.\n", dstFile))
 	// create backup
 	byteValue, err := os.ReadFile(rd.DataFile)
 	if err != nil {
@@ -591,7 +583,7 @@ func (rd *ReminderData) CreateBackup() (string, error) {
 		return dstFile, err
 	}
 	// create alias of latest backup
-	logger.Info(rd.context, fmt.Sprintf("Creating symlink at %q.\n", lnFile))
+	logger.Info(fmt.Sprintf("Creating symlink at %q.\n", lnFile))
 	executable, _ := exec.LookPath("ln")
 	cmd := &exec.Cmd{
 		Path:   executable,
@@ -634,9 +626,9 @@ func (rd *ReminderData) AutoBackup(gapSecs int64) (string, error) {
 	currentTime := utils.CurrentUnixTimestamp()
 	lastBackup := rd.LastBackupAt
 	gap := currentTime - lastBackup
-	logger.Info(rd.context, fmt.Sprintf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs))
+	logger.Info(fmt.Sprintf("Automatic Backup Gap = %vs/%vs\n", gap, gapSecs))
 	if gap < gapSecs {
-		logger.Info(rd.context, fmt.Sprintln("Skipping automatic backup."))
+		logger.Info(fmt.Sprintln("Skipping automatic backup."))
 		return dstFile, nil
 	}
 	dstFile, _ = rd.CreateBackup()
@@ -650,7 +642,7 @@ func (rd *ReminderData) AskTagIds(tagIDs []int) []int {
 	var err error
 	var tagID int
 	// ask user to select tag
-	optionIndex, _, _ := utils.AskOption(rd.context, append(rd.SortedTagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag: ")
+	optionIndex, _, _ := utils.AskOption(append(rd.SortedTagSlugs(), fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Tag")), "Select Tag: ")
 	if optionIndex == -1 {
 		return []int{}
 	}
@@ -669,7 +661,7 @@ func (rd *ReminderData) AskTagIds(tagIDs []int) []int {
 	}
 	// check with user if another tag is to be added
 	promptText, err := utils.GeneratePrompt("tag_another", "")
-	utils.LogError(rd.context, err)
+	utils.LogError(err)
 	promptText = strings.ToLower(promptText)
 	nextTag := false
 	for _, yes := range []string{"yes", "y"} {
@@ -688,7 +680,7 @@ func (rd *ReminderData) AskTagIds(tagIDs []int) []int {
 // It return string representing workflow direction.
 func (rd *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	fmt.Print(note.ExternalText(rd))
-	_, noteOption, _ := utils.AskOption(rd.context, []string{
+	_, noteOption, _ := utils.AskOption([]string{
 		fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"),
 		fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"),
 		fmt.Sprintf("%v %v", utils.Symbols["noAction"], "Do nothing"),
@@ -704,9 +696,9 @@ func (rd *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 	switch noteOption {
 	case fmt.Sprintf("%v %v", utils.Symbols["comment"], "Add comment"):
 		promptText, err := utils.GeneratePrompt("note_comment", "")
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		err = rd.AddNoteComment(note, promptText)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["home"], "Exit to main menu"):
 		return "main-menu"
@@ -715,46 +707,46 @@ func (rd *ReminderData) PrintNoteAndAskOptions(note *Note) string {
 		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["upVote"], "Mark as done"):
 		err := rd.UpdateNoteStatus(note, NoteStatus_Done)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["zzz"], "Mark as suspended"):
 		err := rd.UpdateNoteStatus(note, NoteStatus_Suspended)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["downVote"], "Mark as pending"):
 		err := rd.UpdateNoteStatus(note, NoteStatus_Pending)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["calendar"], "Update due date"):
 		promptText, err := utils.GeneratePrompt("note_completed_by", "")
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		err = rd.UpdateNoteCompleteBy(note, promptText)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["text"], "Update text"):
 		promptText, err := utils.GeneratePrompt("note_text", note.Text)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		err = rd.UpdateNoteText(note, promptText)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["glossary"], "Update summary"):
 		promptText, err := utils.GeneratePrompt("note_summary", note.Summary)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		err = rd.UpdateNoteSummary(note, promptText)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		fmt.Print(note.ExternalText(rd))
 	case fmt.Sprintf("%v %v", utils.Symbols["tag"], "Update tags"):
 		tagIDs := rd.AskTagIds([]int{})
 		if len(tagIDs) > 0 {
 			err := rd.UpdateNoteTags(note, tagIDs)
-			utils.LogError(rd.context, err)
+			utils.LogError(err)
 			fmt.Print(note.ExternalText(rd))
 		} else {
 			fmt.Printf("%v Skipping updating note with empty tagIDs list\n", utils.Symbols["warning"])
 		}
 	case fmt.Sprintf("%v %v", utils.Symbols["hat"], "Toggle main/incidental"):
 		err := rd.ToggleNoteMainFlag(note)
-		utils.LogError(rd.context, err)
+		utils.LogError(err)
 		fmt.Print(note.ExternalText(rd))
 	}
 	return "stay"
@@ -817,7 +809,7 @@ func (rd *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string
 		// otherwise the note will immediately disappear if the updated tags list doesn't include the original tag
 		fmt.Printf("Note: Using passed notes; the list will not be refreshed immediately!\n")
 	default:
-		logger.Error(rd.context, "Error: Unreachable code")
+		logger.Error("Error: Unreachable code")
 	}
 
 	// sort notes
@@ -829,7 +821,7 @@ func (rd *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string
 	}
 	repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
 	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
-	texts := notes.ExternalTexts(utils.TerminalWidth(rd.context)-50, repeatAnnuallyTag.Id, repeatMonthlyTag.Id)
+	texts := notes.ExternalTexts(utils.TerminalWidth()-50, repeatAnnuallyTag.Id, repeatMonthlyTag.Id)
 
 	// ask user to select a note
 	promptText := ""
@@ -838,7 +830,7 @@ func (rd *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string
 	} else {
 		promptText = "Select Note: "
 	}
-	noteIndex, _, err := utils.AskOption(rd.context, append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
+	noteIndex, _, err := utils.AskOption(append(texts, fmt.Sprintf("%v %v", utils.Symbols["add"], "Add Note")), promptText)
 	if (err != nil) || (noteIndex == -1) {
 		return err
 	}

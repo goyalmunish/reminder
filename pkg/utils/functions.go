@@ -5,7 +5,6 @@ package utils
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -187,9 +186,9 @@ func GetCommonMembersIntSlices(arr1 []int, arr2 []int) []int {
 }
 
 // LogError function ignores but prints the error (if present).
-func LogError(ctx context.Context, err error) {
+func LogError(err error) {
 	if err != nil {
-		logger.Error(ctx, fmt.Sprintf("%v %v\n", Symbols["error"], err))
+		logger.Error(fmt.Sprintf("%v %v\n", Symbols["error"], err))
 	}
 }
 
@@ -320,7 +319,7 @@ func IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimest
 // AskOption function asks option to the user.
 // It print error, if encountered any (so that they don't have to printed by calling function).
 // It return a tuple (chosen index, chosen string, err if any).
-func AskOption(ctx context.Context, options []string, label string) (int, string, error) {
+func AskOption(options []string, label string) (int, string, error) {
 	if len(options) == 0 {
 		err := errors.New("Empty List")
 		fmt.Printf("%v Prompt failed %v\n", Symbols["warning"], err)
@@ -342,7 +341,7 @@ func AskOption(ctx context.Context, options []string, label string) (int, string
 		fmt.Printf("%v Prompt failed %v\n", Symbols["warning"], err)
 		return -1, "", err
 	}
-	logger.Info(ctx, fmt.Sprintf("You chose %d:%q\n", selectedIndex, options[selectedIndex]))
+	logger.Info(fmt.Sprintf("You chose %d:%q\n", selectedIndex, options[selectedIndex]))
 	return selectedIndex, options[selectedIndex], nil
 }
 
@@ -360,10 +359,10 @@ func PerformShellOperation(exe string, args ...string) (string, error) {
 }
 
 // TerminalSize function gets terminal size.
-func TerminalSize(ctx context.Context) (int, int) {
+func TerminalSize() (int, int) {
 	out, err := PerformShellOperation("stty", "size")
 	if err != nil {
-		logger.Fatal(ctx, err)
+		logger.Fatal(err)
 	}
 	output := strings.TrimSpace(string(out))
 	dims := strings.Split(output, " ")
@@ -373,8 +372,8 @@ func TerminalSize(ctx context.Context) (int, int) {
 }
 
 // TerminalWidth function gets terminal width.
-func TerminalWidth(ctx context.Context) int {
-	_, width := TerminalSize(ctx)
+func TerminalWidth() int {
+	_, width := TerminalSize()
 	return width
 }
 
