@@ -130,7 +130,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 	}
 
 	// Add events to Cloud Calendar
-	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone)
+	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone, rd)
 	waitFor := 10 * time.Second
 	fmt.Printf("\nSyncing %v events (pending onces with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for %v.\n", len(newEvents), waitFor)
 	fmt.Printf("waiting for %v...\n", waitFor)
@@ -152,7 +152,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 }
 
 // GoogleCalendarEvents returns list of Google Calendar Events.
-func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string) []*gc.Event {
+func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string, reminderData *ReminderData) []*gc.Event {
 	// get all pending notes
 	allNotes := rd.Notes
 	relevantNotes := allNotes.WithStatus(NoteStatus_Pending).WithCompleteBy()
@@ -161,7 +161,7 @@ func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string) []*gc.Event {
 	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
 	var events []*gc.Event
 	for _, note := range relevantNotes {
-		event := note.GoogleCalendarEvent(repeatAnnuallyTag.Id, repeatMonthlyTag.Id, timezoneIANA)
+		event := note.GoogleCalendarEvent(repeatAnnuallyTag.Id, repeatMonthlyTag.Id, timezoneIANA, reminderData)
 		events = append(events, event)
 	}
 	return events
