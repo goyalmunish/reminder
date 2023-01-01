@@ -191,7 +191,6 @@ func (rd *ReminderData) UpdateDataFile(msg string) error {
 	// persist the byte data to file
 	err = os.WriteFile(rd.DataFile, byteValue, 0755)
 	if err != nil {
-		utils.LogError(err)
 		return err
 	}
 	if msg != "" {
@@ -485,7 +484,6 @@ func (rd *ReminderData) NewTagRegistration() (int, error) {
 
 	// validate and save data
 	if err != nil {
-		utils.LogError(err)
 		return 0, err
 	} else {
 		err, _ = rd.newTagAppend(tag), tagID
@@ -528,12 +526,10 @@ func (rd *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
 	note, err := NewNote(tagIDs, "")
 	// validate and save data
 	if err != nil {
-		utils.LogError(err)
 		return note, err
 	}
 	err = rd.newNoteAppend(note)
 	if err != nil {
-		utils.LogError(err)
 		return note, err
 	}
 	return note, nil

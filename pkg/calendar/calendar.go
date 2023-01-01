@@ -55,14 +55,14 @@ func GetCalendarService(options *Options) (*gc.Service, error) {
 	credFile := options.CredentialFile
 	b, err := os.ReadFile(utils.TryConvertTildaBasedPath(credFile))
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't read the client secret file %q; Refer instructions on https://github.com/goyalmunish/reminder#setting-up-the-environment-for-google-calendar-sync; Underneath error: %v", credFile, err)
+		return nil, fmt.Errorf("Couldn't read the client secret file %q; Refer instructions on https://github.com/goyalmunish/reminder#setting-up-the-environment-for-google-calendar-sync; Underneath error: %w", credFile, err)
 	}
 	logger.Info(fmt.Sprintf("Read client secret file %q.", credFile))
 
 	// If modifying these scopes, delete your previously saved token file.
 	config, err := google.ConfigFromJSON(b, gc.CalendarEventsScope)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to parse client secret file to config; If you changed the scope, then deleted your current %q token file and try again; Underneath error: %v", options.TokenFile, err)
+		return nil, fmt.Errorf("Unable to parse client secret file to config; If you changed the scope, then deleted your current %q token file and try again; Underneath error: %w", options.TokenFile, err)
 	}
 
 	client, err := getClient(config, options)

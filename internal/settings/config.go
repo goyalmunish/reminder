@@ -49,7 +49,6 @@ func LoadConfig() (*Settings, error) {
 	// If config file is found, unmarshal those values ontop of default settings struct.
 	// Otherwise, do nothing.
 	if err := viper.Unmarshal(settings); err != nil {
-		utils.LogError(err)
 		return nil, err
 	}
 	logger.Info(fmt.Sprintf("Final Settings:\n%v", settings))
