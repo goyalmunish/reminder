@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -20,7 +19,6 @@ A note can be main or incidental.
 A note can be multiple tags, and a tag can be assocaited with mutiple notes.
 */
 type Note struct {
-	context  context.Context
 	Text     string   `json:"text"`
 	Comments Comments `json:"comments"`
 	Summary  string   `json:"summary"`
@@ -52,11 +50,6 @@ func (note *Note) Type() string {
 		return "main"
 	}
 	return "incidental"
-}
-
-// SetContext sets given context to the receiver.
-func (note *Note) SetContext(ctx context.Context) {
-	note.context = ctx
 }
 
 // Strings provides basic string representation (as a slice of strings) of a note
@@ -125,7 +118,7 @@ func (note *Note) AddComment(text string) error {
 	}
 	comment := &Comment{Text: text, BaseStruct: BaseStruct{CreatedAt: utils.CurrentUnixTimestamp()}}
 	note.Comments = append(note.Comments, comment)
-	defer logger.Info(note.context, fmt.Sprintln("Added the comment."))
+	defer logger.Info(fmt.Sprintln("Added the comment."))
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
@@ -134,7 +127,7 @@ func (note *Note) AddComment(text string) error {
 // UpdateTags updates note's tags.
 func (note *Note) UpdateTags(tagIDs []int) error {
 	note.TagIds = tagIDs
-	defer logger.Info(note.context, fmt.Sprintln("Updated the note with tags."))
+	defer logger.Info(fmt.Sprintln("Updated the note with tags."))
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
@@ -152,7 +145,7 @@ func (note *Note) UpdateStatus(status NoteStatus, repeatTagIDs []int) error {
 	}
 	// happy path
 	note.Status = status
-	defer logger.Info(note.context, fmt.Sprintln("Updated the status."))
+	defer logger.Info(fmt.Sprintln("Updated the status."))
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
@@ -166,7 +159,7 @@ func (note *Note) UpdateText(text string) error {
 	}
 	// happy path
 	note.Text = text
-	defer logger.Info(note.context, fmt.Sprintln("Updated the text."))
+	defer logger.Info(fmt.Sprintln("Updated the text."))
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
@@ -181,10 +174,10 @@ func (note *Note) UpdateSummary(text string) error {
 	// happy path
 	if text == "nil" {
 		note.Summary = ""
-		defer logger.Info(note.context, fmt.Sprintln("Cleared the due date from the note."))
+		defer logger.Info(fmt.Sprintln("Cleared the due date from the note."))
 	} else {
 		note.Summary = text
-		defer logger.Info(note.context, fmt.Sprintln("Updated the summary."))
+		defer logger.Info(fmt.Sprintln("Updated the summary."))
 	}
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
@@ -202,7 +195,7 @@ func (note *Note) UpdateCompleteBy(text string) error {
 	// happy path
 	if text == "nil" {
 		note.CompleteBy = 0
-		defer logger.Info(note.context, fmt.Sprintln("Cleared the due date from the note."))
+		defer logger.Info(fmt.Sprintln("Cleared the due date from the note."))
 	} else {
 		format := "2-1-2006"
 		// set current year as year if year part is missing
@@ -218,7 +211,7 @@ func (note *Note) UpdateCompleteBy(text string) error {
 		// note: this time value that date/month/year in 00:00:00 GMT+0000
 		timeValue, _ := time.Parse(format, text)
 		note.CompleteBy = int64(timeValue.Unix())
-		defer logger.Info(note.context, fmt.Sprintln("Updated the note with new due date."))
+		defer logger.Info(fmt.Sprintln("Updated the note with new due date."))
 	}
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
@@ -240,7 +233,7 @@ func (note *Note) RepeatType(repeatAnnuallyTagId int, repeatMonthlyTagId int) st
 // ToggleMainFlag toggles note's main flag.
 func (note *Note) ToggleMainFlag() error {
 	note.IsMain = !(note.IsMain)
-	defer logger.Info(note.context, fmt.Sprintln("Toggled the note's main/incedental flag."))
+	defer logger.Info(fmt.Sprintln("Toggled the note's main/incedental flag."))
 	// update the UpdatedAt as well
 	note.UpdatedAt = utils.CurrentUnixTimestamp()
 	return nil
@@ -254,7 +247,7 @@ func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagI
 	start := utils.UnixTimestampToTime(note.CompleteBy) // this is the original time in 00:00:00 GMT+0000
 	offset, err := utils.GetZoneFromLocation(timezoneIANA)
 	if err != nil {
-		logger.Fatal(note.context, fmt.Sprintf("Couldn't calculate offset for timezone %q", timezoneIANA))
+		logger.Fatal(fmt.Sprintf("Couldn't calculate offset for timezone %q", timezoneIANA))
 	}
 	start = start.Add(offset)         // adjusting the start to local time for notification purpose
 	start = start.Add(10 * time.Hour) // set notification for 10 AM of given timezoneIANA

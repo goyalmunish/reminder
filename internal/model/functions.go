@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -68,7 +67,7 @@ func printNoteField(fieldName string, fieldValue interface{}) string {
 }
 
 // NewNote function provides prompt to register a new Note, and returns its answer.
-func NewNote(ctx context.Context, tagIDs []int, useText string) (*Note, error) {
+func NewNote(tagIDs []int, useText string) (*Note, error) {
 	var noteText string
 	var err error
 	note := &Note{
@@ -81,7 +80,6 @@ func NewNote(ctx context.Context, tagIDs []int, useText string) (*Note, error) {
 			UpdatedAt: utils.CurrentUnixTimestamp()},
 		// Text:       noteText,
 	}
-	note.SetContext(ctx)
 	if useText == "" {
 		noteText, err = utils.GeneratePrompt("note_text", "")
 		if err != nil {
@@ -133,7 +131,7 @@ func BasicTags() Tags {
 
 // NewTag funciton provides prompt for creating new Tag.
 // Pass useSlug and/or useGroup to use given values instead of prompting user.
-func NewTag(ctx context.Context, tagID int, useSlug string, useGroup string) (*Tag, error) {
+func NewTag(tagID int, useSlug string, useGroup string) (*Tag, error) {
 	var err error
 	var tagSlug string
 	var tagGroup string
@@ -145,7 +143,6 @@ func NewTag(ctx context.Context, tagID int, useSlug string, useGroup string) (*T
 		// Slug:      tagSlug,
 		// Group:     tagGroup,
 	}
-	tag.SetContext(ctx)
 	// ask for tag slug
 	if useSlug == "" {
 		tagSlug, err = utils.GeneratePrompt("tag_slug", "")
@@ -179,19 +176,18 @@ func NewTag(ctx context.Context, tagID int, useSlug string, useGroup string) (*T
 }
 
 // MakeSureFileExists function makes sure that the dataFilePath exists.
-func MakeSureFileExists(ctx context.Context, dataFilePath string, askUserInput bool) error {
+func MakeSureFileExists(dataFilePath string, askUserInput bool) error {
 	_, err := os.Stat(dataFilePath)
 	if err != nil {
-		logger.Warn(ctx, fmt.Sprintf("Error finding existing data file: %v\n", err))
+		logger.Warn(fmt.Sprintf("Error finding existing data file: %v\n", err))
 		if errors.Is(err, fs.ErrNotExist) {
-			logger.Info(ctx, fmt.Sprintf("Trying generating new data file %q.\n", dataFilePath))
+			logger.Info(fmt.Sprintf("Trying generating new data file %q.\n", dataFilePath))
 			err := os.MkdirAll(path.Dir(dataFilePath), 0751)
 			if err != nil {
 				return err
 			}
 			reminderData := *BlankReminder(askUserInput, dataFilePath)
 			reminderData.DataFile = dataFilePath
-			reminderData.SetContext(ctx)
 			err = reminderData.RegisterBasicTags()
 			if err != nil {
 				return err
@@ -262,23 +258,15 @@ func BlankReminder(askUserInput bool, dataFilePath string) *ReminderData {
 }
 
 // ReadDataFile function reads data file as instance of `ReminderData`
-func ReadDataFile(ctx context.Context, dataFilePath string) *ReminderData {
+func ReadDataFile(dataFilePath string) *ReminderData {
 	var reminderData ReminderData
 	// read byte data from file
 	byteValue, err := os.ReadFile(utils.TryConvertTildaBasedPath(dataFilePath))
-	utils.LogError(ctx, err)
+	utils.LogError(err)
 	// parse json data
 	err = json.Unmarshal(byteValue, &reminderData)
-	logger.Info(ctx, fmt.Sprintf("Read contents of %q into ReminderData.", dataFilePath))
-	utils.LogError(ctx, err)
-	// set context
-	reminderData.SetContext(ctx)
-	for _, note := range reminderData.Notes {
-		note.SetContext(ctx)
-	}
-	for _, tag := range reminderData.Tags {
-		tag.SetContext(ctx)
-	}
+	logger.Info(fmt.Sprintf("Read contents of %q into ReminderData.", dataFilePath))
+	utils.LogError(err)
 	// close the file
 	return &reminderData
 }

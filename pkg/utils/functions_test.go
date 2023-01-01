@@ -13,7 +13,7 @@ package utils_test
 
 import (
 	// "fmt"
-	"context"
+
 	"errors"
 	"fmt"
 	"html/template"
@@ -159,7 +159,7 @@ func TestGetCommonMembersIntSlices(t *testing.T) {
 
 func TestLogError(t *testing.T) {
 	err := errors.New("dummy error")
-	utils.LogError(context.TODO(), err)
+	utils.LogError(err)
 }
 
 func TestTrimString(t *testing.T) {

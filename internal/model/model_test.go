@@ -1,7 +1,6 @@
 package model_test
 
 import (
-	"context"
 	"errors"
 
 	// "fmt"
@@ -396,7 +395,6 @@ func TestWithTagIdAndStatus(t *testing.T) {
 func TestAddComment(t *testing.T) {
 	// create notes
 	note1 := model.Note{Text: "1", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note1.SetContext(context.Background())
 	// add comments
 	// case 1
 	err := note1.AddComment("test comment 1")
@@ -418,7 +416,6 @@ func TestAddComment(t *testing.T) {
 func TestUpdateText(t *testing.T) {
 	// create notes
 	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note1.SetContext(context.Background())
 	// update text
 	// case 1
 	err := note1.UpdateText("updated text 1")
@@ -433,7 +430,6 @@ func TestUpdateText(t *testing.T) {
 func TestUpdateSummary(t *testing.T) {
 	// create notes
 	note1 := model.Note{Summary: "original summary", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note1.SetContext(context.Background())
 	// update summary
 	// case 1
 	err := note1.UpdateSummary("updated summary 1")
@@ -448,7 +444,6 @@ func TestUpdateSummary(t *testing.T) {
 func TestUpdateCompleteBy(t *testing.T) {
 	// create notes
 	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note1.SetContext(context.Background())
 	utils.AssertEqual(t, note1.CompleteBy, 0)
 	// update complete_by
 	// case 1
@@ -468,7 +463,6 @@ func TestUpdateCompleteBy(t *testing.T) {
 func TestUpdateTags(t *testing.T) {
 	// create notes
 	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note1.SetContext(context.Background())
 	// update TagIds
 	// case 1
 	tagIds := []int{2, 5}
@@ -485,7 +479,6 @@ func TestUpdateTags(t *testing.T) {
 func TestUpdateStatus(t *testing.T) {
 	// create notes
 	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note1.SetContext(context.Background())
 	// update TagIds
 	// case 1
 	err := note1.UpdateStatus(model.NoteStatus_Done, []int{1, 2, 3})
@@ -506,11 +499,8 @@ func TestRepeatType(t *testing.T) {
 	repeatMonthlyTagId := 4
 	// create notes
 	note1 := model.Note{Text: "original text1", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note1.SetContext(context.Background())
 	note2 := model.Note{Text: "original text2", Status: model.NoteStatus_Done, TagIds: []int{3, 5}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note2.SetContext(context.Background())
 	note3 := model.Note{Text: "original text3", Status: model.NoteStatus_Done, TagIds: []int{2, 6}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note3.SetContext(context.Background())
 	// assert repeat type
 	utils.AssertEqual(t, note1.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "M")
 	utils.AssertEqual(t, note2.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId), "A")
@@ -521,7 +511,6 @@ func TestRepeatType(t *testing.T) {
 func TestToggleMainFlag(t *testing.T) {
 	// create notes
 	note1 := model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}}
-	note1.SetContext(context.Background())
 	// update TagIds
 	// case 1
 	originalPriority := note1.IsMain
@@ -541,7 +530,6 @@ func TestSortedTagsSlug(t *testing.T) {
 		Notes: []*model.Note{},
 		Tags:  model.Tags{},
 	}
-	reminderData.SetContext(context.Background())
 	// creating tags
 	var tags model.Tags
 	// case 1 (no tags)
@@ -747,14 +735,14 @@ func TestFindNotesByTagSlug(t *testing.T) {
 
 func TestNewTagRegistration(t *testing.T) {
 	dataFilePath := path.Join("..", "..", "test", "test_data_file.json")
-	reminderData := model.ReadDataFile(context.Background(), dataFilePath)
+	reminderData := model.ReadDataFile(dataFilePath)
 	utils.AssertEqual(t, len(reminderData.Tags), 5)
 }
 
 func TestNewTag(t *testing.T) {
 	dummySlug := "test_tag_slug"
 	dummyGroup := "test_tag_group"
-	tag, _ := model.NewTag(context.Background(), 10, dummySlug, dummyGroup)
+	tag, _ := model.NewTag(10, dummySlug, dummyGroup)
 	want := &model.Tag{
 		Id:    10,
 		Slug:  dummySlug,
@@ -765,16 +753,13 @@ func TestNewTag(t *testing.T) {
 func TestNewNote(t *testing.T) {
 	tagIDs := []int{1, 3, 5}
 	dummyText := "a random note text"
-	ctx := context.Background()
-	note, _ := model.NewNote(ctx, tagIDs, dummyText)
-	// note.SetContext(context.Background())
+	note, _ := model.NewNote(tagIDs, dummyText)
 	want := &model.Note{
 		Text:       dummyText,
 		TagIds:     tagIDs,
 		Status:     note.Status,
 		BaseStruct: model.BaseStruct{UpdatedAt: note.UpdatedAt, CreatedAt: note.CreatedAt},
 	}
-	want.SetContext(ctx)
 	utils.AssertEqual(t, note, want)
 }
 
@@ -803,7 +788,7 @@ func TestMakeSureFileExists(t *testing.T) {
 	utils.AssertEqual(t, err != nil, true)
 	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), true)
 	// attempt to create the file and required dirs, when the file doesn't exist already
-	_ = model.MakeSureFileExists(context.Background(), dataFilePath, false)
+	_ = model.MakeSureFileExists(dataFilePath, false)
 	// prove that the file was created
 	stats, err := os.Stat(dataFilePath)
 	utils.AssertEqual(t, err != nil, false)
@@ -813,7 +798,7 @@ func TestMakeSureFileExists(t *testing.T) {
 	modificationTime := stats.ModTime()
 	// attempt to create the file and required dirs, when the file does exist already
 	time.Sleep(10 * time.Millisecond)
-	_ = model.MakeSureFileExists(context.Background(), dataFilePath, false)
+	_ = model.MakeSureFileExists(dataFilePath, false)
 	utils.AssertEqual(t, err != nil, false)
 	utils.AssertEqual(t, errors.Is(err, fs.ErrNotExist), false)
 	stats, _ = os.Stat(dataFilePath)
@@ -826,9 +811,9 @@ func TestReadDataFile(t *testing.T) {
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.MakeSureFileExists(context.Background(), dataFilePath, false)
+	_ = model.MakeSureFileExists(dataFilePath, false)
 	// attempt to read file and parse it
-	reminderData := model.ReadDataFile(context.Background(), dataFilePath)
+	reminderData := model.ReadDataFile(dataFilePath)
 	utils.AssertEqual(t, reminderData.UpdatedAt > 0, true)
 }
 
@@ -837,13 +822,13 @@ func TestUpdateDataFile(t *testing.T) {
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.MakeSureFileExists(context.Background(), dataFilePath, false)
-	reminderData := model.ReadDataFile(context.Background(), dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath, false)
+	reminderData := model.ReadDataFile(dataFilePath)
 	// old_updated_at := reminderData.UpdatedAt
 	testUser := model.User{Name: "Test User", EmailId: "user@test.com"}
 	reminderData.User = &testUser
 	_ = reminderData.UpdateDataFile("")
-	remiderDataRe := model.ReadDataFile(context.Background(), dataFilePath)
+	remiderDataRe := model.ReadDataFile(dataFilePath)
 	// utils.AssertEqual(t, remiderDataRe.UpdatedAt > old_updated_at, true)
 	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)
 }
@@ -853,8 +838,8 @@ func TestRegisterBasicTags(t *testing.T) {
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.MakeSureFileExists(context.Background(), dataFilePath, false)
-	reminderData := model.ReadDataFile(context.Background(), dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath, false)
+	reminderData := model.ReadDataFile(dataFilePath)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
 	utils.AssertEqual(t, len(reminderData.Tags), 7)
@@ -865,8 +850,8 @@ func TestNotesApproachingDueDate(t *testing.T) {
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.MakeSureFileExists(context.Background(), dataFilePath, false)
-	reminderData := model.ReadDataFile(context.Background(), dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath, false)
+	reminderData := model.ReadDataFile(dataFilePath)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
 	// get current time
@@ -960,8 +945,8 @@ func TestPrintStats(t *testing.T) {
 	// make sure temporary files and dirs are removed at the end of the test
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
-	_ = model.MakeSureFileExists(context.Background(), dataFilePath, false)
-	reminderData := model.ReadDataFile(context.Background(), dataFilePath)
+	_ = model.MakeSureFileExists(dataFilePath, false)
+	reminderData := model.ReadDataFile(dataFilePath)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
 	got := reminderData.Stats()
