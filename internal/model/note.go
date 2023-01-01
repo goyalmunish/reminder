@@ -69,9 +69,8 @@ func (note *Note) Strings() []string {
 	return strs
 }
 
-// ExternalText prints a note with its tags slugs.
-// This is used as final external reprensentation for display of a single note.
-func (note *Note) ExternalText(reminderData *ReminderData) string {
+// externalText returns a note with its tags slugs as a slice of strings.
+func (note *Note) externalText(reminderData *ReminderData) []string {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
 	basicStrs := note.Strings()
@@ -80,6 +79,22 @@ func (note *Note) ExternalText(reminderData *ReminderData) string {
 	basicStrs[4] = tagsStr
 	// create final list of strings
 	strs = append(strs, basicStrs...)
+	return strs
+}
+
+// ExternalText prints a note with its tags slugs.
+// This is used as final external reprensentation for display of a single note.
+func (note *Note) ExternalText(reminderData *ReminderData) string {
+	strs := note.externalText(reminderData)
+	return strings.Join(strs, "")
+}
+
+// SafeExtText prints a note with its tags slugs, but only the safe components.
+// This is used as final external reprensentation for display of a single note to external services like Google Calendar.
+func (note *Note) SafeExtText(reminderData *ReminderData) string {
+	strs := note.externalText(reminderData)
+	commentIndex := 2
+	strs = append(strs[:commentIndex], strs[commentIndex+1:]...)
 	return strings.Join(strs, "")
 }
 
@@ -240,10 +255,9 @@ func (note *Note) ToggleMainFlag() error {
 }
 
 // GoogleCalendarEvent converts a note to Google Calendar Event.
-func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagId int, timezoneIANA string) *gc.Event {
+func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagId int, timezoneIANA string, reminderData *ReminderData) *gc.Event {
 	// basic information
 	title := note.Text
-	description := ""                                   // don't expose comments for data privacy
 	start := utils.UnixTimestampToTime(note.CompleteBy) // this is the original time in 00:00:00 GMT+0000
 	offset, err := utils.GetZoneFromLocation(timezoneIANA)
 	if err != nil {
@@ -252,6 +266,7 @@ func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagI
 	start = start.Add(offset)         // adjusting the start to local time for notification purpose
 	start = start.Add(10 * time.Hour) // set notification for 10 AM of given timezoneIANA
 	repeatType := note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId)
+	description := note.SafeExtText(reminderData)
 
 	// lego the information
 	var recurrence []string

@@ -250,6 +250,30 @@ func TestExternalText(t *testing.T) {
 	utils.AssertEqual(t, note.ExternalText(reminderData), want)
 }
 
+func TestSafeExtText(t *testing.T) {
+	utils.Location = utils.UTCLocation()
+	comments := model.Comments{&model.Comment{Text: "c < 1"}, &model.Comment{Text: "c > 2"}, &model.Comment{Text: "c & \" 3"}}
+	note := &model.Note{Text: "dummy < > \" text", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1, 2}, CompleteBy: 1609669235}
+	var tags model.Tags
+	tags = append(tags, &model.Tag{Id: 0, Slug: "tag_0", Group: "tag_group1"})
+	tags = append(tags, &model.Tag{Id: 1, Slug: "tag_1", Group: "tag_group1"})
+	tags = append(tags, &model.Tag{Id: 2, Slug: "tag_2", Group: "tag_group2"})
+	reminderData := &model.ReminderData{Tags: tags}
+	want := `Note Details: -------------------------------------------------
+  |          Text:  dummy < > " text
+  |       Summary:  
+  |        Status:  pending
+  |          Tags:
+  |              :  tag_1
+  |              :  tag_2
+  |        IsMain:  false
+  |    CompleteBy:  Sunday, 03-Jan-21 10:20:35 UTC
+  |     CreatedAt:  nil
+  |     UpdatedAt:  nil
+`
+	utils.AssertEqual(t, note.SafeExtText(reminderData), want)
+}
+
 func TestSearchableText(t *testing.T) {
 	// case 1
 	comments := model.Comments{&model.Comment{Text: "c1"}}
