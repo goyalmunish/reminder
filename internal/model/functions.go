@@ -177,17 +177,22 @@ func NewTag(tagID int, useSlug string, useGroup string) (*Tag, error) {
 
 // MakeSureFileExists function makes sure that the dataFilePath exists.
 func MakeSureFileExists(dataFilePath string, askUserInput bool) error {
+	dataFilePath = utils.TryConvertTildaBasedPath(dataFilePath)
 	_, err := os.Stat(dataFilePath)
 	if err != nil {
 		logger.Warn(fmt.Sprintf("Error finding existing data file: %v\n", err))
 		if errors.Is(err, fs.ErrNotExist) {
-			logger.Info(fmt.Sprintf("Trying generating new data file %q.\n", dataFilePath))
+			logger.Info(fmt.Sprintf("Generating new data file %q.\n", dataFilePath))
 			err := os.MkdirAll(path.Dir(dataFilePath), 0751)
 			if err != nil {
 				return err
 			}
 			reminderData := *BlankReminder(askUserInput, dataFilePath)
-			reminderData.DataFile = dataFilePath
+			reminderData.DataFile = dataFilePath // save absolute path
+			err = reminderData.CreateDataFile("Persisting the newly created data file")
+			if err != nil {
+				return err
+			}
 			err = reminderData.RegisterBasicTags()
 			if err != nil {
 				return err
@@ -258,15 +263,21 @@ func BlankReminder(askUserInput bool, dataFilePath string) *ReminderData {
 }
 
 // ReadDataFile function reads data file as instance of `ReminderData`
-func ReadDataFile(dataFilePath string) *ReminderData {
+func ReadDataFile(dataFilePath string, silentMode bool) (*ReminderData, error) {
 	var reminderData ReminderData
 	// read byte data from file
 	byteValue, err := os.ReadFile(utils.TryConvertTildaBasedPath(dataFilePath))
-	utils.LogError(err)
+	if err != nil {
+		return nil, err
+	}
 	// parse json data
 	err = json.Unmarshal(byteValue, &reminderData)
-	logger.Info(fmt.Sprintf("Read contents of %q into ReminderData.", dataFilePath))
-	utils.LogError(err)
+	if err != nil {
+		return nil, err
+	}
+	if !silentMode {
+		logger.Info(fmt.Sprintf("Read contents of %q into ReminderData.", dataFilePath))
+	}
 	// close the file
-	return &reminderData
+	return &reminderData, nil
 }

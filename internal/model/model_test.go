@@ -759,7 +759,7 @@ func TestFindNotesByTagSlug(t *testing.T) {
 
 func TestNewTagRegistration(t *testing.T) {
 	dataFilePath := path.Join("..", "..", "test", "test_data_file.json")
-	reminderData := model.ReadDataFile(dataFilePath)
+	reminderData, _ := model.ReadDataFile(dataFilePath, false)
 	utils.AssertEqual(t, len(reminderData.Tags), 5)
 }
 
@@ -837,8 +837,23 @@ func TestReadDataFile(t *testing.T) {
 	// create the file and required dirs
 	_ = model.MakeSureFileExists(dataFilePath, false)
 	// attempt to read file and parse it
-	reminderData := model.ReadDataFile(dataFilePath)
+	reminderData, _ := model.ReadDataFile(dataFilePath, false)
 	utils.AssertEqual(t, reminderData.UpdatedAt > 0, true)
+}
+func TestCreateDataFile(t *testing.T) {
+	var dataFilePath = "temp_test_dir/mydata.json"
+	// make sure temporary files and dirs are removed at the end of the test
+	defer os.RemoveAll(path.Dir(dataFilePath))
+	// create the file and required dirs
+	_ = model.MakeSureFileExists(dataFilePath, false)
+	reminderData, _ := model.ReadDataFile(dataFilePath, false)
+	// old_updated_at := reminderData.UpdatedAt
+	testUser := model.User{Name: "Test User", EmailId: "user@test.com"}
+	reminderData.User = &testUser
+	_ = reminderData.CreateDataFile("")
+	remiderDataRe, _ := model.ReadDataFile(dataFilePath, false)
+	// utils.AssertEqual(t, remiderDataRe.UpdatedAt > old_updated_at, true)
+	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)
 }
 
 func TestUpdateDataFile(t *testing.T) {
@@ -847,12 +862,12 @@ func TestUpdateDataFile(t *testing.T) {
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
 	_ = model.MakeSureFileExists(dataFilePath, false)
-	reminderData := model.ReadDataFile(dataFilePath)
+	reminderData, _ := model.ReadDataFile(dataFilePath, false)
 	// old_updated_at := reminderData.UpdatedAt
 	testUser := model.User{Name: "Test User", EmailId: "user@test.com"}
 	reminderData.User = &testUser
 	_ = reminderData.UpdateDataFile("")
-	remiderDataRe := model.ReadDataFile(dataFilePath)
+	remiderDataRe, _ := model.ReadDataFile(dataFilePath, false)
 	// utils.AssertEqual(t, remiderDataRe.UpdatedAt > old_updated_at, true)
 	utils.AssertEqual(t, remiderDataRe.User.EmailId == testUser.EmailId, true)
 }
@@ -863,7 +878,7 @@ func TestRegisterBasicTags(t *testing.T) {
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
 	_ = model.MakeSureFileExists(dataFilePath, false)
-	reminderData := model.ReadDataFile(dataFilePath)
+	reminderData, _ := model.ReadDataFile(dataFilePath, false)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
 	utils.AssertEqual(t, len(reminderData.Tags), 7)
@@ -875,7 +890,7 @@ func TestNotesApproachingDueDate(t *testing.T) {
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
 	_ = model.MakeSureFileExists(dataFilePath, false)
-	reminderData := model.ReadDataFile(dataFilePath)
+	reminderData, _ := model.ReadDataFile(dataFilePath, false)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
 	// get current time
@@ -970,7 +985,7 @@ func TestPrintStats(t *testing.T) {
 	defer os.RemoveAll(path.Dir(dataFilePath))
 	// create the file and required dirs
 	_ = model.MakeSureFileExists(dataFilePath, false)
-	reminderData := model.ReadDataFile(dataFilePath)
+	reminderData, _ := model.ReadDataFile(dataFilePath, false)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
 	got := reminderData.Stats()

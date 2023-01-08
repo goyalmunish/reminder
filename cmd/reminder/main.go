@@ -40,7 +40,10 @@ func Flow() {
 		panic(err)
 	}
 	// read and parse the existing data
-	reminderData := *model.ReadDataFile(config.AppInfo.DataFile)
+	reminderData, err := model.ReadDataFile(config.AppInfo.DataFile, false)
+	if err != nil {
+		panic(err)
+	}
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup

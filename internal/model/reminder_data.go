@@ -167,13 +167,56 @@ func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string, reminderData *
 	return events
 }
 
-// UpdateDataFile updates data file.
+// CreateDataFile creates data file with current state of `rd`.
 // The msg is any additional message to be printed.
-func (rd *ReminderData) UpdateDataFile(msg string) error {
+func (rd *ReminderData) CreateDataFile(msg string) error {
 	// update UpdatedAt field
 	// note that UpdatedAt of a whole ReminderData object is different
 	// from corresponding field of each note
-	rd.UpdatedAt = utils.CurrentUnixTimestamp()
+	currentTime := utils.CurrentUnixTimestamp()
+	rd.UpdatedAt = currentTime
+	rd.CreatedAt = currentTime
+	// marshal the data
+	byteValue, err := json.MarshalIndent(&rd, "", "    ")
+	if err != nil {
+		return err
+	}
+	// persist the byte data to file
+	err = os.WriteFile(rd.DataFile, byteValue, 0755)
+	if err != nil {
+		return err
+	}
+	if msg != "" {
+		logger.Info(msg)
+	}
+	logger.Info(fmt.Sprintf("Created the data file at %v!", rd.UpdatedAt))
+	return nil
+}
+
+// UpdateDataFile updates data file with current state of `rd`.
+// The msg is any additional message to be printed.
+func (rd *ReminderData) UpdateDataFile(msg string) error {
+	var conflictError error
+	// if UpdatedAt timestamp of currently loaded data is not same as timestamp persisted on datafile
+	// some other process would have updated the data file, which can lead to data inconsistency
+	persistedData, err := ReadDataFile(rd.DataFile, true)
+	if err != nil {
+		return err
+	}
+	persistedTimestamp := persistedData.UpdatedAt
+	inMemoryTimestamp := rd.UpdatedAt
+	currentTimestamp := utils.CurrentUnixTimestamp()
+	logger.Info(fmt.Sprintf("In-memory timestamp: %v, Persisted timestamp: %v, Current Timestamp (being persisted): %v", inMemoryTimestamp, persistedTimestamp, currentTimestamp))
+	if persistedTimestamp != inMemoryTimestamp {
+		newFilePath := fmt.Sprintf("%s_CONFLICT_%d", rd.DataFile, currentTimestamp)
+		rd.DataFile = newFilePath
+		logger.Error(fmt.Sprintf("It seems another instance of the application updated the data file; the data will instead be saved to confict file %q.", newFilePath))
+		conflictError = ErrorConflictFile
+	}
+	// update UpdatedAt field
+	// note that UpdatedAt of a whole ReminderData object is different
+	// from corresponding field of each note
+	rd.UpdatedAt = currentTimestamp
 	// marshal the data
 	// Refer https://pkg.go.dev/encoding/json#MarshalIndent
 	// Note: String values encoded as JSON strings are coerced to valid
@@ -185,7 +228,6 @@ func (rd *ReminderData) UpdateDataFile(msg string) error {
 	// original string
 	byteValue, err := json.MarshalIndent(&rd, "", "    ")
 	if err != nil {
-		utils.LogError(err)
 		return err
 	}
 	// persist the byte data to file
@@ -196,7 +238,10 @@ func (rd *ReminderData) UpdateDataFile(msg string) error {
 	if msg != "" {
 		logger.Info(msg)
 	}
-	logger.Info("Updated the data file!")
+	logger.Info(fmt.Sprintf("Updated the data file %q at %v!", rd.DataFile, rd.UpdatedAt))
+	if conflictError != nil {
+		return conflictError
+	}
 	return nil
 }
 
@@ -517,6 +562,7 @@ func (rd *ReminderData) newTagAppend(tag *Tag) error {
 }
 
 // NewNoteRegistration registers new note.
+// The note is saved to the data file.
 func (rd *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
 	// collect info about the note
 	if tagIDs == nil {
@@ -536,8 +582,9 @@ func (rd *ReminderData) NewNoteRegistration(tagIDs []int) (*Note, error) {
 }
 
 // newNoteAppend appends a new note.
+// The note is saved to the data file.
 func (rd *ReminderData) newNoteAppend(note *Note) error {
-	logger.Info(fmt.Sprintf("Added Note: %+v\n", *note))
+	logger.Info(fmt.Sprintf("Adding Note: %+v\n", *note))
 	rd.Notes = append(rd.Notes, note)
 	return rd.UpdateDataFile("")
 }
@@ -804,6 +851,7 @@ func (rd *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string
 		// this is useful in circumstances where for example, a note's tags are updated for a note under a tag in which case
 		// otherwise the note will immediately disappear if the updated tags list doesn't include the original tag
 		fmt.Printf("Note: Using passed notes; the list will not be refreshed immediately!\n")
+		fmt.Printf("Note: You must not run multiple instances of the app on same data file!\n")
 	default:
 		logger.Error("Error: Unreachable code")
 	}
