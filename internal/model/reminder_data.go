@@ -35,17 +35,18 @@ type ReminderData struct {
 }
 
 // SyncCalendar syncs pending notes to Cloud Calendar.
-func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
+func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 	if !EnableCalendar {
 		logger.Warn("Google Calendar is disabled.")
-		return
+		return nil
 	}
 
 	// Get calendar service
 	logger.Info("Retrieve the Cloud Calendar Service.")
 	srv, err := calendar.GetCalendarService(calOptions)
 	if err != nil {
-		logger.Fatal(fmt.Sprintf("Unable to retrieve Calendar client: %v", err))
+		logger.Error(fmt.Sprintf("Unable to retrieve Calendar client: %v", err))
+		return err
 	}
 
 	logger.Info("Fetch the list of all upcoming Calendar Events with each type of recurring event as single unit.")
@@ -62,7 +63,8 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 		MaxResults(250). // 250 is default and is maximum value; if there are more than 250 events, then we'll have to paginate
 		Do()
 	if err != nil {
-		logger.Fatal(fmt.Sprintf("Unable to retrieve the events: %v", err))
+		logger.Error(fmt.Sprintf("Unable to retrieve the events: %v", err))
+		return err
 	}
 
 	// Get Cloud Calendar details
@@ -85,7 +87,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 			fmt.Printf("  - %v | %v | owned=%v\n", item.Summary, item.Recurrence, owned)
 		}
 	}
-	fmt.Println()
+	fmt.Println() // just print a blank line
 
 	// Note: Your might like to check your Calendar trash
 	// https://calendar.google.com/calendar/u/0/r/trash and clear it from
@@ -98,7 +100,8 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 		Q(calendar.TitlePrefix).
 		Do()
 	if err != nil {
-		logger.Fatal(fmt.Sprintf("Unable to retrieve the events: %v", err))
+		logger.Error(fmt.Sprintf("Unable to retrieve the events: %v", err))
+		return err
 	}
 	fmt.Printf("Listing matching events (%v) and deleting the ones registered by reminder app:\n", len(reminderEvents.Items))
 	if len(reminderEvents.Items) == 0 {
@@ -118,7 +121,8 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 					continue
 				}
 				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
-					logger.Fatal(fmt.Sprintf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err))
+					logger.Error(fmt.Sprintf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err))
+					return err
 				} else {
 					deletionCount += 1
 					fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, calendar.EventString(item))
@@ -150,6 +154,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) {
 		logger.Info(fmt.Sprintf("Synced the event %q.\n", calendar.EventString(event)))
 	}
 	fmt.Println("Done with syncing process.")
+	return nil
 }
 
 // GoogleCalendarEvents returns list of Google Calendar Events.
