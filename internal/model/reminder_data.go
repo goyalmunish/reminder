@@ -30,6 +30,7 @@ type ReminderData struct {
 	Tags         Tags   `json:"tags"`
 	DataFile     string `json:"data_file"`
 	LastBackupAt int64  `json:"last_backup_at"`
+	MutexLock    bool   `json:"mutex_lock"`
 	BaseStruct
 }
 

@@ -32,18 +32,45 @@ func init() {
 		"run_id": runID,
 	})
 }
-func Flow() {
-	var err error
+
+func Run() error {
 	// make sure DataFile exists
-	err = model.MakeSureFileExists(config.AppInfo.DataFile, true)
-	if err != nil {
-		panic(err)
+	if err := model.MakeSureFileExists(config.AppInfo.DataFile, true); err != nil {
+		return err
 	}
 	// read and parse the existing data
 	reminderData, err := model.ReadDataFile(config.AppInfo.DataFile, false)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	if reminderData.MutexLock {
+		return model.ErrorMutexLockOn
+	}
+	reminderData.MutexLock = true
+	if err := reminderData.UpdateDataFile("Turning ON the Mutex Lock!"); err != nil {
+		return err
+	}
+	// make sure lock is released and any uncommitted data is persisted
+	defer func() {
+		if !reminderData.MutexLock {
+			// prevent multiple runs of cleanup
+			return
+		}
+		// mutex lock is enable
+		reminderData.MutexLock = false
+		if err := reminderData.UpdateDataFile("Turning OFF the Mutex Lock, persisting the data, and closing the app!"); err != nil {
+			utils.LogError(err)
+		}
+	}()
+	// start the repeating interactive process
+	if err := Repeat(reminderData); err != nil {
+		return err
+	}
+	return nil
+}
+
+func Repeat(reminderData *model.ReminderData) error {
+	var err error
 	// print data stats
 	fmt.Println(reminderData.Stats())
 	// try automatic backup
@@ -58,7 +85,7 @@ func Flow() {
 		Hitting 'Ctrl-c' in golang raises as SIGINT signal.
 		By default SIGINT signal (https://pkg.go.dev/os/signal) is converted to run-time panic,
 		and eventually causes the program to exit.
-		But, if you are inside PromptUI's `Run()`, then it cancels the input and moves to next
+		But, if you are inside PromptUI's `Repeat()`, then it cancels the input and moves to next
 		statement in the code.
 	*/
 	_, result, _ := utils.AskOption([]string{
@@ -94,8 +121,8 @@ func Flow() {
 		err = reminderData.DisplayDataFile()
 	case fmt.Sprintf("%s %s %s", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):
 		fmt.Println("Exiting...")
-		return
+		return nil
 	}
 	utils.LogError(err)
-	Flow()
+	return Repeat(reminderData)
 }
