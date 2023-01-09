@@ -54,11 +54,15 @@ func (note *Note) Type() string {
 
 // Strings provides basic string representation (as a slice of strings) of a note
 // with each element of slice representing certain field of the note.
-func (note *Note) Strings() []string {
+func (note *Note) Strings() ([]string, error) {
 	// allocating 10 members before hand, considering there will be around 10 status fields
 	strs := make([]string, 0, 10)
 	strs = append(strs, printNoteField("Text", note.Text))
-	strs = append(strs, printNoteField("Comments", note.Comments.Strings()))
+	comments, err := note.Comments.Strings()
+	if err != nil {
+		return nil, err
+	}
+	strs = append(strs, printNoteField("Comments", comments))
 	strs = append(strs, printNoteField("Summary", note.Summary))
 	strs = append(strs, printNoteField("Status", note.Status))
 	strs = append(strs, printNoteField("Tags", note.TagIds))
@@ -66,49 +70,62 @@ func (note *Note) Strings() []string {
 	strs = append(strs, printNoteField("CompleteBy", utils.UnixTimestampToLongTimeStr(note.CompleteBy)))
 	strs = append(strs, printNoteField("CreatedAt", utils.UnixTimestampToLongTimeStr(note.CreatedAt)))
 	strs = append(strs, printNoteField("UpdatedAt", utils.UnixTimestampToLongTimeStr(note.UpdatedAt)))
-	return strs
+	return strs, nil
 }
 
 // externalText returns a note with its tags slugs as a slice of strings.
-func (note *Note) externalText(reminderData *ReminderData) []string {
+func (note *Note) externalText(reminderData *ReminderData) ([]string, error) {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
-	basicStrs := note.Strings()
+	basicStrs, err := note.Strings()
+	if err != nil {
+		return nil, err
+	}
 	// replace tag ids with tag slugs
 	tagsStr := printNoteField("Tags", reminderData.TagsFromIds(note.TagIds).Slugs())
 	basicStrs[4] = tagsStr
 	// create final list of strings
 	strs = append(strs, basicStrs...)
-	return strs
+	return strs, nil
 }
 
 // ExternalText prints a note with its tags slugs.
 // This is used as final external reprensentation for display of a single note.
-func (note *Note) ExternalText(reminderData *ReminderData) string {
-	strs := note.externalText(reminderData)
-	return strings.Join(strs, "")
+func (note *Note) ExternalText(reminderData *ReminderData) (string, error) {
+	strs, err := note.externalText(reminderData)
+	if err != nil {
+		return "", err
+	}
+	return strings.Join(strs, ""), nil
 }
 
 // SafeExtText prints a note with its tags slugs, but only the safe components.
 // This is used as final external reprensentation for display of a single note to external services like Google Calendar.
-func (note *Note) SafeExtText(reminderData *ReminderData) string {
-	strs := note.externalText(reminderData)
+func (note *Note) SafeExtText(reminderData *ReminderData) (string, error) {
+	strs, err := note.externalText(reminderData)
+	if err != nil {
+		return "", err
+	}
 	// leaving out the comments, as they may contain sensitive information
 	commentIndex := 2
 	strs = append(strs[:commentIndex], strs[commentIndex+1:]...)
-	return strings.Join(strs, "")
+	return strings.Join(strs, ""), nil
 }
 
 // SearchableText provides string representation of the object.
 // It is used while performing full text search on Text and Comments of a note.
-func (note *Note) SearchableText() string {
+func (note *Note) SearchableText() (string, error) {
 	// get comments text array for note
 	var commentsText []string
 	commentsText = append(commentsText, "[")
 	if len(note.Comments) == 0 {
 		commentsText = append(commentsText, "no-comments")
 	} else {
-		commentsText = append(commentsText, strings.Join(note.Comments.Strings(), ", "))
+		text, err := note.Comments.Strings()
+		if err != nil {
+			return "", nil
+		}
+		commentsText = append(commentsText, strings.Join(text, ", "))
 	}
 	commentsText = append(commentsText, "]")
 	// get filters
@@ -124,7 +141,7 @@ func (note *Note) SearchableText() string {
 	// address some special characters
 	text = strings.ReplaceAll(text, "\n", " NWL ")
 	// return searchable text for note a string
-	return text
+	return text, nil
 }
 
 // AddComment adds a new comment to note.
@@ -256,18 +273,21 @@ func (note *Note) ToggleMainFlag() error {
 }
 
 // GoogleCalendarEvent converts a note to Google Calendar Event.
-func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagId int, timezoneIANA string, reminderData *ReminderData) *gc.Event {
+func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagId int, timezoneIANA string, reminderData *ReminderData) (*gc.Event, error) {
 	// basic information
 	title := note.Text
 	start := utils.UnixTimestampToTime(note.CompleteBy) // this is the original time in 00:00:00 GMT+0000
 	offset, err := utils.GetZoneFromLocation(timezoneIANA)
 	if err != nil {
-		logger.Fatal(fmt.Sprintf("Couldn't calculate offset for timezone %q", timezoneIANA))
+		return nil, fmt.Errorf("Couldn't calculate offset for timezone %q; %w", timezoneIANA, err)
 	}
 	start = start.Add(offset)          // adjusting the start to local time for notification purpose
 	start = start.Add(-14 * time.Hour) // set notification for 10 AM of given timezoneIANA
 	repeatType := note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId)
-	description := note.SafeExtText(reminderData)
+	description, err := note.SafeExtText(reminderData)
+	if err != nil {
+		return nil, err
+	}
 
 	// lego the information
 	var recurrence []string
@@ -317,5 +337,5 @@ func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagI
 		Transparency: "transparent",
 		Visibility:   "default",
 	}
-	return event
+	return event, nil
 }

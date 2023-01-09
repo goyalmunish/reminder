@@ -216,7 +216,7 @@ Stats of "{{.DataFile}}"
 			return len(validTags)
 		},
 	}
-	result := utils.TemplateResult(reportTemplate, funcMap, testData)
+	result, _ := utils.TemplateResult(reportTemplate, funcMap, testData)
 	want := `
 Stats of "random/file/path"
   - Number of valid Tags: 2

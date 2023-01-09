@@ -21,7 +21,7 @@ type Comment struct {
 }
 
 // String provides basic string representation of a commment.
-func (comment *Comment) String() string {
+func (comment *Comment) String() (string, error) {
 	var escapeString bool = false
 
 	// way 1
@@ -35,5 +35,5 @@ func (comment *Comment) String() string {
 
 	// way 2
 	parts := []string{utils.UnixTimestampToMediumTimeStr(comment.CreatedAt), comment.Text}
-	return strings.Join(parts, " | ")
+	return strings.Join(parts, " | "), nil
 }

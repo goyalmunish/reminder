@@ -22,11 +22,12 @@ import (
 const TitlePrefix string = "[reminder] "
 
 // EventsDetails returns overall event details.
-func EventsDetails(events *gc.Events) string {
+func EventsDetails(events *gc.Events) (string, error) {
 	localTime := func(events gc.Events) string {
 		value, err := utils.StrToTime(events.Updated, events.TimeZone)
 		if err != nil {
-			logger.Fatal(err)
+			logger.Error(err)
+			return "unparsable"
 		}
 		return value.String()
 	}
@@ -88,7 +89,10 @@ func getClient(config *oauth2.Config, options *Options) (*http.Client, error) {
 		if err != nil {
 			return nil, err
 		}
-		saveToken(tokenFile, tok)
+		err = saveToken(tokenFile, tok)
+		if err != nil {
+			return nil, err
+		}
 		logger.Info(fmt.Sprintf("Saved the token file %q.", tokenFile))
 	}
 	return config.Client(context.Background(), tok), nil
@@ -124,15 +128,16 @@ func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 }
 
 // Saves a token to a file path.
-func saveToken(path string, token *oauth2.Token) {
+func saveToken(path string, token *oauth2.Token) error {
 	fmt.Printf("Saving credential file to: %s\n", path)
 	f, err := os.OpenFile(utils.TryConvertTildaBasedPath(path), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		logger.Fatal(fmt.Sprintf("Unable to cache oauth token: %v", err))
+		return fmt.Errorf("Unable to cache oauth token: %w", err)
 	}
 	defer f.Close()
 	err = json.NewEncoder(f).Encode(token)
 	if err != nil {
-		logger.Fatal(fmt.Sprintf("Unable to encode token: %v", err))
+		return fmt.Errorf("Unable to encode token: %w", err)
 	}
+	return nil
 }

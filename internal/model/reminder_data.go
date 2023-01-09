@@ -68,7 +68,11 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 	}
 
 	// Get Cloud Calendar details
-	fmt.Println(calendar.EventsDetails(existingEvents))
+	eventDetails, err := calendar.EventsDetails(existingEvents)
+	if err != nil {
+		return err
+	}
+	fmt.Println(eventDetails)
 
 	// Iterating through the Cloud Calendar Events
 	fmt.Printf("Listing upcoming calendar events (%v):\n", len(existingEvents.Items))
@@ -135,7 +139,10 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 	}
 
 	// Add events to Cloud Calendar
-	newEvents := rd.GoogleCalendarEvents(existingEvents.TimeZone, rd)
+	newEvents, err := rd.GoogleCalendarEvents(existingEvents.TimeZone, rd)
+	if err != nil {
+		return err
+	}
 	waitFor := 10 * time.Second
 	fmt.Printf("\nSyncing %v events (pending onces with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for %v.\n", len(newEvents), waitFor)
 	fmt.Printf("waiting for %v...\n", waitFor)
@@ -158,7 +165,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 }
 
 // GoogleCalendarEvents returns list of Google Calendar Events.
-func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string, reminderData *ReminderData) []*gc.Event {
+func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string, reminderData *ReminderData) ([]*gc.Event, error) {
 	// get all pending notes
 	allNotes := rd.Notes
 	relevantNotes := allNotes.WithStatus(NoteStatus_Pending).WithCompleteBy()
@@ -167,10 +174,13 @@ func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string, reminderData *
 	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
 	var events []*gc.Event
 	for _, note := range relevantNotes {
-		event := note.GoogleCalendarEvent(repeatAnnuallyTag.Id, repeatMonthlyTag.Id, timezoneIANA, reminderData)
+		event, err := note.GoogleCalendarEvent(repeatAnnuallyTag.Id, repeatMonthlyTag.Id, timezoneIANA, reminderData)
+		if err != nil {
+			return nil, err
+		}
 		events = append(events, event)
 	}
-	return events
+	return events, nil
 }
 
 // CreateDataFile creates data file with current state of `rd`.
@@ -423,7 +433,11 @@ func (rd *ReminderData) SearchNotes() error {
 	// assuming the search shows 25 items in general
 	allTexts := make([]string, 0, 25)
 	for _, note := range allNotes {
-		allTexts = append(allTexts, note.SearchableText())
+		text, err := note.SearchableText()
+		if err != nil {
+			return err
+		}
+		allTexts = append(allTexts, text)
 	}
 	// function to search across notes
 	searchNotes := func(filterValue string, optValue string, optIndex int) bool {
@@ -433,7 +447,11 @@ func (rd *ReminderData) SearchNotes() error {
 	}
 	// display prompt
 	fmt.Printf("Searching through a total of %v notes:\n", len(allTexts))
-	index, err := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, utils.TerminalWidth()-10), searchNotes)
+	width, err := utils.TerminalWidth()
+	if err != nil {
+		return err
+	}
+	index, err := utils.GenerateNoteSearchSelect(utils.ChopStrings(allTexts, width-10), searchNotes)
 	if err != nil {
 		return err
 	}
@@ -596,7 +614,7 @@ func (rd *ReminderData) newNoteAppend(note *Note) error {
 }
 
 // Stats returns current status.
-func (rd *ReminderData) Stats() string {
+func (rd *ReminderData) Stats() (string, error) {
 	reportTemplate := `
 Stats of "{{.DataFile}}":
   - Number of Tags:  {{.Tags | len}}
@@ -871,7 +889,11 @@ func (rd *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string
 	}
 	repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
 	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
-	texts := notes.ExternalTexts(utils.TerminalWidth()-50, repeatAnnuallyTag.Id, repeatMonthlyTag.Id)
+	width, err := utils.TerminalWidth()
+	if err != nil {
+		return err
+	}
+	texts := notes.ExternalTexts(width-50, repeatAnnuallyTag.Id, repeatMonthlyTag.Id)
 
 	// ask user to select a note
 	promptText := ""

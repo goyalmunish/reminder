@@ -18,22 +18,20 @@ import (
 // flow is recursive function for overall flow of interactivity
 var config *settings.Settings
 
-func init() {
+func Run() error {
+	// initialization
 	var err error
 	var runID = uuid.New()
 	// note: setting are loaded before logger is being setup; it will assume only default logrus settings
 	config, err = settings.LoadConfig()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	logger.SetWithOptions(config.Log)
 	logger.SetGlobalFields(map[string]interface{}{
 		"app":    "reminder",
 		"run_id": runID,
 	})
-}
-
-func Run() error {
 	// make sure DataFile exists
 	if err := model.MakeSureFileExists(config.AppInfo.DataFile, true); err != nil {
 		return err
