@@ -22,6 +22,7 @@ func Run() error {
 	// initialization
 	var err error
 	var runID = uuid.New()
+	var startInteractiveProcess bool = true
 	// note: setting are loaded before logger is being setup; it will assume only default logrus settings
 	config, err = settings.LoadConfig()
 	if err != nil {
@@ -32,22 +33,30 @@ func Run() error {
 		"app":    "reminder",
 		"run_id": runID,
 	})
+
 	// make sure DataFile exists
 	if err := model.MakeSureFileExists(config.AppInfo.DataFile, true); err != nil {
 		return err
 	}
+
 	// read and parse the existing data
 	reminderData, err := model.ReadDataFile(config.AppInfo.DataFile, false)
 	if err != nil {
 		return err
 	}
+
+	// check if the data file is locked by another session
 	if reminderData.MutexLock {
-		return model.ErrorMutexLockOn
+		fmt.Printf("WARNING! %s\n", model.ErrorMutexLockOn.Error())
+		reset := utils.AskBoolean("But, do you want to force reset the lock?")
+		if !reset {
+			// exit now without resetting the lock
+			return model.ErrorMutexLockOn
+		}
+		// proceed forward to reset the lock, but don't start the interactive process
+		startInteractiveProcess = false
 	}
-	reminderData.MutexLock = true
-	if err := reminderData.UpdateDataFile("Turning ON the Mutex Lock!"); err != nil {
-		return err
-	}
+
 	// make sure lock is released and any uncommitted data is persisted
 	defer func() {
 		if !reminderData.MutexLock {
@@ -60,6 +69,17 @@ func Run() error {
 			utils.LogError(err)
 		}
 	}()
+
+	// early exit if conditions are not met
+	if !startInteractiveProcess {
+		return model.ErrorInteractiveProcessSkipped
+	}
+
+	reminderData.MutexLock = true
+	if err := reminderData.UpdateDataFile("Turning ON the Mutex Lock!"); err != nil {
+		return err
+	}
+
 	// start the repeating interactive process
 	if err := RepeatInteractiveSession(reminderData); err != nil {
 		return err

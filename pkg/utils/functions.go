@@ -126,14 +126,14 @@ func YearForDueDateDDMM(dateMonth string) (int, error) {
 func StrToTime(tString string, timezone string) (time.Time, error) {
 	t, err := time.Parse(time.RFC3339, tString)
 	if err != nil {
-		return t, fmt.Errorf("Unable to parse the time %v: %v", tString, err)
+		return t, fmt.Errorf("Unable to parse the time %v: %w", tString, err)
 	}
 	if timezone == "" {
 		return t, nil
 	}
 	location, err := time.LoadLocation(timezone)
 	if err != nil {
-		return t, fmt.Errorf("Unable to parse the timezone %v: %v", timezone, err)
+		return t, fmt.Errorf("Unable to parse the timezone %v: %w", timezone, err)
 	}
 	return t.In(location), nil
 }
@@ -514,4 +514,14 @@ func TryConvertTildaBasedPath(path string) string {
 		path = filepath.Join(homeDir, path[2:])
 	}
 	return path
+}
+
+// AskBoolean asks a boolean question to the user.
+func AskBoolean(msg string) bool {
+	var response string
+	fmt.Printf("%s (y/n): ", msg)
+	fmt.Scanln(&response)
+	response = strings.Trim(response, " \n\t")
+	response = strings.ToLower(response)
+	return response == "y"
 }

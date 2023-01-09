@@ -36,7 +36,7 @@ func DeleteEvents(srv *gc.Service, events []*gc.Event, dryMode bool) error {
 				continue
 			}
 			if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
-				return fmt.Errorf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err)
+				return fmt.Errorf("Couldn't delete the Calendar event %q | %q | %w", item.Id, item.Summary, err)
 			} else {
 				deletionCount += 1
 				fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, EventString(item))
@@ -218,12 +218,12 @@ func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 
 	var authCode string
 	if _, err := fmt.Scan(&authCode); err != nil {
-		return nil, fmt.Errorf("Unable to read authorization code: %v", err)
+		return nil, fmt.Errorf("Unable to read authorization code: %w", err)
 	}
 
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve token from web: %v", err)
+		return nil, fmt.Errorf("Unable to retrieve token from web: %w", err)
 	}
 	return tok, nil
 }
