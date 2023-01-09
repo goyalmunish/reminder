@@ -2,6 +2,7 @@ package model_test
 
 import (
 	"errors"
+	"fmt"
 
 	// "fmt"
 	"io/fs"
@@ -17,6 +18,7 @@ import (
 	model "github.com/goyalmunish/reminder/internal/model"
 	"github.com/goyalmunish/reminder/internal/settings"
 	utils "github.com/goyalmunish/reminder/pkg/utils"
+	gc "google.golang.org/api/calendar/v3"
 )
 
 // mocks
@@ -26,6 +28,16 @@ type MockPromptTagSlug struct {
 type MockPromptTagGroup struct {
 }
 type MockPromptNoteText struct {
+}
+type TestTagger struct{}
+
+func (tagger TestTagger) TagsFromIds(tagIDs []int) []string {
+	slugs := []string{}
+	for i, id := range tagIDs {
+		slug := fmt.Sprintf("%d-%d", i, id)
+		slugs = append(slugs, slug)
+	}
+	return slugs
 }
 
 func (prompt *MockPromptTagSlug) Run() (string, error) {
@@ -380,6 +392,26 @@ func TestWithCompleteBy(t *testing.T) {
 	utils.AssertEqual(t, got, want)
 }
 
+func TestOnlyMain(t *testing.T) {
+	var notes model.Notes
+	// case 1 (no notes)
+	utils.AssertEqual(t, notes.OnlyMain(), model.Notes{})
+	// add some notes
+	comments := model.Comments{&model.Comment{Text: "c1"}}
+	note1 := model.Note{Text: "big fat cat", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1, 2}, CompleteBy: 1609669231}
+	notes = append(notes, &note1)
+	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}}
+	note2 := model.Note{Text: "cute brown dog", Comments: comments, Status: model.NoteStatus_Done, TagIds: []int{1, 3}, IsMain: true, CompleteBy: 1609669232}
+	notes = append(notes, &note2)
+	comments = model.Comments{&model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}}
+	note3 := model.Note{Text: "little hamster", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1}}
+	notes = append(notes, &note3)
+	// case 3 (with only few notes to be filtered in)
+	got := notes.OnlyMain()
+	want := model.Notes{&note2}
+	utils.AssertEqual(t, got, want)
+}
+
 func TestWithTagIdAndStatus(t *testing.T) {
 	// var tags model.Tags
 	var notes model.Notes
@@ -551,6 +583,45 @@ func TestToggleMainFlag(t *testing.T) {
 	utils.AssertEqual(t, originalPriority != note1.IsMain, true)
 }
 
+func TestGoogleCalendarEvent(t *testing.T) {
+	tagger := TestTagger{}
+	var tests = []struct {
+		name          string // has to be string
+		note          model.Note
+		inputRATID    int
+		inputRMTID    int
+		inputTimezone string
+		inputTagger   model.Tagger
+		want          *gc.Event
+		wantErr       error
+		wantedErr     bool
+	}{
+		{
+			name:          "general case 1",
+			note:          model.Note{Text: "original text", Status: model.NoteStatus_Pending, TagIds: []int{1, 4}, BaseStruct: model.BaseStruct{UpdatedAt: 1600000001}},
+			inputRATID:    1,
+			inputRMTID:    3,
+			inputTimezone: "Australia/Melbourne",
+			inputTagger:   tagger,
+			want: &gc.Event{
+				Summary: "[reminder] original text",
+			},
+			wantedErr: false,
+		},
+	}
+	for position, subtest := range tests {
+		t.Run(subtest.name, func(t *testing.T) {
+			got, err := subtest.note.GoogleCalendarEvent(subtest.inputRATID, subtest.inputRMTID, subtest.inputTimezone, tagger)
+			if (err != nil) != subtest.wantedErr {
+				t.Fatalf("GoogleCalendarEvent case %q (position=%d) with input <%+v> returns error <%v>; wantError <%v>", subtest.name, position, subtest.note, err, subtest.wantErr)
+			}
+			if got.Summary != subtest.want.Summary {
+				t.Errorf("GoogleCalendarEvent case %q (position=%d) with input <%+v> returns <%+v>; want <%+v>", subtest.name, position, subtest.note, got, subtest.want)
+			}
+		})
+	}
+}
+
 func TestSortedTagsSlug(t *testing.T) {
 	reminderData := model.ReminderData{
 		User:  &model.User{Name: "Test User", EmailId: "user@test.com"},
@@ -592,17 +663,17 @@ func TestTagsFromIds(t *testing.T) {
 	// case 1
 	tagIDs := []int{1, 3}
 	gotSlugs := reminderData.TagsFromIds(tagIDs)
-	wantSlugs := model.Tags{&tag1, &tag3}
+	wantSlugs := model.Tags{&tag1, &tag3}.Slugs()
 	utils.AssertEqual(t, gotSlugs, wantSlugs)
 	// case 2
 	tagIDs = []int{}
 	gotSlugs = reminderData.TagsFromIds(tagIDs)
-	wantSlugs = model.Tags{}
+	wantSlugs = model.Tags{}.Slugs()
 	utils.AssertEqual(t, gotSlugs, wantSlugs)
 	// case 3
 	tagIDs = []int{1, 4, 2, 3}
 	gotSlugs = reminderData.TagsFromIds(tagIDs)
-	wantSlugs = model.Tags{&tag1, &tag4, &tag2, &tag3}
+	wantSlugs = model.Tags{&tag1, &tag4, &tag2, &tag3}.Slugs()
 	utils.AssertEqual(t, gotSlugs, wantSlugs)
 }
 

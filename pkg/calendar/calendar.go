@@ -22,54 +22,11 @@ import (
 
 const TitlePrefix string = "[reminder] "
 
-// DeleteEvents delete passed cloud calendar events
-func DeleteEvents(srv *gc.Service, events []*gc.Event, dryMode bool) error {
-	if len(events) == 0 {
-		logger.Warn("No registered events found.")
-	} else {
-		deletionCount := 0
-		for _, item := range events {
-			fmt.Printf("  - %q -- %q\n", EventString(item), item.Id)
-			if dryMode {
-				logger.Warn(fmt.Sprintf("Dry mode is enabled; skipping deletion of the event %q.", item.Id))
-				// continue with next iteration
-				continue
-			}
-			if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
-				return fmt.Errorf("Couldn't delete the Calendar event %q | %q | %w", item.Id, item.Summary, err)
-			} else {
-				deletionCount += 1
-				fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, EventString(item))
-			}
-		}
-		if deletionCount > 0 {
-			logger.Warn(fmt.Sprintf("\nWaring! Deletion count is %v; you might like to clear your trash manually by visiting https://calendar.google.com/calendar/u/0/r/trash\n", deletionCount))
-		}
-	}
-	return nil
-}
-
-// AddEvents adds passed calendar events to the Cloud
-func AddEvents(srv *gc.Service, events []*gc.Event, dryMode bool) error {
-	for _, event := range events {
-		if dryMode {
-			logger.Warn(fmt.Sprintf("Dry mode is enabled; skipping insertion of event %q.\n", EventString(event)))
-			// continue with next iteration
-			continue
-		}
-		_, err := srv.Events.Insert("primary", event).Do()
-		if err != nil {
-			// just ignore, but log the error
-			utils.LogError(err)
-		}
-		logger.Info(fmt.Sprintf("Synced the event %q.\n", EventString(event)))
-	}
-	return nil
-}
-
 // FetchUpcomingEvents returns slice of `Event` objects for
 // specified number of years, with some default settings.
 func FetchUpcomingEventsAndDetails(srv *gc.Service, backYears int, aheadYears int, query string) ([]*gc.Event, string, string, error) {
+	logger.Info("Start: FetchUpcomingEventsAndDetails")
+	defer logger.Info("End: FetchUpcomingEventsAndDetails")
 	// Get list of all upcomming events, with recurring events as a
 	// unit (and not as separate single events).
 	var allEvents []*gc.Event
@@ -122,6 +79,55 @@ func FetchUpcomingEventsAndDetails(srv *gc.Service, backYears int, aheadYears in
 	return allEvents, calendarDetails, timeZone, nil
 }
 
+// AddEvents adds passed calendar events to the Cloud
+func AddEvents(srv *gc.Service, events []*gc.Event, dryMode bool) error {
+	logger.Info("Start: AddEvents")
+	defer logger.Info("End: AddEvents")
+	for _, event := range events {
+		if dryMode {
+			logger.Warn(fmt.Sprintf("Dry mode is enabled; skipping insertion of event %q.\n", EventString(event)))
+			// continue with next iteration
+			continue
+		}
+		_, err := srv.Events.Insert("primary", event).Do()
+		if err != nil {
+			// just ignore, but log the error
+			utils.LogError(err)
+		}
+		logger.Info(fmt.Sprintf("Synced the event %q.\n", EventString(event)))
+	}
+	return nil
+}
+
+// DeleteEvents delete passed cloud calendar events
+func DeleteEvents(srv *gc.Service, events []*gc.Event, dryMode bool) error {
+	logger.Info("Start: DeleteEvents")
+	defer logger.Info("End: DeleteEvents")
+	if len(events) == 0 {
+		logger.Warn("No registered events found.")
+	} else {
+		deletionCount := 0
+		for _, item := range events {
+			fmt.Printf("  - %q -- %q\n", EventString(item), item.Id)
+			if dryMode {
+				logger.Warn(fmt.Sprintf("Dry mode is enabled; skipping deletion of the event %q.", item.Id))
+				// continue with next iteration
+				continue
+			}
+			if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
+				return fmt.Errorf("Couldn't delete the Calendar event %q | %q | %w", item.Id, item.Summary, err)
+			} else {
+				deletionCount += 1
+				fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, EventString(item))
+			}
+		}
+		if deletionCount > 0 {
+			logger.Warn(fmt.Sprintf("\nWaring! Deletion count is %v; you might like to clear your trash manually by visiting https://calendar.google.com/calendar/u/0/r/trash\n", deletionCount))
+		}
+	}
+	return nil
+}
+
 // eventsDetails returns overall event details.
 func eventsDetails(events *gc.Events) (string, error) {
 	localTime := func(events gc.Events) string {
@@ -147,13 +153,19 @@ Calendar details:
 func EventString(event *gc.Event) string {
 	details := []string{}
 	details = append(details, event.Summary)
-	details = append(details, event.Start.DateTime)
+	// Note: if an event is deleted, but still present in trash
+	// it will have event.Start as nil.
+	if event.Start != nil {
+		details = append(details, event.Start.DateTime)
+	}
 	details = append(details, event.Recurrence...)
 	return strings.Join(details, " | ")
 }
 
 // Get Calendar Service.
 func GetCalendarService(options *Options) (*gc.Service, error) {
+	logger.Info("Start: GetCalendarService")
+	defer logger.Info("End: GetCalendarService")
 	credFile := options.CredentialFile
 	b, err := os.ReadFile(utils.TryConvertTildaBasedPath(credFile))
 	if err != nil {

@@ -34,6 +34,11 @@ type ReminderData struct {
 	BaseStruct
 }
 
+// Tagger is interface representing ReminderData with TagsFromIds method.
+type Tagger interface {
+	TagsFromIds(tagIDs []int) []string
+}
+
 // SyncCalendar syncs pending notes to Cloud Calendar.
 func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 	lookAheadYears := 5
@@ -88,6 +93,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 	}
 
 	// Add events to Cloud Calendar
+	logger.Info("Fetching events to be Synced.")
 	newEvents, err := rd.GoogleCalendarEvents(timeZone, rd)
 	if err != nil {
 		return err
@@ -107,6 +113,8 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 
 // GoogleCalendarEvents returns list of Google Calendar Events.
 func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string, reminderData *ReminderData) ([]*gc.Event, error) {
+	logger.Info("Start: GoogleCalendarEvents")
+	defer logger.Info("End: GoogleCalendarEvents")
 	// get all pending notes
 	allNotes := rd.Notes
 	relevantNotes := allNotes.WithStatus(NoteStatus_Pending).WithCompleteBy()
@@ -216,9 +224,9 @@ func (rd *ReminderData) TagFromSlug(slug string) *Tag {
 	return rd.Tags.FromSlug(slug)
 }
 
-// TagsFromIds returns tags from tagIDs.
-func (rd *ReminderData) TagsFromIds(tagIDs []int) Tags {
-	return rd.Tags.FromIds(tagIDs)
+// TagsFromIds returns tag slugs from tagIDs.
+func (rd *ReminderData) TagsFromIds(tagIDs []int) []string {
+	return rd.Tags.FromIds(tagIDs).Slugs()
 }
 
 // TagIdsForGroup gets tag ids for given group.
@@ -422,7 +430,7 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 	repeatTagIDs := rd.TagIdsForGroup("repeat")
 	// populating currentNotes
 	for _, note := range pendingNotes {
-		noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
+		noteIDsWithRepeat := utils.GetCommonMembersOfSlices(note.TagIds, repeatTagIDs)
 		// first process notes WITHOUT tag with group "repeat"
 		// start showing such notes 7 days in advance from their due date, and until they are marked done
 		minDay := note.CompleteBy - 7*24*60*60
@@ -444,7 +452,7 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 			// we ignore it
 			repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
 			repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
-			if (repeatAnnuallyTag != nil) && utils.IntPresentInSlice(repeatAnnuallyTag.Id, note.TagIds) {
+			if (repeatAnnuallyTag != nil) && utils.IsMemberOfSlice(repeatAnnuallyTag.Id, note.TagIds) {
 				_, noteMonth, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
 				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYear(int(noteMonth), noteDay)
 				noteTimestampPrevious := noteTimestampCurrent - 365*24*60*60
@@ -454,7 +462,7 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 				if view == "long" {
 					daysBefore = int64(365)
 				}
-				shouldDisplay, matchingTimestamp := utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
+				shouldDisplay, matchingTimestamp := utils.MatchedTimestamp(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
 				// temporarity update note's timestamp
 				note.CompleteBy = matchingTimestamp
 				if shouldDisplay {
@@ -462,7 +470,7 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 				}
 			}
 			// check for repeat-monthly tag
-			if (repeatMonthlyTag != nil) && utils.IntPresentInSlice(repeatMonthlyTag.Id, note.TagIds) {
+			if (repeatMonthlyTag != nil) && utils.IsMemberOfSlice(repeatMonthlyTag.Id, note.TagIds) {
 				_, _, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
 				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYearMonth(noteDay)
 				noteTimestampPrevious := noteTimestampCurrent - 30*24*60*60
@@ -472,7 +480,7 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 				if view == "long" {
 					daysBefore = int64(31)
 				}
-				shouldDisplay, matchingTimestamp := utils.IsTimeForRepeatNote(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
+				shouldDisplay, matchingTimestamp := utils.MatchedTimestamp(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
 				// temporarity update note's timestamp
 				note.CompleteBy = matchingTimestamp
 				if shouldDisplay {
@@ -664,7 +672,7 @@ func (rd *ReminderData) AskTagIds(tagIDs []int) []int {
 		err = nil
 	}
 	// update tagIDs
-	if (err == nil) && (!utils.IntPresentInSlice(tagID, tagIDs)) {
+	if (err == nil) && (!utils.IsMemberOfSlice(tagID, tagIDs)) {
 		tagIDs = append(tagIDs, tagID)
 	}
 	// check with user if another tag is to be added
@@ -839,7 +847,7 @@ func (rd *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string
 	// ask user to select a note
 	promptText := ""
 	if tagID >= 0 {
-		promptText = fmt.Sprintf("Select Note (for the tag %v %v): ", utils.Symbols["tag"], rd.TagsFromIds([]int{tagID})[0].Slug)
+		promptText = fmt.Sprintf("Select Note (for the tag %v %v): ", utils.Symbols["tag"], rd.TagsFromIds([]int{tagID})[0])
 	} else {
 		promptText = "Select Note: "
 	}

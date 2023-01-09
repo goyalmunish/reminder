@@ -48,7 +48,10 @@ func Run() error {
 	// check if the data file is locked by another session
 	if reminderData.MutexLock {
 		fmt.Printf("WARNING! %s\n", model.ErrorMutexLockOn.Error())
-		reset := utils.AskBoolean("But, do you want to force reset the lock?")
+		reset, err := utils.AskBoolean("But, do you want to force reset the lock?")
+		if err != nil {
+			return err
+		}
 		if !reset {
 			// exit now without resetting the lock
 			return model.ErrorMutexLockOn

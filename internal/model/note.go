@@ -74,7 +74,7 @@ func (note *Note) Strings() ([]string, error) {
 }
 
 // externalText returns a note with its tags slugs as a slice of strings.
-func (note *Note) externalText(reminderData *ReminderData) ([]string, error) {
+func (note *Note) externalText(tagger Tagger) ([]string, error) {
 	var strs []string
 	strs = append(strs, fmt.Sprintln("Note Details: -------------------------------------------------"))
 	basicStrs, err := note.Strings()
@@ -82,7 +82,7 @@ func (note *Note) externalText(reminderData *ReminderData) ([]string, error) {
 		return nil, err
 	}
 	// replace tag ids with tag slugs
-	tagsStr := printNoteField("Tags", reminderData.TagsFromIds(note.TagIds).Slugs())
+	tagsStr := printNoteField("Tags", tagger.TagsFromIds(note.TagIds))
 	basicStrs[4] = tagsStr
 	// create final list of strings
 	strs = append(strs, basicStrs...)
@@ -101,8 +101,8 @@ func (note *Note) ExternalText(reminderData *ReminderData) (string, error) {
 
 // SafeExtText prints a note with its tags slugs, but only the safe components.
 // This is used as final external reprensentation for display of a single note to external services like Google Calendar.
-func (note *Note) SafeExtText(reminderData *ReminderData) (string, error) {
-	strs, err := note.externalText(reminderData)
+func (note *Note) SafeExtText(tagger Tagger) (string, error) {
+	strs, err := note.externalText(tagger)
 	if err != nil {
 		return "", err
 	}
@@ -146,7 +146,7 @@ func (note *Note) SearchableText() (string, error) {
 
 // AddComment adds a new comment to note.
 func (note *Note) AddComment(text string) error {
-	if len(utils.TrimString(text)) == 0 {
+	if len(strings.TrimSpace(text)) == 0 {
 		return errors.New("Note's comment text is empty")
 	}
 	comment := &Comment{Text: text, BaseStruct: BaseStruct{CreatedAt: utils.CurrentUnixTimestamp()}}
@@ -169,7 +169,7 @@ func (note *Note) UpdateTags(tagIDs []int) error {
 // UpdateStatus updates note's status ("done"/"pending").
 // Status of a note tag with repeat tag cannot be mared as "done".
 func (note *Note) UpdateStatus(status NoteStatus, repeatTagIDs []int) error {
-	noteIDsWithRepeat := utils.GetCommonMembersIntSlices(note.TagIds, repeatTagIDs)
+	noteIDsWithRepeat := utils.GetCommonMembersOfSlices(note.TagIds, repeatTagIDs)
 	if len(noteIDsWithRepeat) != 0 {
 		return errors.New("Note is part of a \"repeat\" group")
 	}
@@ -187,7 +187,7 @@ func (note *Note) UpdateStatus(status NoteStatus, repeatTagIDs []int) error {
 // UpdateText updates note's text.
 // Once updated, the text cannot be made empty.
 func (note *Note) UpdateText(text string) error {
-	if len(utils.TrimString(text)) == 0 {
+	if len(strings.TrimSpace(text)) == 0 {
 		return errors.New("Note's text is empty")
 	}
 	// happy path
@@ -201,7 +201,7 @@ func (note *Note) UpdateText(text string) error {
 // UpdateSummary updates note's summary.
 // If input is "nil", the existing summary is cleared.
 func (note *Note) UpdateSummary(text string) error {
-	if len(utils.TrimString(text)) == 0 {
+	if len(strings.TrimSpace(text)) == 0 {
 		return errors.New("Note's summary is empty")
 	}
 	// happy path
@@ -222,7 +222,7 @@ func (note *Note) UpdateSummary(text string) error {
 // If input is "nil", the existing due date is cleared.
 func (note *Note) UpdateCompleteBy(text string) error {
 	// handle edge-case of empty text
-	if len(utils.TrimString(text)) == 0 {
+	if len(strings.TrimSpace(text)) == 0 {
 		return errors.New("Note's due date is empty")
 	}
 	// happy path
@@ -255,9 +255,9 @@ func (note *Note) UpdateCompleteBy(text string) error {
 // representing repeat-type of the note
 func (note *Note) RepeatType(repeatAnnuallyTagId int, repeatMonthlyTagId int) string {
 	repeat := "-" // non-repeat
-	if utils.IntPresentInSlice(repeatAnnuallyTagId, note.TagIds) {
+	if utils.IsMemberOfSlice(repeatAnnuallyTagId, note.TagIds) {
 		repeat = "A"
-	} else if utils.IntPresentInSlice(repeatMonthlyTagId, note.TagIds) {
+	} else if utils.IsMemberOfSlice(repeatMonthlyTagId, note.TagIds) {
 		repeat = "M"
 	}
 	return repeat
@@ -273,7 +273,7 @@ func (note *Note) ToggleMainFlag() error {
 }
 
 // GoogleCalendarEvent converts a note to Google Calendar Event.
-func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagId int, timezoneIANA string, reminderData *ReminderData) (*gc.Event, error) {
+func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagId int, timezoneIANA string, tagger Tagger) (*gc.Event, error) {
 	// basic information
 	title := note.Text
 	start := utils.UnixTimestampToTime(note.CompleteBy) // this is the original time in 00:00:00 GMT+0000
@@ -284,7 +284,7 @@ func (note *Note) GoogleCalendarEvent(repeatAnnuallyTagId int, repeatMonthlyTagI
 	start = start.Add(offset)          // adjusting the start to local time for notification purpose
 	start = start.Add(-14 * time.Hour) // set notification for 10 AM of given timezoneIANA
 	repeatType := note.RepeatType(repeatAnnuallyTagId, repeatMonthlyTagId)
-	description, err := note.SafeExtText(reminderData)
+	description, err := note.SafeExtText(tagger)
 	if err != nil {
 		return nil, err
 	}

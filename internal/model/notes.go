@@ -83,7 +83,7 @@ func (notes Notes) WithTagIdAndStatus(tagID int, status NoteStatus) Notes {
 	notesWithStatus := notes.WithStatus(status)
 	var result Notes
 	for _, note := range notesWithStatus {
-		if utils.IntPresentInSlice(tagID, note.TagIds) {
+		if utils.IsMemberOfSlice(tagID, note.TagIds) {
 			result = append(result, note)
 		}
 	}

@@ -1,0 +1,8 @@
+if [  "$CONSOLE_PRINT" = "true" ]; then
+  go test -v -coverprofile=c.out ./...
+else
+  go test -coverprofile=c.out ./...
+fi
+
+go tool cover -html=c.out
+echo "Check your browser window"

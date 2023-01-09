@@ -88,11 +88,11 @@ func NewNote(tagIDs []int, useText string) (*Note, error) {
 	} else {
 		noteText = useText
 	}
-	note.Text = utils.TrimString(noteText)
+	note.Text = strings.TrimSpace(noteText)
 	if err != nil || strings.Contains(note.Text, "^C") {
 		return note, err
 	}
-	if len(utils.TrimString(note.Text)) == 0 {
+	if len(strings.TrimSpace(note.Text)) == 0 {
 		// this should never be encountered because of validation in earlier step
 		fmt.Printf("%v Skipping adding note with empty text\n", utils.Symbols["warning"])
 		return note, errors.New("Note's text is empty")
@@ -153,9 +153,9 @@ func NewTag(tagID int, useSlug string, useGroup string) (*Tag, error) {
 	} else {
 		tagSlug = useSlug
 	}
-	tag.Slug = utils.TrimString(tagSlug)
+	tag.Slug = strings.TrimSpace(tagSlug)
 	tag.Slug = strings.ToLower(tag.Slug)
-	if len(utils.TrimString(tag.Slug)) == 0 {
+	if len(strings.TrimSpace(tag.Slug)) == 0 {
 		// this should never be encountered because of validation in earlier step
 		fmt.Printf("%v Skipping adding tag with empty slug\n", utils.Symbols["warning"])
 		err := errors.New("Tag's slug is empty")

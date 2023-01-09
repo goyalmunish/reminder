@@ -1,0 +1,3 @@
+data_file_path=$(cat ./config/default.yaml | grep data_file | awk '{ print $2 }')
+echo "Data File: ${data_file_path}"
+nvim "${data_file_path/#\~/$HOME}"

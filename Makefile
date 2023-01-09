@@ -22,3 +22,11 @@ fmt:
 .PHONY: test
 test:
 	. ./scripts/go_test
+
+.PHONY: coverage
+coverage:
+	. ./scripts/go_coverage
+
+.PHONY: open
+open:
+	. ./scripts/open_data_file
