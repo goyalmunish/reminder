@@ -22,6 +22,33 @@ import (
 
 const TitlePrefix string = "[reminder] "
 
+// DeleteEvents delete passed cloud calendar events
+func DeleteEvents(srv *gc.Service, events []*gc.Event, dryMode bool) error {
+	if len(events) == 0 {
+		logger.Warn("No registered events found.")
+	} else {
+		deletionCount := 0
+		for _, item := range events {
+			fmt.Printf("  - %q -- %q\n", EventString(item), item.Id)
+			if dryMode {
+				logger.Warn(fmt.Sprintf("Dry mode is enabled; skipping deletion of the event %q.", item.Id))
+				// continue with next iteration
+				continue
+			}
+			if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
+				return fmt.Errorf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err)
+			} else {
+				deletionCount += 1
+				fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, EventString(item))
+			}
+		}
+		if deletionCount > 0 {
+			logger.Warn(fmt.Sprintf("\nWaring! Deletion count is %v; you might like to clear your trash manually by visiting https://calendar.google.com/calendar/u/0/r/trash\n", deletionCount))
+		}
+	}
+	return nil
+}
+
 // AddEvents adds passed calendar events to the Cloud
 func AddEvents(srv *gc.Service, events []*gc.Event, dryMode bool) error {
 	for _, event := range events {
@@ -42,18 +69,18 @@ func AddEvents(srv *gc.Service, events []*gc.Event, dryMode bool) error {
 
 // FetchUpcomingEvents returns slice of `Event` objects for
 // specified number of years, with some default settings.
-func FetchUpcomingEventsAndDetails(srv *gc.Service, years int, query string) ([]*gc.Event, string, string, error) {
+func FetchUpcomingEventsAndDetails(srv *gc.Service, backYears int, aheadYears int, query string) ([]*gc.Event, string, string, error) {
 	// Get list of all upcomming events, with recurring events as a
 	// unit (and not as separate single events).
 	var allEvents []*gc.Event
 	var calendarDetails string
 	var timeZone string
 	currentTime := time.Now()
-	tStart := currentTime.Format(time.RFC3339)
-	tStop := currentTime.AddDate(years, 0, 0).Format(time.RFC3339) // until given number of years from now
+	tStart := currentTime.AddDate(-backYears, 0, 0).Format(time.RFC3339)
+	tStop := currentTime.AddDate(aheadYears, 0, 0).Format(time.RFC3339) // until given number of aheadYears from now
 	var pageToken string
 	maxPage := 25 // just a temporarily hard limit (not expected to be reached) to keep the loop bounded
-	logger.Info(fmt.Sprintf("Fetching Calendar items with query %q, of %d years starting from %s", query, years, tStart))
+	logger.Info(fmt.Sprintf("Fetching Calendar items with query %q, of %d years starting from %s", query, aheadYears, tStart))
 	for i := 0; i < maxPage; i++ {
 		logger.Info(fmt.Sprintf("Fetching Page-%d with token %q", i, pageToken))
 		eventsList := srv.Events.List("primary").
