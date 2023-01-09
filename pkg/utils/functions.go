@@ -240,7 +240,7 @@ func ValidateDateString() survey.Validator {
 // It is interesting to note that even though data is recieved as `interface{}`, the template
 // is able to access those attributes without even having to perform type assertion to get
 // the underneath concrete value; this is contrary to masking behavior of interfaces.
-func TemplateResult(reportTemplate string, funcMap template.FuncMap, data interface{}) string {
+func TemplateResult(reportTemplate string, funcMap template.FuncMap, data interface{}) (string, error) {
 	/*
 		Issue with this function: It uses bytes.Buffer and converts it to string, but at the moment
 		bytes (that is, uint8) are not converted back to rune/string properly.
@@ -252,10 +252,10 @@ func TemplateResult(reportTemplate string, funcMap template.FuncMap, data interf
 	// execute report to populate `reportResult`
 	err := report.Execute(&reportResult, data)
 	if err != nil {
-		return err.Error()
+		return "", err
 	} else {
 		// return report data as string
-		return reportResult.String()
+		return reportResult.String(), nil
 	}
 }
 
@@ -359,22 +359,25 @@ func PerformShellOperation(exe string, args ...string) (string, error) {
 }
 
 // TerminalSize function gets terminal size.
-func TerminalSize() (int, int) {
+func TerminalSize() (int, int, error) {
 	out, err := PerformShellOperation("stty", "size")
 	if err != nil {
-		logger.Fatal(err)
+		return 0, 0, err
 	}
 	output := strings.TrimSpace(string(out))
 	dims := strings.Split(output, " ")
 	height, _ := strconv.Atoi(dims[0])
 	width, _ := strconv.Atoi(dims[1])
-	return height, width
+	return height, width, nil
 }
 
 // TerminalWidth function gets terminal width.
-func TerminalWidth() int {
-	_, width := TerminalSize()
-	return width
+func TerminalWidth() (int, error) {
+	_, width, err := TerminalSize()
+	if err != nil {
+		return 0, nil
+	}
+	return width, nil
 }
 
 // PerformFilePresence function checks presence of a file.

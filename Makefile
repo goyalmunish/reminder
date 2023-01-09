@@ -3,8 +3,8 @@ mkfile_path := $(abspath $(mkfile_name))
 repo_path := $(realpath $(dir $(mkfile_path)))
 repo_name := $(notdir ${repo_path})
 
-.PHONY: build
-build:
+.PHONY: gobuild
+gobuild:
 	go build -v ./...
 
 .PHONY: run

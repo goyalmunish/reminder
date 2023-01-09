@@ -12,11 +12,15 @@ func (c Comments) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Comments) Less(i, j int) bool { return c[i].CreatedAt > c[j].CreatedAt }
 
 // Strings provides representation of Commments in terms of slice of strings.
-func (comments Comments) Strings() []string {
+func (comments Comments) Strings() ([]string, error) {
 	// assuming each note will have 10 comments on average
 	strs := make([]string, 0, 10)
 	for _, comment := range comments {
-		strs = append(strs, comment.String())
+		s, err := comment.String()
+		if err != nil {
+			return nil, err
+		}
+		strs = append(strs, s)
 	}
-	return strs
+	return strs, nil
 }

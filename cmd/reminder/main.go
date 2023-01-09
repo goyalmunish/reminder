@@ -18,22 +18,20 @@ import (
 // flow is recursive function for overall flow of interactivity
 var config *settings.Settings
 
-func init() {
+func Run() error {
+	// initialization
 	var err error
 	var runID = uuid.New()
 	// note: setting are loaded before logger is being setup; it will assume only default logrus settings
 	config, err = settings.LoadConfig()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	logger.SetWithOptions(config.Log)
 	logger.SetGlobalFields(map[string]interface{}{
 		"app":    "reminder",
 		"run_id": runID,
 	})
-}
-
-func Run() error {
 	// make sure DataFile exists
 	if err := model.MakeSureFileExists(config.AppInfo.DataFile, true); err != nil {
 		return err
@@ -63,13 +61,13 @@ func Run() error {
 		}
 	}()
 	// start the repeating interactive process
-	if err := Repeat(reminderData); err != nil {
+	if err := RepeatInteractiveSession(reminderData); err != nil {
 		return err
 	}
 	return nil
 }
 
-func Repeat(reminderData *model.ReminderData) error {
+func RepeatInteractiveSession(reminderData *model.ReminderData) error {
 	var err error
 	// print data stats
 	fmt.Println(reminderData.Stats())
@@ -85,7 +83,7 @@ func Repeat(reminderData *model.ReminderData) error {
 		Hitting 'Ctrl-c' in golang raises as SIGINT signal.
 		By default SIGINT signal (https://pkg.go.dev/os/signal) is converted to run-time panic,
 		and eventually causes the program to exit.
-		But, if you are inside PromptUI's `Repeat()`, then it cancels the input and moves to next
+		But, if you are inside PromptUI's `RepeatInteractiveSession()`, then it cancels the input and moves to next
 		statement in the code.
 	*/
 	_, result, _ := utils.AskOption([]string{
@@ -116,13 +114,15 @@ func Repeat(reminderData *model.ReminderData) error {
 	case fmt.Sprintf("%s %s", utils.Symbols["telescope"], "Look Ahead"):
 		err = reminderData.PrintNotesAndAskOptions(model.Notes{}, "pending_long_view_notes", -1, "due-date")
 	case fmt.Sprintf("%s %s", utils.Symbols["refresh"], "Google Cloud Sync"):
-		reminderData.SyncCalendar(config.Calendar)
+		err = reminderData.SyncCalendar(config.Calendar)
 	case fmt.Sprintf("%s %s", utils.Symbols["pad"], "Display Data File"):
 		err = reminderData.DisplayDataFile()
 	case fmt.Sprintf("%s %s %s", utils.Symbols["checkerdFlag"], "Exit", utils.Symbols["redFlag"]):
 		fmt.Println("Exiting...")
 		return nil
 	}
+	// ignore the error, but log it
 	utils.LogError(err)
-	return Repeat(reminderData)
+	// keep the interactive session running
+	return RepeatInteractiveSession(reminderData)
 }

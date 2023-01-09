@@ -18,7 +18,7 @@ jobs:
         with:
             go-version: '>=1.18.0'
       - name: Build
-        run: make build
+        run: make gobuild
       - name: Check Lint
         run: make lint
       - name: Test

@@ -187,7 +187,10 @@ func MakeSureFileExists(dataFilePath string, askUserInput bool) error {
 			if err != nil {
 				return err
 			}
-			reminderData := *BlankReminder(askUserInput, dataFilePath)
+			reminderData, err := BlankReminder(askUserInput, dataFilePath)
+			if err != nil {
+				return err
+			}
 			reminderData.DataFile = dataFilePath // save absolute path
 			err = reminderData.CreateDataFile("Persisting the newly created data file")
 			if err != nil {
@@ -205,7 +208,7 @@ func MakeSureFileExists(dataFilePath string, askUserInput bool) error {
 }
 
 // BlankReminder function creates blank ReminderData object.
-func BlankReminder(askUserInput bool, dataFilePath string) *ReminderData {
+func BlankReminder(askUserInput bool, dataFilePath string) (*ReminderData, error) {
 	var name string
 	var emailID string
 	fmt.Println("Initializing the data file. Please provide following data:")
@@ -218,7 +221,7 @@ func BlankReminder(askUserInput bool, dataFilePath string) *ReminderData {
 	}
 
 	if !askUserInput {
-		return reminderData
+		return reminderData, nil
 	}
 
 	form := tview.NewForm().
@@ -256,10 +259,10 @@ func BlankReminder(askUserInput bool, dataFilePath string) *ReminderData {
 		})
 	form.SetBorder(true).SetTitle("Enter details: ").SetTitleAlign(tview.AlignLeft)
 	if err := app.SetRoot(form, true).SetFocus(form).Run(); err != nil {
-		panic(err)
+		return nil, err
 	}
 	reminderData.User = &User{Name: name, EmailId: emailID}
-	return reminderData
+	return reminderData, nil
 }
 
 // ReadDataFile function reads data file as instance of `ReminderData`

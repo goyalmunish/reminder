@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-	// go utils.Spinner(100 * time.Millisecond)
 	err := reminder.Run()
 	utils.LogError(err)
 }

@@ -10,6 +10,6 @@ func DefaultOptions() *Options {
 	return &Options{
 		CredentialFile: "~/calendar_credentials.json",
 		TokenFile:      "~/calendar_token.json",
-		DryMode:        true,
+		DryMode:        false,
 	}
 }

@@ -219,7 +219,8 @@ func TestNoteStrings(t *testing.T) {
    |     CreatedAt:  nil
    |     UpdatedAt:  nil
 ]`
-	utils.AssertEqual(t, note.Strings(), want)
+	text, _ := note.Strings()
+	utils.AssertEqual(t, text, want)
 }
 
 func TestExternalText(t *testing.T) {
@@ -247,7 +248,8 @@ func TestExternalText(t *testing.T) {
   |     CreatedAt:  nil
   |     UpdatedAt:  nil
 `
-	utils.AssertEqual(t, note.ExternalText(reminderData), want)
+	text, _ := note.ExternalText(reminderData)
+	utils.AssertEqual(t, text, want)
 }
 
 func TestSafeExtText(t *testing.T) {
@@ -271,34 +273,35 @@ func TestSafeExtText(t *testing.T) {
   |     CreatedAt:  nil
   |     UpdatedAt:  nil
 `
-	utils.AssertEqual(t, note.SafeExtText(reminderData), want)
+	text, _ := note.SafeExtText(reminderData)
+	utils.AssertEqual(t, text, want)
 }
 
 func TestSearchableText(t *testing.T) {
 	// case 1
 	comments := model.Comments{&model.Comment{Text: "c1"}}
 	note := model.Note{Text: "a beautiful cat", Comments: comments, Status: model.NoteStatus_Pending, TagIds: []int{1, 2}, CompleteBy: 1609669231}
-	got := note.SearchableText()
+	got, _ := note.SearchableText()
 	utils.AssertEqual(t, got, "| incidental | pending   | ├ a beautiful cat ┤  [nil | c1]")
 	// case 2
 	comments = model.Comments{&model.Comment{Text: "c1"}, &model.Comment{Text: "foo bar"}, &model.Comment{Text: "c3"}}
 	note = model.Note{Text: "a cute dog", Comments: comments, Status: model.NoteStatus_Done, TagIds: []int{1, 2}, CompleteBy: 1609669232}
-	got = note.SearchableText()
+	got, _ = note.SearchableText()
 	utils.AssertEqual(t, got, "| incidental | done      | ├ a cute dog ┤  [nil | c1, nil | foo bar, nil | c3]")
 	// case 3
 	comments = model.Comments{}
 	note = model.Note{Text: "a cute dog", Comments: comments}
-	got = note.SearchableText()
+	got, _ = note.SearchableText()
 	utils.AssertEqual(t, got, "| incidental |           | ├ a cute dog ┤  [no-comments]")
 	// case 4
 	comments = model.Comments{}
 	note = model.Note{Text: "first line\nsecondline\nthird line", Comments: comments}
-	got = note.SearchableText()
+	got, _ = note.SearchableText()
 	utils.AssertEqual(t, got, "| incidental |           | ├ first line NWL secondline NWL third line ┤  [no-comments]")
 	// case 5
 	comments = model.Comments{&model.Comment{Text: "c1"}}
 	note = model.Note{Text: "a beautiful cat", Comments: comments, Status: model.NoteStatus_Suspended, TagIds: []int{1, 2}, CompleteBy: 1609669231}
-	got = note.SearchableText()
+	got, _ = note.SearchableText()
 	utils.AssertEqual(t, got, "| incidental | suspended | ├ a beautiful cat ┤  [nil | c1]")
 }
 
@@ -988,7 +991,7 @@ func TestPrintStats(t *testing.T) {
 	reminderData, _ := model.ReadDataFile(dataFilePath, false)
 	// register basic tags
 	_ = reminderData.RegisterBasicTags()
-	got := reminderData.Stats()
+	got, _ := reminderData.Stats()
 	want := `
 Stats of "temp_test_dir/mydata.json":
   - Number of Tags:  7
