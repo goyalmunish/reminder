@@ -27,7 +27,7 @@ func EventsDetails(events *gc.Events) (string, error) {
 		value, err := utils.StrToTime(events.Updated, events.TimeZone)
 		if err != nil {
 			logger.Error(err)
-			return "unparsable"
+			return ""
 		}
 		return value.String()
 	}

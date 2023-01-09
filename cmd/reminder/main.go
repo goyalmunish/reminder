@@ -70,7 +70,9 @@ func Run() error {
 func RepeatInteractiveSession(reminderData *model.ReminderData) error {
 	var err error
 	// print data stats
-	fmt.Println(reminderData.Stats())
+	stats, err := reminderData.Stats()
+	fmt.Println(stats)
+	utils.LogError(err)
 	// try automatic backup
 	_, err = reminderData.AutoBackup(24 * 60 * 60)
 	utils.LogError(err)

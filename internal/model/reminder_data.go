@@ -45,8 +45,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 	logger.Info("Retrieve the Cloud Calendar Service.")
 	srv, err := calendar.GetCalendarService(calOptions)
 	if err != nil {
-		logger.Error(fmt.Sprintf("Unable to retrieve Calendar client: %v", err))
-		return err
+		return fmt.Errorf("Unable to retrieve Calendar client: %w", err)
 	}
 
 	logger.Info("Fetch the list of all upcoming Calendar Events with each type of recurring event as single unit.")
@@ -63,8 +62,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 		MaxResults(250). // 250 is default and is maximum value; if there are more than 250 events, then we'll have to paginate
 		Do()
 	if err != nil {
-		logger.Error(fmt.Sprintf("Unable to retrieve the events: %v", err))
-		return err
+		return fmt.Errorf("Unable to retrieve the events: %w", err)
 	}
 
 	// Get Cloud Calendar details
@@ -104,8 +102,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 		Q(calendar.TitlePrefix).
 		Do()
 	if err != nil {
-		logger.Error(fmt.Sprintf("Unable to retrieve the events: %v", err))
-		return err
+		return fmt.Errorf("Unable to retrieve the events: %v", err)
 	}
 	fmt.Printf("Listing matching events (%v) and deleting the ones registered by reminder app:\n", len(reminderEvents.Items))
 	if len(reminderEvents.Items) == 0 {
@@ -125,8 +122,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 					continue
 				}
 				if err := srv.Events.Delete("primary", item.Id).Do(); err != nil {
-					logger.Error(fmt.Sprintf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err))
-					return err
+					return fmt.Errorf("Couldn't delete the Calendar event %q | %q | %v", item.Id, item.Summary, err)
 				} else {
 					deletionCount += 1
 					fmt.Printf("    - Deleted the Calendar event %q | %q\n", item.Id, calendar.EventString(item))
@@ -156,7 +152,8 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 		}
 		_, err = srv.Events.Insert("primary", event).Do()
 		if err != nil {
-			logger.Error(err)
+			// just ignore, but log the error
+			utils.LogError(err)
 		}
 		logger.Info(fmt.Sprintf("Synced the event %q.\n", calendar.EventString(event)))
 	}
@@ -877,7 +874,7 @@ func (rd *ReminderData) PrintNotesAndAskOptions(notes Notes, display_mode string
 		fmt.Printf("Note: Using passed notes; the list will not be refreshed immediately!\n")
 		fmt.Printf("Note: You must not run multiple instances of the app on same data file!\n")
 	default:
-		logger.Error("Error: Unreachable code")
+		return errors.New("Error: Unreachable code")
 	}
 
 	// sort notes
