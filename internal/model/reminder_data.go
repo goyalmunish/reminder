@@ -48,37 +48,22 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 		return fmt.Errorf("Unable to retrieve Calendar client: %w", err)
 	}
 
+	// Get list of all upcoming events
 	logger.Info("Fetch the list of all upcoming Calendar Events with each type of recurring event as single unit.")
-	// Get list of all upcomming events, with recurring events as a
-	// unit (and not as separate single events).
-	currentTime := time.Now()
-	tStart := currentTime.Format(time.RFC3339)
-	tStop := currentTime.AddDate(5, 0, 0).Format(time.RFC3339) // 5 years from now
-	existingEvents, err := srv.Events.List("primary").
-		ShowDeleted(false).
-		SingleEvents(false).
-		TimeMin(tStart).
-		TimeMax(tStop).
-		MaxResults(250). // 250 is default and is maximum value; if there are more than 250 events, then we'll have to paginate
-		Do()
-	if err != nil {
-		return fmt.Errorf("Unable to retrieve the events: %w", err)
-	}
-
-	// Get Cloud Calendar details
-	eventDetails, err := calendar.EventsDetails(existingEvents)
+	existingEvents, eventDetails, timeZone, err := calendar.FetchUpcomingEventsAndDetails(srv, 5, "")
 	if err != nil {
 		return err
 	}
+
 	fmt.Println(eventDetails)
 
 	// Iterating through the Cloud Calendar Events
-	fmt.Printf("Listing upcoming calendar events (%v):\n", len(existingEvents.Items))
+	fmt.Printf("Listing upcoming calendar events (%v):\n", len(existingEvents))
 	fmt.Println("Note: It may take some time for Google Calendar read API to pick up the recently added events, or Calendar trash https://calendar.google.com/calendar/u/0/r/trash can also cause issues.")
-	if len(existingEvents.Items) == 0 {
+	if len(existingEvents) == 0 {
 		logger.Warn("No upcoming events found.")
 	} else {
-		for _, item := range existingEvents.Items {
+		for _, item := range existingEvents {
 			if item.Summary == "" {
 				continue
 			}
@@ -95,21 +80,17 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 	// https://calendar.google.com/calendar/u/0/r/trash and clear it from
 	// time to time. Otherwise, this obstructs with visibility of newly
 	// added event in the API call.
-	logger.Info("Fetch all the events (max 250) registered by reminder app (and some other matching the query).")
-	reminderEvents, err := srv.Events.List("primary").
-		ShowDeleted(false).
-		SingleEvents(false).
-		Q(calendar.TitlePrefix).
-		Do()
+	logger.Info("Fetch all the events registered by reminder app (and some other matching the query).")
+	reminderEvents, _, _, err := calendar.FetchUpcomingEventsAndDetails(srv, 5, calendar.TitlePrefix)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve the events: %v", err)
 	}
-	fmt.Printf("Listing matching events (%v) and deleting the ones registered by reminder app:\n", len(reminderEvents.Items))
-	if len(reminderEvents.Items) == 0 {
+	fmt.Printf("Listing matching events (%v) and deleting the ones registered by reminder app:\n", len(reminderEvents))
+	if len(reminderEvents) == 0 {
 		logger.Warn("No registered events found.")
 	} else {
 		deletionCount := 0
-		for _, item := range reminderEvents.Items {
+		for _, item := range reminderEvents {
 			owned := false
 			if strings.HasPrefix(item.Summary, calendar.TitlePrefix) {
 				owned = true
@@ -135,27 +116,18 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 	}
 
 	// Add events to Cloud Calendar
-	newEvents, err := rd.GoogleCalendarEvents(existingEvents.TimeZone, rd)
+	newEvents, err := rd.GoogleCalendarEvents(timeZone, rd)
 	if err != nil {
 		return err
 	}
 	waitFor := 10 * time.Second
-	fmt.Printf("\nSyncing %v events (pending onces with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for %v.\n", len(newEvents), waitFor)
+	fmt.Printf("\nSyncing %v events (pending ones with due-date) to Google Calendar. Hit Ctrl-c if you don't want to do it at the moment. The process will wait for %v.\n", len(newEvents), waitFor)
 	fmt.Printf("waiting for %v...\n", waitFor)
 	time.Sleep(waitFor)
 	fmt.Println("Starting the syncing process.")
-	for _, event := range newEvents {
-		if calOptions.DryMode {
-			logger.Warn(fmt.Sprintf("Dry mode is enabled; skipping insertion of event %q.\n", calendar.EventString(event)))
-			// continue with next iteration
-			continue
-		}
-		_, err = srv.Events.Insert("primary", event).Do()
-		if err != nil {
-			// just ignore, but log the error
-			utils.LogError(err)
-		}
-		logger.Info(fmt.Sprintf("Synced the event %q.\n", calendar.EventString(event)))
+	err = calendar.AddEvents(srv, newEvents, calOptions.DryMode)
+	if err != nil {
+		return err
 	}
 	fmt.Println("Done with syncing process.")
 	return nil
