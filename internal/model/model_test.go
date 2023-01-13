@@ -52,12 +52,6 @@ func (prompt *MockPromptNoteText) Run() (string, error) {
 	return "a random note text", nil
 }
 
-func skipCI(t *testing.T) {
-	if os.Getenv("CI") != "" {
-		t.Skip("Skipping testing in CI environment")
-	}
-}
-
 // test examples
 
 func TestDataFile(t *testing.T) {
@@ -1047,7 +1041,7 @@ func TestNotesApproachingDueDate(t *testing.T) {
 	}
 	t.Logf("Received Texts: %v", urgentNotesText)
 	t.Logf("Expected Texts: %v", expectNotesText)
-	skipCI(t)
+	utils.SkipCI(t)
 	utils.AssertEqual(t, urgentNotesText, expectNotesText)
 	// [NRP01a NRP02a NRP02b NRP03a NRP04a NRP04b NRP05a NRP05b NRP06a RAP02 RAP03 RAP04 RAP05 RAP08 RAP09 RAP10 RAP11 RAP14 RAP15 RAP16 RAP17 RMP03]
 	// [NRP01a NRP02a NRP02b NRP03a NRP04a NRP04b NRP05a NRP05b NRP06a RAP02 RAP03 RAP04 RAP05 RAP08 RAP09 RAP10 RAP11 RAP14 RAP15 RAP16 RAP17 RMP02 RMP03]}

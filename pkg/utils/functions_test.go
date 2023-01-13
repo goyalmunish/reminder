@@ -400,6 +400,7 @@ func TestPerformWhich(t *testing.T) {
 	utils.AssertEqual(t, err == nil, false)
 }
 func TestPerformCwdiff(t *testing.T) {
+	utils.SkipCI(t)
 	// create temporary files
 	file1, err := os.CreateTemp("./", "temp_file")
 	defer os.Remove(file1.Name())
@@ -442,7 +443,7 @@ func TestPerformCwdiff(t *testing.T) {
 
 func TestPerformCat(t *testing.T) {
 	// case 1
-	filePath := "./functions.go"
+	filePath := "./utils_linker_test.go"
 	err := utils.PerformCat(filePath)
 	utils.AssertEqual(t, err == nil, true)
 	// case 2

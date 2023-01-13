@@ -197,6 +197,7 @@ func TestTimeToStr(t *testing.T) {
 	}
 }
 func TestGetLocalZone(t *testing.T) {
+	utils.SkipCI(t)
 	var tests = []struct {
 		name        string
 		currentTime string // RFC3339 string

@@ -252,3 +252,10 @@ func Spinner(delay time.Duration) {
 		}
 	}
 }
+
+// SkipCI skips a unit test in CI environment.
+func SkipCI(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skip("Skipping testing in CI environment")
+	}
+}
