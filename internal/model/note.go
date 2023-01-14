@@ -58,10 +58,7 @@ func (note *Note) Strings() ([]string, error) {
 	// allocating 10 members before hand, considering there will be around 10 status fields
 	strs := make([]string, 0, 10)
 	strs = append(strs, printNoteField("Text", note.Text))
-	comments, err := note.Comments.Strings()
-	if err != nil {
-		return nil, err
-	}
+	comments := note.Comments.Strings()
 	strs = append(strs, printNoteField("Comments", comments))
 	strs = append(strs, printNoteField("Summary", note.Summary))
 	strs = append(strs, printNoteField("Status", note.Status))
@@ -121,10 +118,7 @@ func (note *Note) SearchableText() (string, error) {
 	if len(note.Comments) == 0 {
 		commentsText = append(commentsText, "no-comments")
 	} else {
-		text, err := note.Comments.Strings()
-		if err != nil {
-			return "", nil
-		}
+		text := note.Comments.Strings()
 		commentsText = append(commentsText, strings.Join(text, ", "))
 	}
 	commentsText = append(commentsText, "]")

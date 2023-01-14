@@ -94,7 +94,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 
 	// Add events to Cloud Calendar
 	logger.Info("Fetching events to be Synced.")
-	newEvents, err := rd.GoogleCalendarEvents(timeZone, rd)
+	newEvents, err := rd.GoogleCalendarEvents(timeZone)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func (rd *ReminderData) SyncCalendar(calOptions *calendar.Options) error {
 }
 
 // GoogleCalendarEvents returns list of Google Calendar Events.
-func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string, reminderData *ReminderData) ([]*gc.Event, error) {
+func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string) ([]*gc.Event, error) {
 	logger.Info("Start: GoogleCalendarEvents")
 	defer logger.Info("End: GoogleCalendarEvents")
 	// get all pending notes
@@ -123,7 +123,7 @@ func (rd *ReminderData) GoogleCalendarEvents(timezoneIANA string, reminderData *
 	repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
 	var events []*gc.Event
 	for _, note := range relevantNotes {
-		event, err := note.GoogleCalendarEvent(repeatAnnuallyTag.Id, repeatMonthlyTag.Id, timezoneIANA, reminderData)
+		event, err := note.GoogleCalendarEvent(repeatAnnuallyTag.Id, repeatMonthlyTag.Id, timezoneIANA, rd)
 		if err != nil {
 			return nil, err
 		}
