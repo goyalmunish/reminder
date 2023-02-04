@@ -25,10 +25,11 @@ type Note struct {
 	// Status can be "pending", "done", or "suspended".
 	// The "pending" status is special, and notes marked with it show up everywhere, whereas
 	// the nodes marked with other status show up only under "Search" or their dedicated menu.
-	Status     NoteStatus `json:"status"`
-	TagIds     []int      `json:"tag_ids"`
-	IsMain     bool       `json:"is_main"`
-	CompleteBy int64      `json:"complete_by"`
+	Status      NoteStatus `json:"status"`
+	TagIds      []int      `json:"tag_ids"`
+	IsMain      bool       `json:"is_main"`
+	CompleteBy  int64      `json:"complete_by"`
+	tempDueDate int64
 	BaseStruct
 }
 

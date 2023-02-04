@@ -41,6 +41,13 @@ func (notes Notes) ExternalTexts(maxStrLen int, repeatAnnuallyTagId int, repeatM
 	return allTexts
 }
 
+// PopulateTempDueDate popultes tempDueDate field of note from its CompleteBy field.
+func (notes Notes) PopulateTempDueDate() {
+	for _, note := range notes {
+		note.tempDueDate = note.CompleteBy
+	}
+}
+
 // WithStatus filters-in notes with given status (such as "pending" status).
 // It returns empty Notes if no matching Note is found (even when given status doesn't exist).
 func (notes Notes) WithStatus(status NoteStatus) Notes {

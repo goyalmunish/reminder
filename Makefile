@@ -5,7 +5,7 @@ repo_name := $(notdir ${repo_path})
 
 .PHONY: gobuild
 gobuild:
-	go build -v ./...
+	go build -v -x -o bin/ ./...
 
 .PHONY: run
 run:

@@ -428,32 +428,34 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 	// assuming there are at least 100 notes (on average)
 	currentNotes := make([]*Note, 0, 100)
 	repeatTagIDs := rd.TagIdsForGroup("repeat")
+	// populate tempDueDate
+	pendingNotes.PopulateTempDueDate()
 	// populating currentNotes
 	for _, note := range pendingNotes {
 		noteIDsWithRepeat := utils.GetCommonMembersOfSlices(note.TagIds, repeatTagIDs)
 		// first process notes WITHOUT tag with group "repeat"
 		// start showing such notes 7 days in advance from their due date, and until they are marked done
-		minDay := note.CompleteBy - 7*24*60*60
+		minDay := note.tempDueDate - 7*24*60*60
 		if view == "long" {
-			minDay = note.CompleteBy - 365*24*60*60
+			minDay = note.tempDueDate - 365*24*60*60
 		}
 		currentTimestamp := utils.CurrentUnixTimestamp()
-		if (len(noteIDsWithRepeat) == 0) && (note.CompleteBy != 0) && (currentTimestamp >= minDay) {
+		if (len(noteIDsWithRepeat) == 0) && (note.tempDueDate != 0) && (currentTimestamp >= minDay) {
 			currentNotes = append(currentNotes, note)
 		}
 		// check notes with tag with group "repeat"
 		// start showing notes with "repeat-annually" 7 days in advance
 		// start showing notes with "repeat-monthly" 3 days in advance
 		// don't show such notes after their due date is past by 2 day
-		if (len(noteIDsWithRepeat) > 0) && (note.CompleteBy != 0) {
+		if (len(noteIDsWithRepeat) > 0) && (note.tempDueDate != 0) {
 			// check for repeat-annually tag
-			// note: for the CompleteBy date of the note, we accept only date
+			// note: for the tempDueDate date of the note, we accept only date
 			// so, even if there is a time element recorded the the timestamp,
 			// we ignore it
 			repeatAnnuallyTag := rd.TagFromSlug("repeat-annually")
 			repeatMonthlyTag := rd.TagFromSlug("repeat-monthly")
 			if (repeatAnnuallyTag != nil) && utils.IsMemberOfSlice(repeatAnnuallyTag.Id, note.TagIds) {
-				_, noteMonth, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
+				_, noteMonth, noteDay := utils.UnixTimestampToTime(note.tempDueDate).Date()
 				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYear(int(noteMonth), noteDay)
 				noteTimestampPrevious := noteTimestampCurrent - 365*24*60*60
 				noteTimestampNext := noteTimestampCurrent + 365*24*60*60
@@ -464,14 +466,14 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 				}
 				shouldDisplay, matchingTimestamp := utils.MatchedTimestamp(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
 				// temporarity update note's timestamp
-				note.CompleteBy = matchingTimestamp
+				note.tempDueDate = matchingTimestamp
 				if shouldDisplay {
 					currentNotes = append(currentNotes, note)
 				}
 			}
 			// check for repeat-monthly tag
 			if (repeatMonthlyTag != nil) && utils.IsMemberOfSlice(repeatMonthlyTag.Id, note.TagIds) {
-				_, _, noteDay := utils.UnixTimestampToTime(note.CompleteBy).Date()
+				_, _, noteDay := utils.UnixTimestampToTime(note.tempDueDate).Date()
 				noteTimestampCurrent := utils.UnixTimestampForCorrespondingCurrentYearMonth(noteDay)
 				noteTimestampPrevious := noteTimestampCurrent - 30*24*60*60
 				noteTimestampNext := noteTimestampCurrent + 30*24*60*60
@@ -482,7 +484,7 @@ func (rd *ReminderData) NotesApprachingDueDate(view string) Notes {
 				}
 				shouldDisplay, matchingTimestamp := utils.MatchedTimestamp(noteTimestampCurrent, noteTimestampPrevious, noteTimestampNext, daysBefore, daysAfter)
 				// temporarity update note's timestamp
-				note.CompleteBy = matchingTimestamp
+				note.tempDueDate = matchingTimestamp
 				if shouldDisplay {
 					currentNotes = append(currentNotes, note)
 				}
