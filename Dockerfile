@@ -1,4 +1,4 @@
-FROM golang:1.19.7-alpine3.17
+FROM golang:1.20.6-alpine
 
 ENV DIR_HOME=/root
 ENV DIR_DATA /data
